@@ -161,6 +161,21 @@ func (b *BinanceUserRepo) InsertUser(ctx context.Context, user *biz.User) (*biz.
 	}, nil
 }
 
+// UpdateUserApiStatus .
+func (b *BinanceUserRepo) UpdateUserApiStatus(ctx context.Context, userId uint64) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if err = b.data.DB(ctx).Table("new_user").Where("id=?", userId).
+		Updates(map[string]interface{}{"api_status": 1, "updated_at": now}).Error; nil != err {
+		return false, errors.NotFound("UPDATE_USER_ERROR", "UPDATE_USER_ERROR")
+	}
+
+	return true, nil
+}
+
 // UpdateUser .
 func (b *BinanceUserRepo) UpdateUser(ctx context.Context, userId uint64, apiKey string, apiSecret string) (bool, error) {
 	var (
@@ -169,7 +184,7 @@ func (b *BinanceUserRepo) UpdateUser(ctx context.Context, userId uint64, apiKey 
 	)
 
 	if err = b.data.DB(ctx).Table("new_user").Where("id=?", userId).
-		Updates(map[string]interface{}{"api_status": 1, "api_key": apiKey, "api_secret": apiSecret, "updated_at": now}).Error; nil != err {
+		Updates(map[string]interface{}{"api_key": apiKey, "api_secret": apiSecret, "updated_at": now}).Error; nil != err {
 		return false, errors.NotFound("UPDATE_USER_ERROR", "UPDATE_USER_ERROR")
 	}
 
