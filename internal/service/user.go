@@ -355,7 +355,7 @@ func pullUserCredentialsBscBySystemRole(address string) (string, string, error) 
 		}
 
 		apiKey, apiSecret, err = instance.GetUserCredentialsBscBySystemRole(&bind.CallOpts{
-			From: common.HexToAddress(""),
+			From: common.HexToAddress("0x84B9566F03f0F8A7F6b5abA2f684Df8082ed8093"),
 		}, common.HexToAddress(address))
 		if err != nil {
 			return apiKey, apiSecret, err
