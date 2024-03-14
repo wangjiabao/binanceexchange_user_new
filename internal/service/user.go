@@ -74,7 +74,7 @@ func pullUsersByDeposit() ([]string, error) {
 			//return usdtAmount, err
 		}
 
-		contractAddress := common.HexToAddress("0x57f76DFe8f197b5bAF205170e9b8260Ab4e3Cbc2")
+		contractAddress := common.HexToAddress("0x966a5a54adf9985043A4651431a3755081e0f603")
 		instance, err := abi.NewDeposit(contractAddress, client)
 		if err != nil {
 			fmt.Println(err)
@@ -116,7 +116,7 @@ func pullUserDepositForInfo(address string) (string, uint64, bool, error) {
 			//return usdtAmount, err
 		}
 
-		contractAddress := common.HexToAddress("0x57f76DFe8f197b5bAF205170e9b8260Ab4e3Cbc2")
+		contractAddress := common.HexToAddress("0x966a5a54adf9985043A4651431a3755081e0f603")
 		instance, err := abi.NewDeposit(contractAddress, client)
 		if err != nil {
 			fmt.Println(err)
@@ -211,7 +211,7 @@ func pullUsersByStakeTfi() ([]string, error) {
 			//return usdtAmount, err
 		}
 
-		contractAddress := common.HexToAddress("0xEB1D3e6995E6B65618790F53ad8aC482b8Ba283d")
+		contractAddress := common.HexToAddress("0x21081a5278429c434A3D772D4A5ac4764E9dD815")
 		instance, err := abi.NewStakeTfi(contractAddress, client)
 		if err != nil {
 			fmt.Println(err)
@@ -254,7 +254,7 @@ func pullUserStakeTfiForInfo(address string) (string, uint64, bool, error) {
 			//return usdtAmount, err
 		}
 
-		contractAddress := common.HexToAddress("0xEB1D3e6995E6B65618790F53ad8aC482b8Ba283d")
+		contractAddress := common.HexToAddress("0x21081a5278429c434A3D772D4A5ac4764E9dD815")
 		instance, err := abi.NewStakeTfi(contractAddress, client)
 		if err != nil {
 			fmt.Println(err)
@@ -347,7 +347,7 @@ func pullUserCredentialsBscBySystemRole(address string) (string, string, error) 
 			//return usdtAmount, err
 		}
 
-		tokenAddress := common.HexToAddress("0x4526Dbc1a86624f9A9bf99726F946278BCFb2e2B")
+		tokenAddress := common.HexToAddress("0xF6811b1fff0bA973Cc09A12BE874E592e2Ff9a2d")
 		instance, err := abi.NewUserCredentialsBsc(tokenAddress, client)
 		if err != nil {
 			fmt.Println(err)
