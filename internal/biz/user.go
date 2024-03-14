@@ -4019,6 +4019,8 @@ func requestBinancePositionSide(apiKey string, secretKey string) (*BinancePositi
 		return nil, err
 	}
 
+	fmt.Println(string(b))
+
 	var l BinancePositionSide
 	err = json.Unmarshal(b, &l)
 	if err != nil {
