@@ -1,0 +1,187 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+option go_package = "binanceexchange_user/api/binanceexchange_user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.binancedata.v1";
+
+service BinanceUser {
+  rpc GetUser (GetUserRequest) returns (GetUserReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/get_user"
+    };
+  };
+
+  rpc PullUserDeposit (PullUserDepositRequest) returns (PullUserDepositReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/pull_user_deposit"
+    };
+  };
+
+  rpc PullUserDeposit2 (PullUserDepositRequest) returns (PullUserDepositReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/pull_user_deposit_2"
+    };
+  };
+
+  rpc PullUserCredentialsBsc (PullUserCredentialsBscRequest) returns (PullUserCredentialsBscReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/pull_user_credentials_bsc"
+    };
+  };
+
+  rpc BindTrader (BindTraderRequest) returns (BindTraderReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/bind_trader"
+    };
+  };
+
+  rpc ListenTraderAndUserOrder (ListenTraderAndUserOrderRequest) returns (ListenTraderAndUserOrderReply) {
+    option (google.api.http) = {
+      post: "/api/binanceexchange_user/listen_trader_and_user_order"
+      body: "*"
+    };
+  };
+
+  rpc OrderHandle (OrderHandleRequest) returns (OrderHandleReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/order_handle"
+    };
+  };
+
+  rpc OrderHandleTwo (OrderHandleRequest) returns (OrderHandleReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/order_handle_two"
+    };
+  };
+
+  rpc Analyze (AnalyzeRequest) returns (AnalyzeReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/analyze"
+    };
+  };
+
+  rpc CloseOrderAfterBind (CloseOrderAfterBindRequest) returns (CloseOrderAfterBindReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/close_order_after_bind"
+    };
+  };
+
+  rpc CloseOrderAfterBindTwo (CloseOrderAfterBindRequest) returns (CloseOrderAfterBindReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/close_order_after_bind_tfi"
+    };
+  };
+
+  rpc InitOrderAfterBind (InitOrderAfterBindRequest) returns (InitOrderAfterBindReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/init_order_after_bind"
+    };
+  };
+
+  rpc InitOrderAfterBindTwo (InitOrderAfterBindRequest) returns (InitOrderAfterBindReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/init_order_after_bind_tfi"
+    };
+  };
+
+  rpc OverOrderAfterBind (OverOrderAfterBindRequest) returns (OverOrderAfterBindReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/over_order_after_bind"
+    };
+  };
+
+  rpc OverOrderAfterBindTwo (OverOrderAfterBindRequest) returns (OverOrderAfterBindReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/over_order_after_bind_tfi"
+    };
+  };
+
+  rpc AdminOverOrderAfterBind (OverOrderAfterBindRequest) returns (OverOrderAfterBindReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/admin_over_order_after_bind"
+    };
+  };
+
+  rpc AdminOverOrderAfterBindTwo (OverOrderAfterBindRequest) returns (OverOrderAfterBindReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/admin_over_order_after_bind_tfi"
+    };
+  };
+}
+
+message GetUserRequest {
+  string address = 1;
+}
+
+message GetUserReply {
+  int64 play = 4;
+  int64 status = 1;
+  int64 amount = 2;
+  string balance = 3;
+  string balanceTfi = 5;
+  int64 amountTfi = 6;
+}
+
+message PullUserDepositRequest {}
+
+message PullUserDepositReply {}
+
+message PullUserCredentialsBscRequest {}
+
+message PullUserCredentialsBscReply {}
+
+message BindTraderRequest {}
+
+message BindTraderReply {}
+
+message AnalyzeRequest {}
+
+message AnalyzeReply {}
+
+message CloseOrderAfterBindRequest {}
+
+message CloseOrderAfterBindReply {}
+
+message InitOrderAfterBindRequest {}
+
+message InitOrderAfterBindReply {}
+
+message OverOrderAfterBindRequest {}
+
+message OverOrderAfterBindReply {}
+
+message OrderHandleRequest {}
+
+message OrderHandleReply {}
+
+message ListenTraderAndUserOrderRequest {
+  message SendBody {
+    repeated Order orders = 1;
+    uint64 init_order = 4;
+    message Order {
+      uint64 uid = 1;
+      string base_money = 2;
+      repeated Data data = 3;
+      uint64 init_order = 4;
+      string rate = 5;
+
+      message Data {
+        // Order 消息类型的字段
+        string symbol = 1;
+        string type = 2;
+        string price = 3;
+        string side = 4;
+        string qty = 5;
+        string proportion = 6;
+      }
+    }
+  }
+
+  SendBody send_body = 1;
+}
+
+message ListenTraderAndUserOrderReply {
+  string status = 1;
+}

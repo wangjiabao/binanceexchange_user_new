@@ -1,0 +1,442 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: BinanceUser API
+    version: 0.0.1
+paths:
+    /api/binanceexchange_user/admin_over_order_after_bind:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_AdminOverOrderAfterBind
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OverOrderAfterBindReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/admin_over_order_after_bind_tfi:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_AdminOverOrderAfterBindTwo
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OverOrderAfterBindReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/analyze:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_Analyze
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AnalyzeReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/bind_trader:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_BindTrader
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BindTraderReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/close_order_after_bind:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_CloseOrderAfterBind
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CloseOrderAfterBindReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/close_order_after_bind_tfi:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_CloseOrderAfterBindTwo
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CloseOrderAfterBindReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/get_user:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_GetUser
+            parameters:
+                - name: address
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/init_order_after_bind:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_InitOrderAfterBind
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InitOrderAfterBindReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/init_order_after_bind_tfi:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_InitOrderAfterBindTwo
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InitOrderAfterBindReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/listen_trader_and_user_order:
+        post:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_ListenTraderAndUserOrder
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ListenTraderAndUserOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListenTraderAndUserOrderReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/order_handle:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_OrderHandle
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OrderHandleReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/order_handle_two:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_OrderHandleTwo
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OrderHandleReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/over_order_after_bind:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_OverOrderAfterBind
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OverOrderAfterBindReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/over_order_after_bind_tfi:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_OverOrderAfterBindTwo
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OverOrderAfterBindReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/pull_user_credentials_bsc:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_PullUserCredentialsBsc
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PullUserCredentialsBscReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/pull_user_deposit:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_PullUserDeposit
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PullUserDepositReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/pull_user_deposit_2:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_PullUserDeposit2
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PullUserDepositReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        AnalyzeReply:
+            type: object
+            properties: {}
+        BindTraderReply:
+            type: object
+            properties: {}
+        CloseOrderAfterBindReply:
+            type: object
+            properties: {}
+        GetUserReply:
+            type: object
+            properties:
+                play:
+                    type: string
+                status:
+                    type: string
+                amount:
+                    type: string
+                balance:
+                    type: string
+                balanceTfi:
+                    type: string
+                amountTfi:
+                    type: string
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        InitOrderAfterBindReply:
+            type: object
+            properties: {}
+        ListenTraderAndUserOrderReply:
+            type: object
+            properties:
+                status:
+                    type: string
+        ListenTraderAndUserOrderRequest:
+            type: object
+            properties:
+                sendBody:
+                    $ref: '#/components/schemas/ListenTraderAndUserOrderRequest_SendBody'
+        ListenTraderAndUserOrderRequest_SendBody:
+            type: object
+            properties:
+                orders:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/SendBody_Order'
+                initOrder:
+                    type: string
+        OrderHandleReply:
+            type: object
+            properties: {}
+        Order_Data:
+            type: object
+            properties:
+                symbol:
+                    type: string
+                    description: Order 消息类型的字段
+                type:
+                    type: string
+                price:
+                    type: string
+                side:
+                    type: string
+                qty:
+                    type: string
+                proportion:
+                    type: string
+        OverOrderAfterBindReply:
+            type: object
+            properties: {}
+        PullUserCredentialsBscReply:
+            type: object
+            properties: {}
+        PullUserDepositReply:
+            type: object
+            properties: {}
+        SendBody_Order:
+            type: object
+            properties:
+                uid:
+                    type: string
+                baseMoney:
+                    type: string
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Order_Data'
+                initOrder:
+                    type: string
+                rate:
+                    type: string
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+tags:
+    - name: BinanceUser
