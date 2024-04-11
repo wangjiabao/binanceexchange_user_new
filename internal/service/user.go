@@ -5,9 +5,11 @@ import (
 	v1 "binanceexchange_user/api/binanceexchange_user/v1"
 	"binanceexchange_user/internal/biz"
 	"context"
+	"crypto/ecdsa"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
 	"strconv"
@@ -429,6 +431,8 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 		tokenIds       []uint64
 		boxAmount      map[uint64]uint64
 		tradingBoxOpen map[uint64]*biz.TradingBoxOpen
+		incomeTokenIds []uint64
+		incomeAmounts  []string
 		err            error
 	)
 
@@ -470,6 +474,8 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 		return nil, nil
 	}
 
+	incomeTokenIds = make([]uint64, 0)
+	incomeAmounts = make([]string, 0)
 	for _, vTokenIds := range tokenIds {
 		if _, ok := boxAmount[vTokenIds]; !ok {
 			continue
@@ -490,11 +496,18 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 			}
 
 			if tmpLastTerm < vTokenIds && vTokenIds <= vTerms { // 本期区间
+				// 写入数据
 				tmpRate := float64(boxAmount[vTokenIds]) / float64(boxTotalAmount[vTerms])
-				err = b.buc.InsertTradingBoxOpen(ctx, vTokenIds, boxAmount[vTokenIds], boxTotalAmount[vTerms], tmpRate, balance[vTerms], balance[vTerms]*tmpRate)
+				tmpIncome := balance[vTerms] * tmpRate
+				err = b.buc.InsertTradingBoxOpen(ctx, vTokenIds, boxAmount[vTokenIds], boxTotalAmount[vTerms], tmpRate, balance[vTerms], tmpIncome)
 				if nil != err {
 					fmt.Println(err)
 				}
+
+				incomeTokenIds = append(incomeTokenIds, vTokenIds)
+				incomeAmounts = append(incomeAmounts, float64ToString(tmpIncome))
+
+				fmt.Println(vTokenIds, float64ToString(tmpIncome))
 				break
 			}
 
@@ -504,6 +517,31 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 	}
 
 	return nil, nil
+}
+
+func float64ToString(input float64) string {
+	// 将浮点数转换为字符串，使用 'f' 表示格式化为小数点形式
+	str := strconv.FormatFloat(input, 'f', -1, 64)
+	// 找到小数点的位置
+	dotIndex := -1
+	for i, char := range str {
+		if char == '.' {
+			dotIndex = i
+			break
+		}
+	}
+	if dotIndex == -1 {
+		// 没有小数点，直接在字符串后面添加 18 个 0
+		str += "000000000000000000"
+	} else {
+		// 计算需要填充多少个 0
+		zeroCount := 18 - (len(str) - dotIndex - 1)
+		// 填充 0
+		for i := 0; i < zeroCount; i++ {
+			str += "0"
+		}
+	}
+	return str
 }
 
 func pullTradingBoxOpen() ([]uint64, map[uint64]uint64, error) {
@@ -523,7 +561,7 @@ func pullTradingBoxOpen() ([]uint64, map[uint64]uint64, error) {
 			//return usdtAmount, err
 		}
 
-		contractAddress := common.HexToAddress("0xC2550aedbF6B1c858eFE8CEa4FFed1D383723887")
+		contractAddress := common.HexToAddress("0x5a96a79AcF5cc01e8d7D39D8a0Ea48ce06f32Db5")
 		instance, err := abi.NewTradingBox(contractAddress, client)
 		if err != nil {
 			fmt.Println(err)
@@ -606,7 +644,7 @@ func pullBoxTerm() ([]uint64, map[uint64]uint64, error) {
 			//return usdtAmount, err
 		}
 
-		contractAddress := common.HexToAddress("0x40e9803682E7739F574d8fbEB581a91d42Bc8292")
+		contractAddress := common.HexToAddress("0x602B406C6B90D353d7f827B6AbE3EaCbe7F6B28f")
 		instance, err := abi.NewTradingAdmin(contractAddress, client)
 		if err != nil {
 			fmt.Println(err)
@@ -697,4 +735,66 @@ func (b *BinanceUserService) SettleTradingBoxOpen(ctx context.Context, req *v1.S
 	//}
 
 	return nil, nil
+}
+
+func setIncomeTradingBox(tokenIds []uint64, amounts []string) error {
+	url1 := "https://bsc-dataseed4.binance.org/"
+
+	for i := 0; i < 5; i++ {
+		client, err := ethclient.Dial(url1)
+		if err != nil {
+			url1 = "https://bsc-dataseed1.bnbchain.org"
+			continue
+			//return usdtAmount, err
+		}
+
+		contractAddress := common.HexToAddress("0x5a96a79AcF5cc01e8d7D39D8a0Ea48ce06f32Db5")
+		instance, err := abi.NewTradingBox(contractAddress, client)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		var authUser *bind.TransactOpts
+
+		var privateKey *ecdsa.PrivateKey
+		privateKey, err = crypto.HexToECDSA("")
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		authUser, err = bind.NewKeyedTransactorWithChainID(privateKey, new(big.Int).SetInt64(56))
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		var (
+			tmpTokenIds       []*big.Int
+			tmpWithdrawAmount []*big.Int
+		)
+
+		for _, vTmpTokenIds := range tokenIds {
+			tmpTokenIds = append(tmpTokenIds, new(big.Int).SetUint64(vTmpTokenIds))
+		}
+
+		for _, vAmounts := range amounts {
+			tmp1, _ := new(big.Int).SetString(vAmounts, 10)
+			tmpWithdrawAmount = append(tmpWithdrawAmount, tmp1)
+		}
+
+		_, err = instance.SetIncomeAny(&bind.TransactOpts{
+			From:     authUser.From,
+			Signer:   authUser.Signer,
+			GasLimit: 0,
+		}, tmpTokenIds, tmpWithdrawAmount)
+		if err != nil {
+			return err
+		}
+
+		break
+	}
+
+	return nil
 }
