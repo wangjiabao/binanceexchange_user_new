@@ -447,6 +447,7 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 	}
 
 	// todo 每期一个账户
+	balance = make(map[uint64]float64, 0)
 	for k, vTerms := range terms {
 		if 0 == k {
 			var tmpBalance float64
@@ -550,7 +551,7 @@ func pullTradingBoxOpen() ([]uint64, map[uint64]uint64, error) {
 		boxAmount map[uint64]uint64
 		err       error
 	)
-	
+
 	openBox = make([]uint64, 0)
 	boxAmount = make(map[uint64]uint64, 0)
 
