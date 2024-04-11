@@ -13,6 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
 	"strconv"
+	"strings"
 )
 
 // BinanceUserService is a BinanceData service .
@@ -507,8 +508,6 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 
 				incomeTokenIds = append(incomeTokenIds, vTokenIds)
 				incomeAmounts = append(incomeAmounts, float64ToString(tmpIncome))
-
-				fmt.Println(vTokenIds, float64ToString(tmpIncome))
 				break
 			}
 
@@ -517,32 +516,35 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 
 	}
 
+	if 0 < len(incomeAmounts) {
+		err = setIncomeTradingBox(incomeTokenIds, incomeAmounts)
+		if nil != err {
+			fmt.Println(err)
+			return nil, err
+		}
+	}
+
 	return nil, nil
 }
 
 func float64ToString(input float64) string {
-	// 将浮点数转换为字符串，使用 'f' 表示格式化为小数点形式
+	// 将浮点数转换为字符串
 	str := strconv.FormatFloat(input, 'f', -1, 64)
 	// 找到小数点的位置
-	dotIndex := -1
-	for i, char := range str {
-		if char == '.' {
-			dotIndex = i
-			break
-		}
-	}
+	dotIndex := strings.Index(str, ".")
 	if dotIndex == -1 {
-		// 没有小数点，直接在字符串后面添加 18 个 0
-		str += "000000000000000000"
-	} else {
-		// 计算需要填充多少个 0
-		zeroCount := 18 - (len(str) - dotIndex - 1)
-		// 填充 0
-		for i := 0; i < zeroCount; i++ {
-			str += "0"
-		}
+		// 如果没有小数点，则在字符串末尾添加 18 个零
+		return str + strings.Repeat("0", 18)
 	}
-	return str
+	// 如果有小数点，则截取小数点前面的部分和后面的部分
+	intPart := str[:dotIndex]
+	decimalPart := str[dotIndex+1:]
+	// 如果小数部分的长度不足 18 位，则在末尾补齐零
+	if len(decimalPart) < 18 {
+		decimalPart += strings.Repeat("0", 18-len(decimalPart))
+	}
+	// 将整数部分和小数部分拼接起来并返回
+	return intPart + decimalPart
 }
 
 func pullTradingBoxOpen() ([]uint64, map[uint64]uint64, error) {
