@@ -329,8 +329,7 @@ type BinanceUserRepo interface {
 	GetUserOrderById(orderId int64) (*UserOrder, error)
 	GetTraderPosition(traderId uint64) ([]*TraderPosition, error)
 	InsertTradingBoxOpen(ctx context.Context, box *TradingBoxOpen) (*TradingBoxOpen, error)
-	UpdateTradingBoxOpenTerm(ctx context.Context, tokenId uint64, amountTotal uint64, amountRate float64) (bool, error)
-	UpdateTradingBoxOpenStatus(ctx context.Context, tokenId uint64, total float64, withdrawAmount float64) (bool, error)
+	UpdateTradingBoxOpenStatus(ctx context.Context, tokenId uint64) (bool, error)
 	GetTradingBoxOpen() ([]*TradingBoxOpen, error)
 	GetTradingBoxOpenMap() (map[uint64]*TradingBoxOpen, error)
 	GetTradingBoxOpenMapByStatus(status uint64) (map[uint64]*TradingBoxOpen, error)
@@ -709,17 +708,16 @@ func (b *BinanceUserUsecase) GetTradingBoxOpenMapByStatus(status uint64) (map[ui
 	return b.binanceUserRepo.GetTradingBoxOpenMapByStatus(status)
 }
 
-func (b *BinanceUserUsecase) InsertTradingBoxOpen(context context.Context, tokenId uint64, amount uint64) error {
+func (b *BinanceUserUsecase) InsertTradingBoxOpen(context context.Context, tokenId uint64, amount uint64, amountTotal uint64, amountRate float64, total float64, withdrawAmount float64) error {
 	_, err := b.binanceUserRepo.InsertTradingBoxOpen(context, &TradingBoxOpen{
-		TokenId: tokenId,
-		Amount:  amount,
+		TokenId:        tokenId,
+		Amount:         amount,
+		AmountTotal:    amountTotal,
+		WithdrawStatus: 0,
+		AmountRate:     amountRate,
+		Total:          total,
+		WithdrawAmount: withdrawAmount,
 	})
-
-	return err
-}
-
-func (b *BinanceUserUsecase) UpdateTradingBoxOpenTerm(context context.Context, tokenId uint64, amountTotal uint64, amountRate float64) error {
-	_, err := b.binanceUserRepo.UpdateTradingBoxOpenTerm(context, tokenId, amountTotal, amountRate)
 
 	return err
 }
@@ -4139,6 +4137,7 @@ func (b *BinanceUserUsecase) GetTermBinanceCurrentBalance(ctx context.Context, u
 		user           *User
 		binanceBalance *BinanceUserBalance
 		balanceFloat   float64
+		crossUnPnl     float64
 		err            error
 	)
 
@@ -4152,14 +4151,17 @@ func (b *BinanceUserUsecase) GetTermBinanceCurrentBalance(ctx context.Context, u
 		return 0, err
 	}
 
-	fmt.Println(binanceBalance)
-
 	balanceFloat, err = strconv.ParseFloat(binanceBalance.Balance, 64)
 	if nil != err {
 		return 0, err
 	}
 
-	return balanceFloat, nil
+	crossUnPnl, err = strconv.ParseFloat(binanceBalance.CrossUnPnl, 64)
+	if nil != err {
+		return 0, err
+	}
+
+	return balanceFloat + crossUnPnl, nil
 
 }
 

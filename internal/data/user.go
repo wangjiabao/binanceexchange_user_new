@@ -2293,30 +2293,15 @@ func (b *BinanceUserRepo) InsertTradingBoxOpen(ctx context.Context, box *biz.Tra
 	}, nil
 }
 
-// UpdateTradingBoxOpenTerm .
-func (b *BinanceUserRepo) UpdateTradingBoxOpenTerm(ctx context.Context, tokenId, amountTotal uint64, amountRate float64) (bool, error) {
+// UpdateTradingBoxOpenStatus .
+func (b *BinanceUserRepo) UpdateTradingBoxOpenStatus(ctx context.Context, tokenId uint64) (bool, error) {
 	var (
 		err error
 		now = time.Now()
 	)
 
 	if err = b.data.DB(ctx).Table("new_trading_box_open").Where("token_id=? and withdraw_status=?", tokenId, 0).
-		Updates(map[string]interface{}{"withdraw_status": 1, "amount_total": amountTotal, "amount_rate": amountRate, "updated_at": now}).Error; nil != err {
-		return false, errors.NotFound("UPDATE_TRADING_BOX_OPEN_ERROR", "UPDATE_TRADING_BOX_ERROR")
-	}
-
-	return true, nil
-}
-
-// UpdateTradingBoxOpenStatus .
-func (b *BinanceUserRepo) UpdateTradingBoxOpenStatus(ctx context.Context, tokenId uint64, total float64, withdrawAmount float64) (bool, error) {
-	var (
-		err error
-		now = time.Now()
-	)
-
-	if err = b.data.DB(ctx).Table("new_trading_box_open").Where("token_id=? and withdraw_status=?", tokenId, 1).
-		Updates(map[string]interface{}{"withdraw_status": 2, "total": total, "withdraw_amount": withdrawAmount, "updated_at": now}).Error; nil != err {
+		Updates(map[string]interface{}{"withdraw_status": 1, "updated_at": now}).Error; nil != err {
 		return false, errors.NotFound("UPDATE_TRADING_BOX_OPEN_ERROR", "UPDATE_TRADING_BOX_ERROR")
 	}
 

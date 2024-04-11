@@ -448,9 +448,6 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 		return nil, nil
 	}
 
-	fmt.Println(balance)
-	return nil, nil
-
 	tokenIds, boxAmount, err = pullTradingBoxOpen()
 	if err != nil {
 		fmt.Println(err)
@@ -464,8 +461,6 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 	}
 
 	for _, vTokenIds := range tokenIds {
-		continue
-
 		if _, ok := boxAmount[vTokenIds]; !ok {
 			continue
 		}
@@ -482,8 +477,8 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 
 			if tmpLastTerm < vTokenIds && vTokenIds <= vTerms { // 本期区间
 
-				//tmpRate := float64(boxAmount[vTokenIds]) / float64(boxTotalAmount[vTerms])
-				err = b.buc.InsertTradingBoxOpen(ctx, vTokenIds, boxAmount[vTokenIds])
+				tmpRate := float64(boxAmount[vTokenIds]) / float64(boxTotalAmount[vTerms])
+				err = b.buc.InsertTradingBoxOpen(ctx, vTokenIds, boxAmount[vTokenIds], boxTotalAmount[vTerms], tmpRate, balance, balance*tmpRate)
 				if nil != err {
 					fmt.Println(err)
 					continue
