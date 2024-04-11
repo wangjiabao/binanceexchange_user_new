@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
+	"strconv"
 )
 
 // BinanceUserService is a BinanceData service .
@@ -417,4 +418,276 @@ func (b *BinanceUserService) AdminOverOrderAfterBind(ctx context.Context, req *v
 
 func (b *BinanceUserService) AdminOverOrderAfterBindTwo(ctx context.Context, req *v1.OverOrderAfterBindRequest) (*v1.OverOrderAfterBindReply, error) {
 	return b.buc.AdminOverOrderTwo(ctx, req)
+}
+
+// PullTradingBoxOpen .
+func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.PullTradingBoxOpenRequest) (*v1.PullTradingBoxOpenReply, error) {
+	var (
+		terms          []uint64
+		boxTotalAmount map[uint64]uint64
+		balance        float64
+		tokenIds       []uint64
+		boxAmount      map[uint64]uint64
+		tradingBoxOpen map[uint64]*biz.TradingBoxOpen
+		err            error
+	)
+
+	terms, boxTotalAmount, err = pullBoxTerm()
+	if err != nil {
+		fmt.Println(err)
+		return nil, nil
+	}
+
+	if 0 >= len(terms) {
+		return nil, nil
+	}
+
+	balance, err = b.buc.GetTermBinanceCurrentBalance(ctx, 17)
+	if err != nil {
+		fmt.Println(err)
+		return nil, nil
+	}
+
+	fmt.Println(balance)
+	return nil, nil
+
+	tokenIds, boxAmount, err = pullTradingBoxOpen()
+	if err != nil {
+		fmt.Println(err)
+		return nil, nil
+	}
+
+	tradingBoxOpen, err = b.buc.GetTradingBoxOpenMap()
+	if err != nil {
+		fmt.Println(err)
+		return nil, nil
+	}
+
+	for _, vTokenIds := range tokenIds {
+		continue
+
+		if _, ok := boxAmount[vTokenIds]; !ok {
+			continue
+		}
+
+		if _, ok := tradingBoxOpen[vTokenIds]; ok { // 存在数据
+			continue
+		}
+
+		tmpLastTerm := uint64(0)
+		for _, vTerms := range terms {
+			if _, ok := boxTotalAmount[vTerms]; !ok {
+				continue
+			}
+
+			if tmpLastTerm < vTokenIds && vTokenIds <= vTerms { // 本期区间
+
+				//tmpRate := float64(boxAmount[vTokenIds]) / float64(boxTotalAmount[vTerms])
+				err = b.buc.InsertTradingBoxOpen(ctx, vTokenIds, boxAmount[vTokenIds])
+				if nil != err {
+					fmt.Println(err)
+					continue
+				}
+
+			}
+
+			tmpLastTerm = vTerms
+		}
+
+	}
+
+	return nil, nil
+}
+
+func pullTradingBoxOpen() ([]uint64, map[uint64]uint64, error) {
+	var (
+		openBox   []uint64
+		boxAmount map[uint64]uint64
+		err       error
+	)
+
+	url1 := "https://bsc-dataseed4.binance.org/"
+
+	for i := 0; i < 5; i++ {
+		client, err := ethclient.Dial(url1)
+		if err != nil {
+			url1 = "https://bsc-dataseed1.bnbchain.org"
+			continue
+			//return usdtAmount, err
+		}
+
+		contractAddress := common.HexToAddress("0xC2550aedbF6B1c858eFE8CEa4FFed1D383723887")
+		instance, err := abi.NewTradingBox(contractAddress, client)
+		if err != nil {
+			fmt.Println(err)
+			return openBox, boxAmount, err
+		}
+
+		var (
+			tmp *big.Int
+		)
+
+		tmp, err = instance.TotalSupply(&bind.CallOpts{})
+		if err != nil {
+			return openBox, boxAmount, err
+		}
+
+		if 0 >= tmp.Uint64() {
+			return openBox, boxAmount, err
+		}
+
+		openBox = make([]uint64, 0)
+		boxAmount = make(map[uint64]uint64, 0)
+		for tokenId := int64(1); tokenId <= tmp.Int64(); tokenId++ {
+			var (
+				tmp2 *big.Int
+				tmp3 *big.Int
+			)
+
+			tmp3, err = instance.BoxTokenAmount(&bind.CallOpts{}, big.NewInt(tokenId))
+			if err != nil {
+				continue
+			}
+
+			lengthToKeep := len(tmp3.String()) - 15 // todo 每个盒子业务默认100u
+
+			if lengthToKeep > 0 {
+				amountTmpStr := tmp3.String()[:lengthToKeep]
+				var (
+					tmp4 int64
+				)
+				tmp4, err = strconv.ParseInt(amountTmpStr, 10, 64)
+				if nil != err || 0 >= tmp4 {
+					continue
+				}
+
+				boxAmount[uint64(tokenId)] = uint64(tmp4)
+			} else {
+				continue
+			}
+
+			tmp2, err = instance.OpenTimeStamp(&bind.CallOpts{}, big.NewInt(tokenId))
+			if err != nil {
+				continue
+			}
+
+			if 0 < tmp2.Uint64() {
+				openBox = append(openBox, uint64(tokenId))
+			}
+		}
+
+		break
+	}
+
+	return openBox, boxAmount, err
+}
+
+func pullBoxTerm() ([]uint64, map[uint64]uint64, error) {
+	var (
+		terms      []uint64
+		termAmount map[uint64]uint64
+		err        error
+	)
+
+	url1 := "https://bsc-dataseed4.binance.org/"
+
+	for i := 0; i < 5; i++ {
+		client, err := ethclient.Dial(url1)
+		if err != nil {
+			url1 = "https://bsc-dataseed1.bnbchain.org"
+			continue
+			//return usdtAmount, err
+		}
+
+		contractAddress := common.HexToAddress("0x40e9803682E7739F574d8fbEB581a91d42Bc8292")
+		instance, err := abi.NewTradingAdmin(contractAddress, client)
+		if err != nil {
+			fmt.Println(err)
+			return terms, termAmount, err
+		}
+
+		var (
+			tmp []*big.Int
+		)
+
+		tmp, err = instance.GetTradingTerm(&bind.CallOpts{})
+		if err != nil {
+			return terms, termAmount, err
+		}
+
+		if 0 >= len(tmp) {
+			return terms, termAmount, err
+		}
+
+		terms = make([]uint64, 0)
+		termAmount = make(map[uint64]uint64, 0)
+		for _, vTmp := range tmp {
+			var (
+				tmp3 *big.Int
+			)
+
+			tmp3, err = instance.GetTermAmount(&bind.CallOpts{}, vTmp)
+			if err != nil {
+				continue
+			}
+
+			lengthToKeep := len(tmp3.String()) - 15 // todo 每个盒子业务默认100u
+
+			if lengthToKeep > 0 {
+				amountTmpStr := tmp3.String()[:lengthToKeep]
+				var (
+					tmp4 int64
+				)
+				tmp4, err = strconv.ParseInt(amountTmpStr, 10, 64)
+				if nil != err || 0 >= tmp4 {
+					continue
+				}
+
+				termAmount[vTmp.Uint64()] = uint64(tmp4)
+			} else {
+				continue
+			}
+
+			terms = append(terms, vTmp.Uint64())
+		}
+
+		break
+	}
+
+	return terms, termAmount, err
+}
+
+// SettleTradingBoxOpen .
+func (b *BinanceUserService) SettleTradingBoxOpen(ctx context.Context, req *v1.SettleTradingBoxOpenRequest) (*v1.SettleTradingBoxOpenReply, error) {
+	//var (
+	//	terms          []uint64
+	//	tradingBoxOpen map[uint64]*biz.TradingBoxOpen
+	//	err            error
+	//)
+	//
+	//terms, _, err = pullBoxTerm()
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return nil, nil
+	//}
+	//
+	//tradingBoxOpen, err = b.buc.GetTradingBoxOpenMapByStatus(1)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return nil, nil
+	//}
+	//
+	//for tokenId, vTradingBoxOpen := range tradingBoxOpen {
+	//	// tokenId从1开始，和 totalSupply是相等的，因为不能燃烧，燃烧需要update_role权限也不会放开
+	//	tmpLastTerm := uint64(0)
+	//	for _, vTerms := range terms {
+	//		if tmpLastTerm >= tokenId || tokenId > vTerms { // 非本期区间
+	//			continue
+	//		}
+	//
+	//		tmpLastTerm = vTerms
+	//	}
+	//}
+
+	return nil, nil
 }

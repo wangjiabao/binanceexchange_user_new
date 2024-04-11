@@ -154,6 +154,19 @@ type UserOrderErr struct {
 	UpdatedAt     time.Time
 }
 
+type TradingBoxOpen struct {
+	ID             uint64    `gorm:"primarykey;type:int"`
+	TokenId        uint64    `gorm:"type:int;not null"`
+	Amount         uint64    `gorm:"type:varchar(200);not null"`
+	AmountTotal    uint64    `gorm:"type:varchar(200);not null"`
+	WithdrawStatus uint64    `gorm:"type:int;not null"`
+	AmountRate     float64   `gorm:"type:decimal(65,20);not null"`
+	Total          float64   `gorm:"type:decimal(65,20);not null"`
+	WithdrawAmount float64   `gorm:"type:decimal(65,20);not null"`
+	CreatedAt      time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt      time.Time `gorm:"type:datetime;not null"`
+}
+
 type BinanceUserRepo struct {
 	data *Data
 	log  *log.Helper
@@ -2244,6 +2257,157 @@ func (b *BinanceUserRepo) GetTraderPosition(traderId uint64) ([]*biz.TraderPosit
 			Side:         v.Side,
 			PositionSide: v.Type,
 		})
+	}
+
+	return res, nil
+}
+
+// InsertTradingBoxOpen .
+func (b *BinanceUserRepo) InsertTradingBoxOpen(ctx context.Context, box *biz.TradingBoxOpen) (*biz.TradingBoxOpen, error) {
+	insertBox := &TradingBoxOpen{
+		TokenId:        box.TokenId,
+		Amount:         box.Amount,
+		AmountTotal:    box.AmountTotal,
+		WithdrawStatus: box.WithdrawStatus,
+		AmountRate:     box.AmountRate,
+		Total:          box.Total,
+		WithdrawAmount: box.WithdrawAmount,
+	}
+
+	res := b.data.DB(ctx).Table("new_trading_box_open").Create(&insertBox)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_TRADING_BOX_OPEN_ERROR", "创建数据失败")
+	}
+
+	return &biz.TradingBoxOpen{
+		ID:             box.ID,
+		TokenId:        box.TokenId,
+		Amount:         box.Amount,
+		AmountTotal:    box.AmountTotal,
+		WithdrawStatus: box.WithdrawStatus,
+		AmountRate:     box.AmountRate,
+		Total:          box.Total,
+		WithdrawAmount: box.WithdrawAmount,
+		CreatedAt:      box.CreatedAt,
+		UpdatedAt:      box.UpdatedAt,
+	}, nil
+}
+
+// UpdateTradingBoxOpenTerm .
+func (b *BinanceUserRepo) UpdateTradingBoxOpenTerm(ctx context.Context, tokenId, amountTotal uint64, amountRate float64) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if err = b.data.DB(ctx).Table("new_trading_box_open").Where("token_id=? and withdraw_status=?", tokenId, 0).
+		Updates(map[string]interface{}{"withdraw_status": 1, "amount_total": amountTotal, "amount_rate": amountRate, "updated_at": now}).Error; nil != err {
+		return false, errors.NotFound("UPDATE_TRADING_BOX_OPEN_ERROR", "UPDATE_TRADING_BOX_ERROR")
+	}
+
+	return true, nil
+}
+
+// UpdateTradingBoxOpenStatus .
+func (b *BinanceUserRepo) UpdateTradingBoxOpenStatus(ctx context.Context, tokenId uint64, total float64, withdrawAmount float64) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if err = b.data.DB(ctx).Table("new_trading_box_open").Where("token_id=? and withdraw_status=?", tokenId, 1).
+		Updates(map[string]interface{}{"withdraw_status": 2, "total": total, "withdraw_amount": withdrawAmount, "updated_at": now}).Error; nil != err {
+		return false, errors.NotFound("UPDATE_TRADING_BOX_OPEN_ERROR", "UPDATE_TRADING_BOX_ERROR")
+	}
+
+	return true, nil
+}
+
+// GetTradingBoxOpen .
+func (b *BinanceUserRepo) GetTradingBoxOpen() ([]*biz.TradingBoxOpen, error) {
+	var tradingBoxOpen []*TradingBoxOpen
+	if err := b.data.db.Table("new_trading_box_open").Find(&tradingBoxOpen).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_TRADING_BOX_OPEN_ERROR", err.Error())
+	}
+
+	res := make([]*biz.TradingBoxOpen, 0)
+	for _, box := range tradingBoxOpen {
+		res = append(res, &biz.TradingBoxOpen{
+			ID:             box.ID,
+			TokenId:        box.TokenId,
+			Amount:         box.Amount,
+			AmountTotal:    box.AmountTotal,
+			WithdrawStatus: box.WithdrawStatus,
+			AmountRate:     box.AmountRate,
+			Total:          box.Total,
+			WithdrawAmount: box.WithdrawAmount,
+			CreatedAt:      box.CreatedAt,
+			UpdatedAt:      box.UpdatedAt,
+		})
+	}
+
+	return res, nil
+}
+
+// GetTradingBoxOpenMap .
+func (b *BinanceUserRepo) GetTradingBoxOpenMap() (map[uint64]*biz.TradingBoxOpen, error) {
+	var tradingBoxOpen []*TradingBoxOpen
+	if err := b.data.db.Table("new_trading_box_open").Find(&tradingBoxOpen).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_TRADING_BOX_OPEN_ERROR", err.Error())
+	}
+
+	res := make(map[uint64]*biz.TradingBoxOpen, 0)
+	for _, box := range tradingBoxOpen {
+		res[box.TokenId] = &biz.TradingBoxOpen{
+			ID:             box.ID,
+			TokenId:        box.TokenId,
+			Amount:         box.Amount,
+			AmountTotal:    box.AmountTotal,
+			WithdrawStatus: box.WithdrawStatus,
+			AmountRate:     box.AmountRate,
+			Total:          box.Total,
+			WithdrawAmount: box.WithdrawAmount,
+			CreatedAt:      box.CreatedAt,
+			UpdatedAt:      box.UpdatedAt,
+		}
+	}
+
+	return res, nil
+}
+
+// GetTradingBoxOpenMapByStatus .
+func (b *BinanceUserRepo) GetTradingBoxOpenMapByStatus(status uint64) (map[uint64]*biz.TradingBoxOpen, error) {
+	var tradingBoxOpen []*TradingBoxOpen
+	if err := b.data.db.Table("new_trading_box_open").Where("withdraw_status=?", status).Find(&tradingBoxOpen).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_TRADING_BOX_OPEN_ERROR", err.Error())
+	}
+
+	res := make(map[uint64]*biz.TradingBoxOpen, 0)
+	for _, box := range tradingBoxOpen {
+		res[box.TokenId] = &biz.TradingBoxOpen{
+			ID:             box.ID,
+			TokenId:        box.TokenId,
+			Amount:         box.Amount,
+			AmountTotal:    box.AmountTotal,
+			WithdrawStatus: box.WithdrawStatus,
+			AmountRate:     box.AmountRate,
+			Total:          box.Total,
+			WithdrawAmount: box.WithdrawAmount,
+			CreatedAt:      box.CreatedAt,
+			UpdatedAt:      box.UpdatedAt,
+		}
 	}
 
 	return res, nil
