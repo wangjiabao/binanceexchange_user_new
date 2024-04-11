@@ -425,7 +425,7 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 	var (
 		terms          []uint64
 		boxTotalAmount map[uint64]uint64
-		balance        float64
+		balance        map[uint64]float64
 		tokenIds       []uint64
 		boxAmount      map[uint64]uint64
 		tradingBoxOpen map[uint64]*biz.TradingBoxOpen
@@ -442,10 +442,20 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 		return nil, nil
 	}
 
-	balance, err = b.buc.GetTermBinanceCurrentBalance(ctx, 17)
-	if err != nil {
-		fmt.Println(err)
-		return nil, nil
+	// todo 每期一个账户
+	for k, vTerms := range terms {
+		if 0 == k {
+			var tmpBalance float64
+			tmpBalance, err = b.buc.GetTermBinanceCurrentBalance(ctx, 17)
+			if err != nil {
+				fmt.Println(err)
+				return nil, nil
+			}
+
+			if 0 < tmpBalance {
+				balance[vTerms] = tmpBalance
+			}
+		}
 	}
 
 	tokenIds, boxAmount, err = pullTradingBoxOpen()
@@ -475,15 +485,17 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 				continue
 			}
 
-			if tmpLastTerm < vTokenIds && vTokenIds <= vTerms { // 本期区间
+			if _, ok := balance[vTerms]; !ok {
+				continue
+			}
 
+			if tmpLastTerm < vTokenIds && vTokenIds <= vTerms { // 本期区间
 				tmpRate := float64(boxAmount[vTokenIds]) / float64(boxTotalAmount[vTerms])
-				err = b.buc.InsertTradingBoxOpen(ctx, vTokenIds, boxAmount[vTokenIds], boxTotalAmount[vTerms], tmpRate, balance, balance*tmpRate)
+				err = b.buc.InsertTradingBoxOpen(ctx, vTokenIds, boxAmount[vTokenIds], boxTotalAmount[vTerms], tmpRate, balance[vTerms], balance[vTerms]*tmpRate)
 				if nil != err {
 					fmt.Println(err)
-					continue
 				}
-
+				break
 			}
 
 			tmpLastTerm = vTerms
