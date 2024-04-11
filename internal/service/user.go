@@ -550,6 +550,9 @@ func pullTradingBoxOpen() ([]uint64, map[uint64]uint64, error) {
 		boxAmount map[uint64]uint64
 		err       error
 	)
+	
+	openBox = make([]uint64, 0)
+	boxAmount = make(map[uint64]uint64, 0)
 
 	url1 := "https://bsc-dataseed4.binance.org/"
 
@@ -581,8 +584,6 @@ func pullTradingBoxOpen() ([]uint64, map[uint64]uint64, error) {
 			return openBox, boxAmount, err
 		}
 
-		openBox = make([]uint64, 0)
-		boxAmount = make(map[uint64]uint64, 0)
 		for tokenId := int64(1); tokenId <= tmp.Int64(); tokenId++ {
 			var (
 				tmp2 *big.Int
