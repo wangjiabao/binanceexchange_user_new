@@ -4709,7 +4709,6 @@ func requestBinanceUserBalance(apiKey string, secretKey string) (*BinanceUserBal
 		return nil, err
 	}
 
-	fmt.Println(string(b))
 	var o []*BinanceUserBalance
 	err = json.Unmarshal(b, &o)
 	if err != nil {
