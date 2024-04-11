@@ -227,6 +227,7 @@ type OrderData struct {
 
 type BinanceUserBalance struct {
 	Balance            string
+	Asset              string
 	CrossUnPnl         string
 	AvailableBalance   string
 	CrossWalletBalance string
@@ -4707,19 +4708,23 @@ func requestBinanceUserBalance(apiKey string, secretKey string) (*BinanceUserBal
 	}
 
 	fmt.Println(string(b))
-	var o BinanceUserBalance
+	var o []*BinanceUserBalance
 	err = json.Unmarshal(b, &o)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
 
-	res = &BinanceUserBalance{
-		Balance:            o.Balance,
-		CrossUnPnl:         o.CrossUnPnl,
-		AvailableBalance:   o.AvailableBalance,
-		CrossWalletBalance: o.CrossWalletBalance,
-		MaxWithdrawAmount:  o.MaxWithdrawAmount,
+	for _, v := range o {
+		if "USDT" == v.Asset {
+			res = &BinanceUserBalance{
+				Balance:            v.Balance,
+				CrossUnPnl:         v.CrossUnPnl,
+				AvailableBalance:   v.AvailableBalance,
+				CrossWalletBalance: v.CrossWalletBalance,
+				MaxWithdrawAmount:  v.MaxWithdrawAmount,
+			}
+		}
 	}
 
 	return res, nil
