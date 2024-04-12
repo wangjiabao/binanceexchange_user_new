@@ -37,7 +37,6 @@ const (
 	BinanceUser_AdminOverOrderAfterBind_FullMethodName    = "/BinanceUser/AdminOverOrderAfterBind"
 	BinanceUser_AdminOverOrderAfterBindTwo_FullMethodName = "/BinanceUser/AdminOverOrderAfterBindTwo"
 	BinanceUser_PullTradingBoxOpen_FullMethodName         = "/BinanceUser/PullTradingBoxOpen"
-	BinanceUser_PullTradingBoxOpenTerm_FullMethodName     = "/BinanceUser/PullTradingBoxOpenTerm"
 	BinanceUser_SettleTradingBoxOpen_FullMethodName       = "/BinanceUser/SettleTradingBoxOpen"
 )
 
@@ -63,7 +62,6 @@ type BinanceUserClient interface {
 	AdminOverOrderAfterBind(ctx context.Context, in *OverOrderAfterBindRequest, opts ...grpc.CallOption) (*OverOrderAfterBindReply, error)
 	AdminOverOrderAfterBindTwo(ctx context.Context, in *OverOrderAfterBindRequest, opts ...grpc.CallOption) (*OverOrderAfterBindReply, error)
 	PullTradingBoxOpen(ctx context.Context, in *PullTradingBoxOpenRequest, opts ...grpc.CallOption) (*PullTradingBoxOpenReply, error)
-	PullTradingBoxOpenTerm(ctx context.Context, in *PullTradingBoxOpenTermRequest, opts ...grpc.CallOption) (*PullTradingBoxOpenTermReply, error)
 	SettleTradingBoxOpen(ctx context.Context, in *SettleTradingBoxOpenRequest, opts ...grpc.CallOption) (*SettleTradingBoxOpenReply, error)
 }
 
@@ -237,15 +235,6 @@ func (c *binanceUserClient) PullTradingBoxOpen(ctx context.Context, in *PullTrad
 	return out, nil
 }
 
-func (c *binanceUserClient) PullTradingBoxOpenTerm(ctx context.Context, in *PullTradingBoxOpenTermRequest, opts ...grpc.CallOption) (*PullTradingBoxOpenTermReply, error) {
-	out := new(PullTradingBoxOpenTermReply)
-	err := c.cc.Invoke(ctx, BinanceUser_PullTradingBoxOpenTerm_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *binanceUserClient) SettleTradingBoxOpen(ctx context.Context, in *SettleTradingBoxOpenRequest, opts ...grpc.CallOption) (*SettleTradingBoxOpenReply, error) {
 	out := new(SettleTradingBoxOpenReply)
 	err := c.cc.Invoke(ctx, BinanceUser_SettleTradingBoxOpen_FullMethodName, in, out, opts...)
@@ -277,7 +266,6 @@ type BinanceUserServer interface {
 	AdminOverOrderAfterBind(context.Context, *OverOrderAfterBindRequest) (*OverOrderAfterBindReply, error)
 	AdminOverOrderAfterBindTwo(context.Context, *OverOrderAfterBindRequest) (*OverOrderAfterBindReply, error)
 	PullTradingBoxOpen(context.Context, *PullTradingBoxOpenRequest) (*PullTradingBoxOpenReply, error)
-	PullTradingBoxOpenTerm(context.Context, *PullTradingBoxOpenTermRequest) (*PullTradingBoxOpenTermReply, error)
 	SettleTradingBoxOpen(context.Context, *SettleTradingBoxOpenRequest) (*SettleTradingBoxOpenReply, error)
 	mustEmbedUnimplementedBinanceUserServer()
 }
@@ -339,9 +327,6 @@ func (UnimplementedBinanceUserServer) AdminOverOrderAfterBindTwo(context.Context
 }
 func (UnimplementedBinanceUserServer) PullTradingBoxOpen(context.Context, *PullTradingBoxOpenRequest) (*PullTradingBoxOpenReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PullTradingBoxOpen not implemented")
-}
-func (UnimplementedBinanceUserServer) PullTradingBoxOpenTerm(context.Context, *PullTradingBoxOpenTermRequest) (*PullTradingBoxOpenTermReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PullTradingBoxOpenTerm not implemented")
 }
 func (UnimplementedBinanceUserServer) SettleTradingBoxOpen(context.Context, *SettleTradingBoxOpenRequest) (*SettleTradingBoxOpenReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SettleTradingBoxOpen not implemented")
@@ -683,24 +668,6 @@ func _BinanceUser_PullTradingBoxOpen_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BinanceUser_PullTradingBoxOpenTerm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PullTradingBoxOpenTermRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BinanceUserServer).PullTradingBoxOpenTerm(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: BinanceUser_PullTradingBoxOpenTerm_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BinanceUserServer).PullTradingBoxOpenTerm(ctx, req.(*PullTradingBoxOpenTermRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _BinanceUser_SettleTradingBoxOpen_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SettleTradingBoxOpenRequest)
 	if err := dec(in); err != nil {
@@ -797,10 +764,6 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PullTradingBoxOpen",
 			Handler:    _BinanceUser_PullTradingBoxOpen_Handler,
-		},
-		{
-			MethodName: "PullTradingBoxOpenTerm",
-			Handler:    _BinanceUser_PullTradingBoxOpenTerm_Handler,
 		},
 		{
 			MethodName: "SettleTradingBoxOpen",

@@ -34,7 +34,6 @@ const OperationBinanceUserOrderHandleTwo = "/BinanceUser/OrderHandleTwo"
 const OperationBinanceUserOverOrderAfterBind = "/BinanceUser/OverOrderAfterBind"
 const OperationBinanceUserOverOrderAfterBindTwo = "/BinanceUser/OverOrderAfterBindTwo"
 const OperationBinanceUserPullTradingBoxOpen = "/BinanceUser/PullTradingBoxOpen"
-const OperationBinanceUserPullTradingBoxOpenTerm = "/BinanceUser/PullTradingBoxOpenTerm"
 const OperationBinanceUserPullUserCredentialsBsc = "/BinanceUser/PullUserCredentialsBsc"
 const OperationBinanceUserPullUserDeposit = "/BinanceUser/PullUserDeposit"
 const OperationBinanceUserPullUserDeposit2 = "/BinanceUser/PullUserDeposit2"
@@ -56,7 +55,6 @@ type BinanceUserHTTPServer interface {
 	OverOrderAfterBind(context.Context, *OverOrderAfterBindRequest) (*OverOrderAfterBindReply, error)
 	OverOrderAfterBindTwo(context.Context, *OverOrderAfterBindRequest) (*OverOrderAfterBindReply, error)
 	PullTradingBoxOpen(context.Context, *PullTradingBoxOpenRequest) (*PullTradingBoxOpenReply, error)
-	PullTradingBoxOpenTerm(context.Context, *PullTradingBoxOpenTermRequest) (*PullTradingBoxOpenTermReply, error)
 	PullUserCredentialsBsc(context.Context, *PullUserCredentialsBscRequest) (*PullUserCredentialsBscReply, error)
 	PullUserDeposit(context.Context, *PullUserDepositRequest) (*PullUserDepositReply, error)
 	PullUserDeposit2(context.Context, *PullUserDepositRequest) (*PullUserDepositReply, error)
@@ -83,7 +81,6 @@ func RegisterBinanceUserHTTPServer(s *http.Server, srv BinanceUserHTTPServer) {
 	r.GET("/api/binanceexchange_user/admin_over_order_after_bind", _BinanceUser_AdminOverOrderAfterBind0_HTTP_Handler(srv))
 	r.GET("/api/binanceexchange_user/admin_over_order_after_bind_tfi", _BinanceUser_AdminOverOrderAfterBindTwo0_HTTP_Handler(srv))
 	r.GET("/api/binanceexchange_user/pull_trading_box_open", _BinanceUser_PullTradingBoxOpen0_HTTP_Handler(srv))
-	r.GET("/api/binanceexchange_user/pull_trading_box_open_term", _BinanceUser_PullTradingBoxOpenTerm0_HTTP_Handler(srv))
 	r.GET("/api/binanceexchange_user/settle_trading_box_open", _BinanceUser_SettleTradingBoxOpen0_HTTP_Handler(srv))
 }
 
@@ -432,25 +429,6 @@ func _BinanceUser_PullTradingBoxOpen0_HTTP_Handler(srv BinanceUserHTTPServer) fu
 	}
 }
 
-func _BinanceUser_PullTradingBoxOpenTerm0_HTTP_Handler(srv BinanceUserHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in PullTradingBoxOpenTermRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationBinanceUserPullTradingBoxOpenTerm)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.PullTradingBoxOpenTerm(ctx, req.(*PullTradingBoxOpenTermRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*PullTradingBoxOpenTermReply)
-		return ctx.Result(200, reply)
-	}
-}
-
 func _BinanceUser_SettleTradingBoxOpen0_HTTP_Handler(srv BinanceUserHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in SettleTradingBoxOpenRequest
@@ -486,7 +464,6 @@ type BinanceUserHTTPClient interface {
 	OverOrderAfterBind(ctx context.Context, req *OverOrderAfterBindRequest, opts ...http.CallOption) (rsp *OverOrderAfterBindReply, err error)
 	OverOrderAfterBindTwo(ctx context.Context, req *OverOrderAfterBindRequest, opts ...http.CallOption) (rsp *OverOrderAfterBindReply, err error)
 	PullTradingBoxOpen(ctx context.Context, req *PullTradingBoxOpenRequest, opts ...http.CallOption) (rsp *PullTradingBoxOpenReply, err error)
-	PullTradingBoxOpenTerm(ctx context.Context, req *PullTradingBoxOpenTermRequest, opts ...http.CallOption) (rsp *PullTradingBoxOpenTermReply, err error)
 	PullUserCredentialsBsc(ctx context.Context, req *PullUserCredentialsBscRequest, opts ...http.CallOption) (rsp *PullUserCredentialsBscReply, err error)
 	PullUserDeposit(ctx context.Context, req *PullUserDepositRequest, opts ...http.CallOption) (rsp *PullUserDepositReply, err error)
 	PullUserDeposit2(ctx context.Context, req *PullUserDepositRequest, opts ...http.CallOption) (rsp *PullUserDepositReply, err error)
@@ -688,19 +665,6 @@ func (c *BinanceUserHTTPClientImpl) PullTradingBoxOpen(ctx context.Context, in *
 	pattern := "/api/binanceexchange_user/pull_trading_box_open"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationBinanceUserPullTradingBoxOpen))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, err
-}
-
-func (c *BinanceUserHTTPClientImpl) PullTradingBoxOpenTerm(ctx context.Context, in *PullTradingBoxOpenTermRequest, opts ...http.CallOption) (*PullTradingBoxOpenTermReply, error) {
-	var out PullTradingBoxOpenTermReply
-	pattern := "/api/binanceexchange_user/pull_trading_box_open_term"
-	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationBinanceUserPullTradingBoxOpenTerm))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

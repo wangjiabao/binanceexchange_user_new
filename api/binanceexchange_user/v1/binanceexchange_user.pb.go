@@ -933,82 +933,6 @@ func (*PullTradingBoxOpenReply) Descriptor() ([]byte, []int) {
 	return file_api_binanceexchange_user_v1_binanceexchange_user_proto_rawDescGZIP(), []int{21}
 }
 
-type PullTradingBoxOpenTermRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *PullTradingBoxOpenTermRequest) Reset() {
-	*x = PullTradingBoxOpenTermRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[22]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *PullTradingBoxOpenTermRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PullTradingBoxOpenTermRequest) ProtoMessage() {}
-
-func (x *PullTradingBoxOpenTermRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[22]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PullTradingBoxOpenTermRequest.ProtoReflect.Descriptor instead.
-func (*PullTradingBoxOpenTermRequest) Descriptor() ([]byte, []int) {
-	return file_api_binanceexchange_user_v1_binanceexchange_user_proto_rawDescGZIP(), []int{22}
-}
-
-type PullTradingBoxOpenTermReply struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *PullTradingBoxOpenTermReply) Reset() {
-	*x = PullTradingBoxOpenTermReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[23]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *PullTradingBoxOpenTermReply) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PullTradingBoxOpenTermReply) ProtoMessage() {}
-
-func (x *PullTradingBoxOpenTermReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[23]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PullTradingBoxOpenTermReply.ProtoReflect.Descriptor instead.
-func (*PullTradingBoxOpenTermReply) Descriptor() ([]byte, []int) {
-	return file_api_binanceexchange_user_v1_binanceexchange_user_proto_rawDescGZIP(), []int{23}
-}
-
 type SettleTradingBoxOpenRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1018,7 +942,7 @@ type SettleTradingBoxOpenRequest struct {
 func (x *SettleTradingBoxOpenRequest) Reset() {
 	*x = SettleTradingBoxOpenRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[24]
+		mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1031,7 +955,7 @@ func (x *SettleTradingBoxOpenRequest) String() string {
 func (*SettleTradingBoxOpenRequest) ProtoMessage() {}
 
 func (x *SettleTradingBoxOpenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[24]
+	mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1044,7 +968,7 @@ func (x *SettleTradingBoxOpenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SettleTradingBoxOpenRequest.ProtoReflect.Descriptor instead.
 func (*SettleTradingBoxOpenRequest) Descriptor() ([]byte, []int) {
-	return file_api_binanceexchange_user_v1_binanceexchange_user_proto_rawDescGZIP(), []int{24}
+	return file_api_binanceexchange_user_v1_binanceexchange_user_proto_rawDescGZIP(), []int{22}
 }
 
 type SettleTradingBoxOpenReply struct {
@@ -1056,7 +980,7 @@ type SettleTradingBoxOpenReply struct {
 func (x *SettleTradingBoxOpenReply) Reset() {
 	*x = SettleTradingBoxOpenReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[25]
+		mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1069,7 +993,7 @@ func (x *SettleTradingBoxOpenReply) String() string {
 func (*SettleTradingBoxOpenReply) ProtoMessage() {}
 
 func (x *SettleTradingBoxOpenReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[25]
+	mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1082,7 +1006,7 @@ func (x *SettleTradingBoxOpenReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SettleTradingBoxOpenReply.ProtoReflect.Descriptor instead.
 func (*SettleTradingBoxOpenReply) Descriptor() ([]byte, []int) {
-	return file_api_binanceexchange_user_v1_binanceexchange_user_proto_rawDescGZIP(), []int{25}
+	return file_api_binanceexchange_user_v1_binanceexchange_user_proto_rawDescGZIP(), []int{23}
 }
 
 type ListenTraderAndUserOrderRequest_SendBody struct {
@@ -1097,7 +1021,7 @@ type ListenTraderAndUserOrderRequest_SendBody struct {
 func (x *ListenTraderAndUserOrderRequest_SendBody) Reset() {
 	*x = ListenTraderAndUserOrderRequest_SendBody{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[26]
+		mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1110,7 +1034,7 @@ func (x *ListenTraderAndUserOrderRequest_SendBody) String() string {
 func (*ListenTraderAndUserOrderRequest_SendBody) ProtoMessage() {}
 
 func (x *ListenTraderAndUserOrderRequest_SendBody) ProtoReflect() protoreflect.Message {
-	mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[26]
+	mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1155,7 +1079,7 @@ type ListenTraderAndUserOrderRequest_SendBody_Order struct {
 func (x *ListenTraderAndUserOrderRequest_SendBody_Order) Reset() {
 	*x = ListenTraderAndUserOrderRequest_SendBody_Order{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[27]
+		mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1168,7 +1092,7 @@ func (x *ListenTraderAndUserOrderRequest_SendBody_Order) String() string {
 func (*ListenTraderAndUserOrderRequest_SendBody_Order) ProtoMessage() {}
 
 func (x *ListenTraderAndUserOrderRequest_SendBody_Order) ProtoReflect() protoreflect.Message {
-	mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[27]
+	mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1236,7 +1160,7 @@ type ListenTraderAndUserOrderRequest_SendBody_Order_Data struct {
 func (x *ListenTraderAndUserOrderRequest_SendBody_Order_Data) Reset() {
 	*x = ListenTraderAndUserOrderRequest_SendBody_Order_Data{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[28]
+		mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1249,7 +1173,7 @@ func (x *ListenTraderAndUserOrderRequest_SendBody_Order_Data) String() string {
 func (*ListenTraderAndUserOrderRequest_SendBody_Order_Data) ProtoMessage() {}
 
 func (x *ListenTraderAndUserOrderRequest_SendBody_Order_Data) ProtoReflect() protoreflect.Message {
-	mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[28]
+	mi := &file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1395,15 +1319,11 @@ var file_api_binanceexchange_user_v1_binanceexchange_user_proto_rawDesc = []byte
 	0x75, 0x73, 0x22, 0x1b, 0x0a, 0x19, 0x50, 0x75, 0x6c, 0x6c, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e,
 	0x67, 0x42, 0x6f, 0x78, 0x4f, 0x70, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22,
 	0x19, 0x0a, 0x17, 0x50, 0x75, 0x6c, 0x6c, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42, 0x6f,
-	0x78, 0x4f, 0x70, 0x65, 0x6e, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x1f, 0x0a, 0x1d, 0x50, 0x75,
-	0x6c, 0x6c, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42, 0x6f, 0x78, 0x4f, 0x70, 0x65, 0x6e,
-	0x54, 0x65, 0x72, 0x6d, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x1d, 0x0a, 0x1b, 0x50,
-	0x75, 0x6c, 0x6c, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42, 0x6f, 0x78, 0x4f, 0x70, 0x65,
-	0x6e, 0x54, 0x65, 0x72, 0x6d, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x1d, 0x0a, 0x1b, 0x53, 0x65,
+	0x78, 0x4f, 0x70, 0x65, 0x6e, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x1d, 0x0a, 0x1b, 0x53, 0x65,
 	0x74, 0x74, 0x6c, 0x65, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42, 0x6f, 0x78, 0x4f, 0x70,
 	0x65, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x1b, 0x0a, 0x19, 0x53, 0x65, 0x74,
 	0x74, 0x6c, 0x65, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42, 0x6f, 0x78, 0x4f, 0x70, 0x65,
-	0x6e, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x32, 0xb2, 0x14, 0x0a, 0x0b, 0x42, 0x69, 0x6e, 0x61, 0x6e,
+	0x6e, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x32, 0x9b, 0x13, 0x0a, 0x0b, 0x42, 0x69, 0x6e, 0x61, 0x6e,
 	0x63, 0x65, 0x55, 0x73, 0x65, 0x72, 0x12, 0x55, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65,
 	0x72, 0x12, 0x0f, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65,
 	0x73, 0x74, 0x1a, 0x0d, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x70, 0x6c,
@@ -1548,30 +1468,21 @@ var file_api_binanceexchange_user_v1_binanceexchange_user_proto_rawDesc = []byte
 	0xd3, 0xe4, 0x93, 0x02, 0x31, 0x12, 0x2f, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x62, 0x69, 0x6e, 0x61,
 	0x6e, 0x63, 0x65, 0x65, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x5f, 0x75, 0x73, 0x65, 0x72,
 	0x2f, 0x70, 0x75, 0x6c, 0x6c, 0x5f, 0x74, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x62, 0x6f,
-	0x78, 0x5f, 0x6f, 0x70, 0x65, 0x6e, 0x12, 0x94, 0x01, 0x0a, 0x16, 0x50, 0x75, 0x6c, 0x6c, 0x54,
-	0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42, 0x6f, 0x78, 0x4f, 0x70, 0x65, 0x6e, 0x54, 0x65, 0x72,
-	0x6d, 0x12, 0x1e, 0x2e, 0x50, 0x75, 0x6c, 0x6c, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42,
-	0x6f, 0x78, 0x4f, 0x70, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x1c, 0x2e, 0x50, 0x75, 0x6c, 0x6c, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42,
-	0x6f, 0x78, 0x4f, 0x70, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22,
-	0x3c, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x36, 0x12, 0x34, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x62, 0x69,
+	0x78, 0x5f, 0x6f, 0x70, 0x65, 0x6e, 0x12, 0x8b, 0x01, 0x0a, 0x14, 0x53, 0x65, 0x74, 0x74, 0x6c,
+	0x65, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42, 0x6f, 0x78, 0x4f, 0x70, 0x65, 0x6e, 0x12,
+	0x1c, 0x2e, 0x53, 0x65, 0x74, 0x74, 0x6c, 0x65, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42,
+	0x6f, 0x78, 0x4f, 0x70, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1a, 0x2e,
+	0x53, 0x65, 0x74, 0x74, 0x6c, 0x65, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42, 0x6f, 0x78,
+	0x4f, 0x70, 0x65, 0x6e, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x39, 0x82, 0xd3, 0xe4, 0x93, 0x02,
+	0x33, 0x12, 0x31, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x62, 0x69, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x65,
+	0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x5f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x73, 0x65, 0x74,
+	0x74, 0x6c, 0x65, 0x5f, 0x74, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x62, 0x6f, 0x78, 0x5f,
+	0x6f, 0x70, 0x65, 0x6e, 0x42, 0x4b, 0x0a, 0x12, 0x61, 0x70, 0x69, 0x2e, 0x62, 0x69, 0x6e, 0x61,
+	0x6e, 0x63, 0x65, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x50, 0x01, 0x5a, 0x33, 0x62, 0x69,
 	0x6e, 0x61, 0x6e, 0x63, 0x65, 0x65, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x5f, 0x75, 0x73,
-	0x65, 0x72, 0x2f, 0x70, 0x75, 0x6c, 0x6c, 0x5f, 0x74, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x5f,
-	0x62, 0x6f, 0x78, 0x5f, 0x6f, 0x70, 0x65, 0x6e, 0x5f, 0x74, 0x65, 0x72, 0x6d, 0x12, 0x8b, 0x01,
-	0x0a, 0x14, 0x53, 0x65, 0x74, 0x74, 0x6c, 0x65, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42,
-	0x6f, 0x78, 0x4f, 0x70, 0x65, 0x6e, 0x12, 0x1c, 0x2e, 0x53, 0x65, 0x74, 0x74, 0x6c, 0x65, 0x54,
-	0x72, 0x61, 0x64, 0x69, 0x6e, 0x67, 0x42, 0x6f, 0x78, 0x4f, 0x70, 0x65, 0x6e, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x1a, 0x1a, 0x2e, 0x53, 0x65, 0x74, 0x74, 0x6c, 0x65, 0x54, 0x72, 0x61,
-	0x64, 0x69, 0x6e, 0x67, 0x42, 0x6f, 0x78, 0x4f, 0x70, 0x65, 0x6e, 0x52, 0x65, 0x70, 0x6c, 0x79,
-	0x22, 0x39, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x33, 0x12, 0x31, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x62,
-	0x69, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x65, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x5f, 0x75,
-	0x73, 0x65, 0x72, 0x2f, 0x73, 0x65, 0x74, 0x74, 0x6c, 0x65, 0x5f, 0x74, 0x72, 0x61, 0x64, 0x69,
-	0x6e, 0x67, 0x5f, 0x62, 0x6f, 0x78, 0x5f, 0x6f, 0x70, 0x65, 0x6e, 0x42, 0x4b, 0x0a, 0x12, 0x61,
-	0x70, 0x69, 0x2e, 0x62, 0x69, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76,
-	0x31, 0x50, 0x01, 0x5a, 0x33, 0x62, 0x69, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x65, 0x78, 0x63, 0x68,
-	0x61, 0x6e, 0x67, 0x65, 0x5f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x62, 0x69,
-	0x6e, 0x61, 0x6e, 0x63, 0x65, 0x65, 0x78, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x5f, 0x75, 0x73,
-	0x65, 0x72, 0x2f, 0x76, 0x31, 0x3b, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x72, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x62, 0x69, 0x6e, 0x61, 0x6e, 0x63, 0x65, 0x65, 0x78,
+	0x63, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x5f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x76, 0x31, 0x3b, 0x76,
+	0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1586,7 +1497,7 @@ func file_api_binanceexchange_user_v1_binanceexchange_user_proto_rawDescGZIP() [
 	return file_api_binanceexchange_user_v1_binanceexchange_user_proto_rawDescData
 }
 
-var file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
+var file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_api_binanceexchange_user_v1_binanceexchange_user_proto_goTypes = []interface{}{
 	(*GetUserRequest)(nil),                                      // 0: GetUserRequest
 	(*GetUserReply)(nil),                                        // 1: GetUserReply
@@ -1610,18 +1521,16 @@ var file_api_binanceexchange_user_v1_binanceexchange_user_proto_goTypes = []inte
 	(*ListenTraderAndUserOrderReply)(nil),                       // 19: ListenTraderAndUserOrderReply
 	(*PullTradingBoxOpenRequest)(nil),                           // 20: PullTradingBoxOpenRequest
 	(*PullTradingBoxOpenReply)(nil),                             // 21: PullTradingBoxOpenReply
-	(*PullTradingBoxOpenTermRequest)(nil),                       // 22: PullTradingBoxOpenTermRequest
-	(*PullTradingBoxOpenTermReply)(nil),                         // 23: PullTradingBoxOpenTermReply
-	(*SettleTradingBoxOpenRequest)(nil),                         // 24: SettleTradingBoxOpenRequest
-	(*SettleTradingBoxOpenReply)(nil),                           // 25: SettleTradingBoxOpenReply
-	(*ListenTraderAndUserOrderRequest_SendBody)(nil),            // 26: ListenTraderAndUserOrderRequest.SendBody
-	(*ListenTraderAndUserOrderRequest_SendBody_Order)(nil),      // 27: ListenTraderAndUserOrderRequest.SendBody.Order
-	(*ListenTraderAndUserOrderRequest_SendBody_Order_Data)(nil), // 28: ListenTraderAndUserOrderRequest.SendBody.Order.Data
+	(*SettleTradingBoxOpenRequest)(nil),                         // 22: SettleTradingBoxOpenRequest
+	(*SettleTradingBoxOpenReply)(nil),                           // 23: SettleTradingBoxOpenReply
+	(*ListenTraderAndUserOrderRequest_SendBody)(nil),            // 24: ListenTraderAndUserOrderRequest.SendBody
+	(*ListenTraderAndUserOrderRequest_SendBody_Order)(nil),      // 25: ListenTraderAndUserOrderRequest.SendBody.Order
+	(*ListenTraderAndUserOrderRequest_SendBody_Order_Data)(nil), // 26: ListenTraderAndUserOrderRequest.SendBody.Order.Data
 }
 var file_api_binanceexchange_user_v1_binanceexchange_user_proto_depIdxs = []int32{
-	26, // 0: ListenTraderAndUserOrderRequest.send_body:type_name -> ListenTraderAndUserOrderRequest.SendBody
-	27, // 1: ListenTraderAndUserOrderRequest.SendBody.orders:type_name -> ListenTraderAndUserOrderRequest.SendBody.Order
-	28, // 2: ListenTraderAndUserOrderRequest.SendBody.Order.data:type_name -> ListenTraderAndUserOrderRequest.SendBody.Order.Data
+	24, // 0: ListenTraderAndUserOrderRequest.send_body:type_name -> ListenTraderAndUserOrderRequest.SendBody
+	25, // 1: ListenTraderAndUserOrderRequest.SendBody.orders:type_name -> ListenTraderAndUserOrderRequest.SendBody.Order
+	26, // 2: ListenTraderAndUserOrderRequest.SendBody.Order.data:type_name -> ListenTraderAndUserOrderRequest.SendBody.Order.Data
 	0,  // 3: BinanceUser.GetUser:input_type -> GetUserRequest
 	2,  // 4: BinanceUser.PullUserDeposit:input_type -> PullUserDepositRequest
 	2,  // 5: BinanceUser.PullUserDeposit2:input_type -> PullUserDepositRequest
@@ -1640,30 +1549,28 @@ var file_api_binanceexchange_user_v1_binanceexchange_user_proto_depIdxs = []int3
 	14, // 18: BinanceUser.AdminOverOrderAfterBind:input_type -> OverOrderAfterBindRequest
 	14, // 19: BinanceUser.AdminOverOrderAfterBindTwo:input_type -> OverOrderAfterBindRequest
 	20, // 20: BinanceUser.PullTradingBoxOpen:input_type -> PullTradingBoxOpenRequest
-	22, // 21: BinanceUser.PullTradingBoxOpenTerm:input_type -> PullTradingBoxOpenTermRequest
-	24, // 22: BinanceUser.SettleTradingBoxOpen:input_type -> SettleTradingBoxOpenRequest
-	1,  // 23: BinanceUser.GetUser:output_type -> GetUserReply
-	3,  // 24: BinanceUser.PullUserDeposit:output_type -> PullUserDepositReply
-	3,  // 25: BinanceUser.PullUserDeposit2:output_type -> PullUserDepositReply
-	5,  // 26: BinanceUser.PullUserCredentialsBsc:output_type -> PullUserCredentialsBscReply
-	7,  // 27: BinanceUser.BindTrader:output_type -> BindTraderReply
-	19, // 28: BinanceUser.ListenTraderAndUserOrder:output_type -> ListenTraderAndUserOrderReply
-	17, // 29: BinanceUser.OrderHandle:output_type -> OrderHandleReply
-	17, // 30: BinanceUser.OrderHandleTwo:output_type -> OrderHandleReply
-	9,  // 31: BinanceUser.Analyze:output_type -> AnalyzeReply
-	11, // 32: BinanceUser.CloseOrderAfterBind:output_type -> CloseOrderAfterBindReply
-	11, // 33: BinanceUser.CloseOrderAfterBindTwo:output_type -> CloseOrderAfterBindReply
-	13, // 34: BinanceUser.InitOrderAfterBind:output_type -> InitOrderAfterBindReply
-	13, // 35: BinanceUser.InitOrderAfterBindTwo:output_type -> InitOrderAfterBindReply
-	15, // 36: BinanceUser.OverOrderAfterBind:output_type -> OverOrderAfterBindReply
-	15, // 37: BinanceUser.OverOrderAfterBindTwo:output_type -> OverOrderAfterBindReply
-	15, // 38: BinanceUser.AdminOverOrderAfterBind:output_type -> OverOrderAfterBindReply
-	15, // 39: BinanceUser.AdminOverOrderAfterBindTwo:output_type -> OverOrderAfterBindReply
-	21, // 40: BinanceUser.PullTradingBoxOpen:output_type -> PullTradingBoxOpenReply
-	23, // 41: BinanceUser.PullTradingBoxOpenTerm:output_type -> PullTradingBoxOpenTermReply
-	25, // 42: BinanceUser.SettleTradingBoxOpen:output_type -> SettleTradingBoxOpenReply
-	23, // [23:43] is the sub-list for method output_type
-	3,  // [3:23] is the sub-list for method input_type
+	22, // 21: BinanceUser.SettleTradingBoxOpen:input_type -> SettleTradingBoxOpenRequest
+	1,  // 22: BinanceUser.GetUser:output_type -> GetUserReply
+	3,  // 23: BinanceUser.PullUserDeposit:output_type -> PullUserDepositReply
+	3,  // 24: BinanceUser.PullUserDeposit2:output_type -> PullUserDepositReply
+	5,  // 25: BinanceUser.PullUserCredentialsBsc:output_type -> PullUserCredentialsBscReply
+	7,  // 26: BinanceUser.BindTrader:output_type -> BindTraderReply
+	19, // 27: BinanceUser.ListenTraderAndUserOrder:output_type -> ListenTraderAndUserOrderReply
+	17, // 28: BinanceUser.OrderHandle:output_type -> OrderHandleReply
+	17, // 29: BinanceUser.OrderHandleTwo:output_type -> OrderHandleReply
+	9,  // 30: BinanceUser.Analyze:output_type -> AnalyzeReply
+	11, // 31: BinanceUser.CloseOrderAfterBind:output_type -> CloseOrderAfterBindReply
+	11, // 32: BinanceUser.CloseOrderAfterBindTwo:output_type -> CloseOrderAfterBindReply
+	13, // 33: BinanceUser.InitOrderAfterBind:output_type -> InitOrderAfterBindReply
+	13, // 34: BinanceUser.InitOrderAfterBindTwo:output_type -> InitOrderAfterBindReply
+	15, // 35: BinanceUser.OverOrderAfterBind:output_type -> OverOrderAfterBindReply
+	15, // 36: BinanceUser.OverOrderAfterBindTwo:output_type -> OverOrderAfterBindReply
+	15, // 37: BinanceUser.AdminOverOrderAfterBind:output_type -> OverOrderAfterBindReply
+	15, // 38: BinanceUser.AdminOverOrderAfterBindTwo:output_type -> OverOrderAfterBindReply
+	21, // 39: BinanceUser.PullTradingBoxOpen:output_type -> PullTradingBoxOpenReply
+	23, // 40: BinanceUser.SettleTradingBoxOpen:output_type -> SettleTradingBoxOpenReply
+	22, // [22:41] is the sub-list for method output_type
+	3,  // [3:22] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name
@@ -1940,30 +1847,6 @@ func file_api_binanceexchange_user_v1_binanceexchange_user_proto_init() {
 			}
 		}
 		file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PullTradingBoxOpenTermRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PullTradingBoxOpenTermReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SettleTradingBoxOpenRequest); i {
 			case 0:
 				return &v.state
@@ -1975,7 +1858,7 @@ func file_api_binanceexchange_user_v1_binanceexchange_user_proto_init() {
 				return nil
 			}
 		}
-		file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
+		file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SettleTradingBoxOpenReply); i {
 			case 0:
 				return &v.state
@@ -1987,7 +1870,7 @@ func file_api_binanceexchange_user_v1_binanceexchange_user_proto_init() {
 				return nil
 			}
 		}
-		file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
+		file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListenTraderAndUserOrderRequest_SendBody); i {
 			case 0:
 				return &v.state
@@ -1999,7 +1882,7 @@ func file_api_binanceexchange_user_v1_binanceexchange_user_proto_init() {
 				return nil
 			}
 		}
-		file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
+		file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListenTraderAndUserOrderRequest_SendBody_Order); i {
 			case 0:
 				return &v.state
@@ -2011,7 +1894,7 @@ func file_api_binanceexchange_user_v1_binanceexchange_user_proto_init() {
 				return nil
 			}
 		}
-		file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
+		file_api_binanceexchange_user_v1_binanceexchange_user_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListenTraderAndUserOrderRequest_SendBody_Order_Data); i {
 			case 0:
 				return &v.state
@@ -2030,7 +1913,7 @@ func file_api_binanceexchange_user_v1_binanceexchange_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_api_binanceexchange_user_v1_binanceexchange_user_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   29,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -116,12 +116,6 @@ service BinanceUser {
     };
   };
 
-  rpc PullTradingBoxOpenTerm (PullTradingBoxOpenTermRequest) returns (PullTradingBoxOpenTermReply) {
-    option (google.api.http) = {
-      get: "/api/binanceexchange_user/pull_trading_box_open_term"
-    };
-  };
-
   rpc SettleTradingBoxOpen (SettleTradingBoxOpenRequest) returns (SettleTradingBoxOpenReply) {
     option (google.api.http) = {
       get: "/api/binanceexchange_user/settle_trading_box_open"
@@ -207,10 +201,6 @@ message ListenTraderAndUserOrderReply {
 message PullTradingBoxOpenRequest {}
 
 message PullTradingBoxOpenReply {}
-
-message PullTradingBoxOpenTermRequest {}
-
-message PullTradingBoxOpenTermReply {}
 
 message SettleTradingBoxOpenRequest {}
 

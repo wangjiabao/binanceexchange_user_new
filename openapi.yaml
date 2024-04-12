@@ -287,24 +287,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/binanceexchange_user/pull_trading_box_open_term:
-        get:
-            tags:
-                - BinanceUser
-            operationId: BinanceUser_PullTradingBoxOpenTerm
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/PullTradingBoxOpenTermReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
     /api/binanceexchange_user/pull_user_credentials_bsc:
         get:
             tags:
@@ -456,9 +438,6 @@ components:
             type: object
             properties: {}
         PullTradingBoxOpenReply:
-            type: object
-            properties: {}
-        PullTradingBoxOpenTermReply:
             type: object
             properties: {}
         PullUserCredentialsBscReply:
