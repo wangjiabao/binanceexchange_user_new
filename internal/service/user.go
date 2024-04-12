@@ -519,6 +519,7 @@ func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.Pul
 	if 0 < len(incomeAmounts) {
 		err = setIncomeTradingBox(incomeTokenIds, incomeAmounts)
 		if nil != err {
+			fmt.Println("记录开盒数据请求区块链失败", err, incomeTokenIds[0], incomeTokenIds[len(incomeTokenIds)-1])
 			fmt.Println(err)
 			return nil, err
 		}
