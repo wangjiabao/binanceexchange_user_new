@@ -4971,7 +4971,7 @@ func getProxy() ([]*Proxy, error) {
 		err error
 	)
 
-	content, err := ioutil.ReadFile("../../log/a.log")
+	content, err := ioutil.ReadFile("./log/a.log")
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
