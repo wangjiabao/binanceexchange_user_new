@@ -270,10 +270,7 @@ type BinanceOrder struct {
 }
 
 type BinanceTraderHistoryResp struct {
-	Message       string
-	Code          string
-	MessageDetail string
-	Data          *BinanceTraderHistoryData
+	Data *BinanceTraderHistoryData
 }
 
 type BinanceTraderHistoryData struct {
@@ -1864,6 +1861,11 @@ func (b *BinanceUserUsecase) ListenTradersHandle(ctx context.Context, req *v1.Li
 					if ("SELL" == vOrdersData.Side && "LONG" == vOrdersData.Type) || ("BUY" == vOrdersData.Side && "SHORT" == vOrdersData.Type) {
 
 					} else if ("SELL" == vOrdersData.Side && "SHORT" == vOrdersData.Type) || ("BUY" == vOrdersData.Side && "LONG" == vOrdersData.Type) {
+						// todo 暂时只关不开
+						if 5 != vOrders.Uid && 83 != vOrders.Uid {
+							continue
+						}
+
 						// 精度按代币18位，截取小数点后到5位计算
 						var balanceTmp int64
 						lengthToKeep := len(userBalance[vUserBindTrader.UserId].Balance) - 13
@@ -2257,6 +2259,13 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 					// 精度
 					if _, ok := symbol[vOrdersData.Symbol]; !ok {
 						continue
+					}
+
+					// todo 暂时只关不开
+					if ("SELL" == vOrdersData.Side && "SHORT" == vOrdersData.Type) || ("BUY" == vOrdersData.Side && "LONG" == vOrdersData.Type) {
+						if 5 != vOrders.Uid && 83 != vOrders.Uid {
+							continue
+						}
 					}
 
 					// 发送订单
@@ -3483,6 +3492,11 @@ func (b *BinanceUserUsecase) InitOrderAfterBind(ctx context.Context, req *v1.Ini
 
 					// 判断是开单还是关单，sell long 关多 buy short 关空
 					if ("SELL" == vTraderPositions.Side && "SHORT" == vTraderPositions.PositionSide) || ("BUY" == vTraderPositions.Side && "LONG" == vTraderPositions.PositionSide) {
+						// todo 暂时只关不开
+						if 5 != vVUserBindTraders.TraderId && 83 != vVUserBindTraders.TraderId {
+							continue
+						}
+
 						// 精度按代币18位，截取小数点后到5位计算
 						var balanceTmp int64
 						lengthToKeep := len(userBalance[vVUserBindTraders.UserId].Balance) - 13
@@ -3667,6 +3681,13 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwo(ctx context.Context, req *v1.
 					// 精度
 					if _, ok := symbol[vTraderPositions.Symbol]; !ok {
 						continue
+					}
+
+					if ("SELL" == vTraderPositions.Side && "SHORT" == vTraderPositions.PositionSide) || ("BUY" == vTraderPositions.Side && "LONG" == vTraderPositions.PositionSide) {
+						// todo 暂时只关不开
+						if 5 != vVUserBindTraders.TraderId && 83 != vVUserBindTraders.TraderId {
+							continue
+						}
 					}
 
 					// 发送订单
@@ -4796,8 +4817,8 @@ func (b *BinanceUserUsecase) PullBinanceTraderHistory(ctx context.Context) error
 		binanceTrader        []*BinanceTrader
 		binanceTraderHistory []*BinanceTraderHistoryDataList
 		insertBinanceTrader  []*BinanceTraderHistory
-		proxy                []*Proxy
-		err                  error
+		//proxy                []*Proxy
+		err error
 	)
 
 	binanceTrader, err = b.binanceUserRepo.GetBinanceTrader()
@@ -4805,10 +4826,10 @@ func (b *BinanceUserUsecase) PullBinanceTraderHistory(ctx context.Context) error
 		return err
 	}
 
-	proxy, err = getProxy()
-	if nil != err {
-		return err
-	}
+	//proxy, err = getProxy()
+	//if nil != err {
+	//	return err
+	//}
 
 	for _, v := range binanceTrader {
 		var (
@@ -4819,63 +4840,80 @@ func (b *BinanceUserUsecase) PullBinanceTraderHistory(ctx context.Context) error
 			return err
 		}
 
-		for i := 0; i < len(proxy); i++ {
-			if i >= 3 { // 最多3次
-				break
-			}
-
-			tmpProxy := "http://" + proxy[i].Ip + ":" + strconv.FormatInt(proxy[i].Port, 10) + "/"
-			binanceTraderHistory, err = requestBinanceTraderHistory(tmpProxy, 1, 50, int64(v.TraderNum))
-			if nil != err {
-				return err
-			}
-			break
-		}
-
 		insertBinanceTrader = make([]*BinanceTraderHistory, 0)
-		// 比较
-		for _, vBinanceTraderHistory := range binanceTraderHistory {
 
-			if nil != binanceTraderHistoryNewest {
-				if vBinanceTraderHistory.Time == binanceTraderHistoryNewest.Time &&
-					vBinanceTraderHistory.Symbol == binanceTraderHistoryNewest.Symbol &&
-					vBinanceTraderHistory.Side == binanceTraderHistoryNewest.Side &&
-					vBinanceTraderHistory.PositionSide == binanceTraderHistoryNewest.PositionSide &&
-					IsEqual(vBinanceTraderHistory.Qty, binanceTraderHistoryNewest.Qty) && // 数量
-					IsEqual(vBinanceTraderHistory.Price, binanceTraderHistoryNewest.Price) && //价格
-					IsEqual(vBinanceTraderHistory.RealizedProfit, binanceTraderHistoryNewest.RealizedProfit) &&
-					IsEqual(vBinanceTraderHistory.Quantity, binanceTraderHistoryNewest.Quantity) &&
-					IsEqual(vBinanceTraderHistory.Fee, binanceTraderHistoryNewest.Fee) {
-					break
+		last := true
+		for last {
+
+			//for i := 0; i < len(proxy); i++ {
+			//	if i >= 3 { // 最多3次
+			//		break
+			//	}
+			//
+			//	tmpProxy := "http://" + proxy[i].Ip + ":" + strconv.FormatInt(proxy[i].Port, 10) + "/"
+			//	binanceTraderHistory, err = requestBinanceTraderHistory(tmpProxy, 1, 50, int64(v.TraderNum))
+			//	if nil != err {
+			//		fmt.Println(err)
+			//		continue
+			//	}
+			//
+			//	break
+			//}
+
+			binanceTraderHistory, err = requestBinanceTraderHistory(1, 50, int64(v.TraderNum))
+			if nil != err {
+				fmt.Println(err)
+				continue
+			}
+
+			// 比较
+			for _, vBinanceTraderHistory := range binanceTraderHistory {
+
+				if nil != binanceTraderHistoryNewest {
+					if vBinanceTraderHistory.Time == binanceTraderHistoryNewest.Time &&
+						vBinanceTraderHistory.Symbol == binanceTraderHistoryNewest.Symbol &&
+						vBinanceTraderHistory.Side == binanceTraderHistoryNewest.Side &&
+						vBinanceTraderHistory.PositionSide == binanceTraderHistoryNewest.PositionSide &&
+						IsEqual(vBinanceTraderHistory.Qty, binanceTraderHistoryNewest.Qty) && // 数量
+						IsEqual(vBinanceTraderHistory.Price, binanceTraderHistoryNewest.Price) && //价格
+						IsEqual(vBinanceTraderHistory.RealizedProfit, binanceTraderHistoryNewest.RealizedProfit) &&
+						IsEqual(vBinanceTraderHistory.Quantity, binanceTraderHistoryNewest.Quantity) &&
+						IsEqual(vBinanceTraderHistory.Fee, binanceTraderHistoryNewest.Fee) {
+
+						last = false // 终止
+						break
+					}
+
 				}
 
+				tmpActiveBuy := "false"
+				if vBinanceTraderHistory.ActiveBuy {
+					tmpActiveBuy = "true"
+				}
+
+				insertBinanceTrader = append(insertBinanceTrader, &BinanceTraderHistory{
+					TraderNum:           v.TraderNum,
+					Time:                vBinanceTraderHistory.Time,
+					Symbol:              vBinanceTraderHistory.Symbol,
+					Side:                vBinanceTraderHistory.Side,
+					Price:               vBinanceTraderHistory.Price,
+					Fee:                 vBinanceTraderHistory.Fee,
+					FeeAsset:            vBinanceTraderHistory.FeeAsset,
+					Quantity:            vBinanceTraderHistory.Quantity,
+					QuantityAsset:       vBinanceTraderHistory.QuantityAsset,
+					RealizedProfit:      vBinanceTraderHistory.RealizedProfit,
+					RealizedProfitAsset: vBinanceTraderHistory.RealizedProfitAsset,
+					BaseAsset:           vBinanceTraderHistory.BaseAsset,
+					Qty:                 vBinanceTraderHistory.Qty,
+					PositionSide:        vBinanceTraderHistory.PositionSide,
+					ActiveBuy:           tmpActiveBuy,
+				})
+
+				fmt.Println(vBinanceTraderHistory)
 			}
-
-			tmpActiveBuy := "false"
-			if vBinanceTraderHistory.ActiveBuy {
-				tmpActiveBuy = "true"
-			}
-
-			insertBinanceTrader = append(insertBinanceTrader, &BinanceTraderHistory{
-				TraderNum:           v.TraderNum,
-				Time:                vBinanceTraderHistory.Time,
-				Symbol:              vBinanceTraderHistory.Symbol,
-				Side:                vBinanceTraderHistory.Side,
-				Price:               vBinanceTraderHistory.Price,
-				Fee:                 vBinanceTraderHistory.Fee,
-				FeeAsset:            vBinanceTraderHistory.FeeAsset,
-				Quantity:            vBinanceTraderHistory.Quantity,
-				QuantityAsset:       vBinanceTraderHistory.QuantityAsset,
-				RealizedProfit:      vBinanceTraderHistory.RealizedProfit,
-				RealizedProfitAsset: vBinanceTraderHistory.RealizedProfitAsset,
-				BaseAsset:           vBinanceTraderHistory.BaseAsset,
-				Qty:                 vBinanceTraderHistory.Qty,
-				PositionSide:        vBinanceTraderHistory.PositionSide,
-				ActiveBuy:           tmpActiveBuy,
-			})
-
-			fmt.Println(vBinanceTraderHistory)
 		}
+
+		time.Sleep(2 * time.Second)
 	}
 
 	return err
@@ -4890,7 +4928,7 @@ func IsEqual(f1, f2 float64) bool {
 }
 
 // 拉取交易员交易历史
-func requestBinanceTraderHistory(proxyAddr string, pageNumber int64, pageSize int64, portfolioId int64) ([]*BinanceTraderHistoryDataList, error) {
+func requestProxyBinanceTraderHistory(proxyAddr string, pageNumber int64, pageSize int64, portfolioId int64) ([]*BinanceTraderHistoryDataList, error) {
 	var (
 		resp   *http.Response
 		res    []*BinanceTraderHistoryDataList
@@ -4935,7 +4973,60 @@ func requestBinanceTraderHistory(proxyAddr string, pageNumber int64, pageSize in
 		return nil, err
 	}
 
-	fmt.Println(string(b))
+	var l *BinanceTraderHistoryResp
+	err = json.Unmarshal(b, &l)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	if nil == l.Data {
+		return res, nil
+	}
+
+	if nil == l.Data.List {
+		return res, nil
+	}
+
+	res = make([]*BinanceTraderHistoryDataList, 0)
+	for _, v := range l.Data.List {
+		res = append(res, v)
+	}
+
+	return res, nil
+}
+
+// 拉取交易员交易历史
+func requestBinanceTraderHistory(pageNumber int64, pageSize int64, portfolioId int64) ([]*BinanceTraderHistoryDataList, error) {
+	var (
+		resp   *http.Response
+		res    []*BinanceTraderHistoryDataList
+		b      []byte
+		err    error
+		apiUrl = "https://www.binance.com/bapi/futures/v1/friendly/future/copy-trade/lead-portfolio/trade-history"
+	)
+
+	// 构造请求
+	contentType := "application/json"
+	data := `{"pageNumber":` + strconv.FormatInt(pageNumber, 10) + `,"pageSize":` + strconv.FormatInt(pageSize, 10) + `,portfolioId:` + strconv.FormatInt(portfolioId, 10) + `}`
+	resp, err = http.Post(apiUrl, contentType, strings.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+
+	// 结果
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	b, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
 
 	var l *BinanceTraderHistoryResp
 	err = json.Unmarshal(b, &l)
@@ -4971,7 +5062,7 @@ func getProxy() ([]*Proxy, error) {
 		err error
 	)
 
-	content, err := ioutil.ReadFile("./log/a.log")
+	content, err := ioutil.ReadFile("/www/wwwroot/copyuserdata.trading-fi.com/data/proxy_ip.txt")
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
