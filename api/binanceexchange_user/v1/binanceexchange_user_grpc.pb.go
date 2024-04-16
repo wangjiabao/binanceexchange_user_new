@@ -38,6 +38,7 @@ const (
 	BinanceUser_AdminOverOrderAfterBindTwo_FullMethodName = "/BinanceUser/AdminOverOrderAfterBindTwo"
 	BinanceUser_PullTradingBoxOpen_FullMethodName         = "/BinanceUser/PullTradingBoxOpen"
 	BinanceUser_SettleTradingBoxOpen_FullMethodName       = "/BinanceUser/SettleTradingBoxOpen"
+	BinanceUser_PullBinanceTraderHistory_FullMethodName   = "/BinanceUser/PullBinanceTraderHistory"
 )
 
 // BinanceUserClient is the client API for BinanceUser service.
@@ -63,6 +64,7 @@ type BinanceUserClient interface {
 	AdminOverOrderAfterBindTwo(ctx context.Context, in *OverOrderAfterBindRequest, opts ...grpc.CallOption) (*OverOrderAfterBindReply, error)
 	PullTradingBoxOpen(ctx context.Context, in *PullTradingBoxOpenRequest, opts ...grpc.CallOption) (*PullTradingBoxOpenReply, error)
 	SettleTradingBoxOpen(ctx context.Context, in *SettleTradingBoxOpenRequest, opts ...grpc.CallOption) (*SettleTradingBoxOpenReply, error)
+	PullBinanceTraderHistory(ctx context.Context, in *PullBinanceTraderHistoryRequest, opts ...grpc.CallOption) (*PullBinanceTraderHistoryReply, error)
 }
 
 type binanceUserClient struct {
@@ -244,6 +246,15 @@ func (c *binanceUserClient) SettleTradingBoxOpen(ctx context.Context, in *Settle
 	return out, nil
 }
 
+func (c *binanceUserClient) PullBinanceTraderHistory(ctx context.Context, in *PullBinanceTraderHistoryRequest, opts ...grpc.CallOption) (*PullBinanceTraderHistoryReply, error) {
+	out := new(PullBinanceTraderHistoryReply)
+	err := c.cc.Invoke(ctx, BinanceUser_PullBinanceTraderHistory_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BinanceUserServer is the server API for BinanceUser service.
 // All implementations must embed UnimplementedBinanceUserServer
 // for forward compatibility
@@ -267,6 +278,7 @@ type BinanceUserServer interface {
 	AdminOverOrderAfterBindTwo(context.Context, *OverOrderAfterBindRequest) (*OverOrderAfterBindReply, error)
 	PullTradingBoxOpen(context.Context, *PullTradingBoxOpenRequest) (*PullTradingBoxOpenReply, error)
 	SettleTradingBoxOpen(context.Context, *SettleTradingBoxOpenRequest) (*SettleTradingBoxOpenReply, error)
+	PullBinanceTraderHistory(context.Context, *PullBinanceTraderHistoryRequest) (*PullBinanceTraderHistoryReply, error)
 	mustEmbedUnimplementedBinanceUserServer()
 }
 
@@ -330,6 +342,9 @@ func (UnimplementedBinanceUserServer) PullTradingBoxOpen(context.Context, *PullT
 }
 func (UnimplementedBinanceUserServer) SettleTradingBoxOpen(context.Context, *SettleTradingBoxOpenRequest) (*SettleTradingBoxOpenReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SettleTradingBoxOpen not implemented")
+}
+func (UnimplementedBinanceUserServer) PullBinanceTraderHistory(context.Context, *PullBinanceTraderHistoryRequest) (*PullBinanceTraderHistoryReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PullBinanceTraderHistory not implemented")
 }
 func (UnimplementedBinanceUserServer) mustEmbedUnimplementedBinanceUserServer() {}
 
@@ -686,6 +701,24 @@ func _BinanceUser_SettleTradingBoxOpen_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BinanceUser_PullBinanceTraderHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PullBinanceTraderHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).PullBinanceTraderHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_PullBinanceTraderHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).PullBinanceTraderHistory(ctx, req.(*PullBinanceTraderHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BinanceUser_ServiceDesc is the grpc.ServiceDesc for BinanceUser service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -768,6 +801,10 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SettleTradingBoxOpen",
 			Handler:    _BinanceUser_SettleTradingBoxOpen_Handler,
+		},
+		{
+			MethodName: "PullBinanceTraderHistory",
+			Handler:    _BinanceUser_PullBinanceTraderHistory_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

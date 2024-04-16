@@ -803,3 +803,17 @@ func setIncomeTradingBox(tokenIds []uint64, amounts []string) error {
 
 	return nil
 }
+
+// PullBinanceTraderHistory .
+func (b *BinanceUserService) PullBinanceTraderHistory(ctx context.Context, req *v1.PullBinanceTraderHistoryRequest) (*v1.PullBinanceTraderHistoryReply, error) {
+	var (
+		err error
+	)
+
+	err = b.buc.PullBinanceTraderHistory(ctx)
+	if nil != err {
+		fmt.Println(err)
+	}
+
+	return nil, nil
+}

@@ -121,6 +121,12 @@ service BinanceUser {
       get: "/api/binanceexchange_user/settle_trading_box_open"
     };
   };
+
+  rpc PullBinanceTraderHistory (PullBinanceTraderHistoryRequest) returns (PullBinanceTraderHistoryReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/pull_binance_trader_history"
+    };
+  };
 }
 
 message GetUserRequest {
@@ -205,3 +211,7 @@ message PullTradingBoxOpenReply {}
 message SettleTradingBoxOpenRequest {}
 
 message SettleTradingBoxOpenReply {}
+
+message PullBinanceTraderHistoryRequest{}
+
+message PullBinanceTraderHistoryReply {}

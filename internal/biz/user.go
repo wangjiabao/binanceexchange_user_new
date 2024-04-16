@@ -15,6 +15,7 @@ import (
 	"math"
 	"math/big"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
@@ -174,6 +175,27 @@ type TradingBoxOpen struct {
 	UpdatedAt      time.Time
 }
 
+type BinanceTraderHistory struct {
+	ID                  uint64
+	TraderNum           uint64
+	Time                uint64
+	Symbol              string
+	Side                string
+	Price               float64
+	Fee                 float64
+	FeeAsset            string
+	Quantity            float64
+	QuantityAsset       string
+	RealizedProfit      float64
+	RealizedProfitAsset string
+	BaseAsset           string
+	Qty                 float64
+	PositionSide        string
+	ActiveBuy           string
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
+}
+
 type Symbol struct {
 	ID                uint64
 	Symbol            string
@@ -245,6 +267,41 @@ type BinanceOrder struct {
 	PositionSide  string
 	ClosePosition bool
 	Type          string
+}
+
+type BinanceTraderHistoryResp struct {
+	Message       string
+	Code          string
+	MessageDetail string
+	Data          *BinanceTraderHistoryData
+}
+
+type BinanceTraderHistoryData struct {
+	Total uint64
+	List  []*BinanceTraderHistoryDataList
+}
+
+type BinanceTrader struct {
+	ID        uint64
+	TraderNum uint64
+	Status    uint64
+}
+
+type BinanceTraderHistoryDataList struct {
+	Time                uint64
+	Symbol              string
+	Side                string
+	Price               float64
+	Fee                 float64
+	FeeAsset            string
+	Quantity            float64
+	QuantityAsset       string
+	RealizedProfit      float64
+	RealizedProfitAsset string
+	BaseAsset           string
+	Qty                 float64
+	PositionSide        string
+	ActiveBuy           bool
 }
 
 type BinanceUserRepo interface {
@@ -333,6 +390,9 @@ type BinanceUserRepo interface {
 	GetTradingBoxOpen() ([]*TradingBoxOpen, error)
 	GetTradingBoxOpenMap() (map[uint64]*TradingBoxOpen, error)
 	GetTradingBoxOpenMapByStatus(status uint64) (map[uint64]*TradingBoxOpen, error)
+	GetBinanceTraderHistory(traderNum uint64) ([]*BinanceTraderHistory, error)
+	GetBinanceTraderHistoryByTraderNumNewest(traderNum uint64) (*BinanceTraderHistory, error)
+	GetBinanceTrader() ([]*BinanceTrader, error)
 
 	SAddOrderSetSellLongOrBuyShort(ctx context.Context, OrderId int64) error
 	SMembersOrderSetSellLongOrBuyShort(ctx context.Context) ([]string, error)
@@ -4729,4 +4789,199 @@ func requestBinanceUserBalance(apiKey string, secretKey string) (*BinanceUserBal
 	}
 
 	return res, nil
+}
+
+func (b *BinanceUserUsecase) PullBinanceTraderHistory(ctx context.Context) error {
+	var (
+		binanceTrader        []*BinanceTrader
+		binanceTraderHistory []*BinanceTraderHistoryDataList
+		insertBinanceTrader  []*BinanceTraderHistory
+		proxy                []*Proxy
+		err                  error
+	)
+
+	binanceTrader, err = b.binanceUserRepo.GetBinanceTrader()
+	if nil != err {
+		return err
+	}
+
+	proxy, err = getProxy()
+	if nil != err {
+		return err
+	}
+
+	for _, v := range binanceTrader {
+		var (
+			binanceTraderHistoryNewest *BinanceTraderHistory
+		)
+		binanceTraderHistoryNewest, err = b.binanceUserRepo.GetBinanceTraderHistoryByTraderNumNewest(v.TraderNum)
+		if nil != err {
+			return err
+		}
+
+		for i := 0; i < len(proxy); i++ {
+			if i >= 3 { // 最多3次
+				break
+			}
+
+			tmpProxy := "http://" + proxy[i].Ip + ":" + strconv.FormatInt(proxy[i].Port, 10) + "/"
+			binanceTraderHistory, err = requestBinanceTraderHistory(tmpProxy, 1, 50, int64(v.TraderNum))
+			if nil != err {
+				return err
+			}
+			break
+		}
+
+		insertBinanceTrader = make([]*BinanceTraderHistory, 0)
+		// 比较
+		for _, vBinanceTraderHistory := range binanceTraderHistory {
+
+			if nil != binanceTraderHistoryNewest {
+				if vBinanceTraderHistory.Time == binanceTraderHistoryNewest.Time &&
+					vBinanceTraderHistory.Symbol == binanceTraderHistoryNewest.Symbol &&
+					vBinanceTraderHistory.Side == binanceTraderHistoryNewest.Side &&
+					vBinanceTraderHistory.PositionSide == binanceTraderHistoryNewest.PositionSide &&
+					IsEqual(vBinanceTraderHistory.Qty, binanceTraderHistoryNewest.Qty) && // 数量
+					IsEqual(vBinanceTraderHistory.Price, binanceTraderHistoryNewest.Price) && //价格
+					IsEqual(vBinanceTraderHistory.RealizedProfit, binanceTraderHistoryNewest.RealizedProfit) &&
+					IsEqual(vBinanceTraderHistory.Quantity, binanceTraderHistoryNewest.Quantity) &&
+					IsEqual(vBinanceTraderHistory.Fee, binanceTraderHistoryNewest.Fee) {
+					break
+				}
+
+			}
+
+			tmpActiveBuy := "false"
+			if vBinanceTraderHistory.ActiveBuy {
+				tmpActiveBuy = "true"
+			}
+
+			insertBinanceTrader = append(insertBinanceTrader, &BinanceTraderHistory{
+				TraderNum:           v.TraderNum,
+				Time:                vBinanceTraderHistory.Time,
+				Symbol:              vBinanceTraderHistory.Symbol,
+				Side:                vBinanceTraderHistory.Side,
+				Price:               vBinanceTraderHistory.Price,
+				Fee:                 vBinanceTraderHistory.Fee,
+				FeeAsset:            vBinanceTraderHistory.FeeAsset,
+				Quantity:            vBinanceTraderHistory.Quantity,
+				QuantityAsset:       vBinanceTraderHistory.QuantityAsset,
+				RealizedProfit:      vBinanceTraderHistory.RealizedProfit,
+				RealizedProfitAsset: vBinanceTraderHistory.RealizedProfitAsset,
+				BaseAsset:           vBinanceTraderHistory.BaseAsset,
+				Qty:                 vBinanceTraderHistory.Qty,
+				PositionSide:        vBinanceTraderHistory.PositionSide,
+				ActiveBuy:           tmpActiveBuy,
+			})
+
+			fmt.Println(vBinanceTraderHistory)
+		}
+	}
+
+	return err
+}
+
+func IsEqual(f1, f2 float64) bool {
+	if f1 > f2 {
+		return f1-f2 < 0.000000001
+	} else {
+		return f2-f1 < 0.000000001
+	}
+}
+
+// 拉取交易员交易历史
+func requestBinanceTraderHistory(proxyAddr string, pageNumber int64, pageSize int64, portfolioId int64) ([]*BinanceTraderHistoryDataList, error) {
+	var (
+		resp   *http.Response
+		res    []*BinanceTraderHistoryDataList
+		b      []byte
+		err    error
+		apiUrl = "https://www.binance.com/bapi/futures/v1/friendly/future/copy-trade/lead-portfolio/trade-history"
+	)
+
+	proxy, err := url.Parse(proxyAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	netTransport := &http.Transport{
+		Proxy:                 http.ProxyURL(proxy),
+		MaxIdleConnsPerHost:   10,
+		ResponseHeaderTimeout: time.Second * time.Duration(5),
+	}
+	httpClient := &http.Client{
+		Timeout:   time.Second * 10,
+		Transport: netTransport,
+	}
+
+	// 构造请求
+	contentType := "application/json"
+	data := `{"pageNumber":` + strconv.FormatInt(pageNumber, 10) + `,"pageSize":` + strconv.FormatInt(pageSize, 10) + `,portfolioId:` + strconv.FormatInt(portfolioId, 10) + `}`
+	resp, err = httpClient.Post(apiUrl, contentType, strings.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+
+	// 结果
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	b, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	fmt.Println(string(b))
+
+	var l *BinanceTraderHistoryResp
+	err = json.Unmarshal(b, &l)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	if nil == l.Data {
+		return res, nil
+	}
+
+	if nil == l.Data.List {
+		return res, nil
+	}
+
+	res = make([]*BinanceTraderHistoryDataList, 0)
+	for _, v := range l.Data.List {
+		res = append(res, v)
+	}
+
+	return res, nil
+}
+
+type Proxy struct {
+	Ip   string
+	Port int64
+}
+
+func getProxy() ([]*Proxy, error) {
+	var (
+		p   []*Proxy
+		err error
+	)
+
+	content, err := ioutil.ReadFile("../../log/a.log")
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	err = json.Unmarshal(content, &p)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return p, nil
 }

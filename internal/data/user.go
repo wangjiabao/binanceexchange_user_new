@@ -167,6 +167,33 @@ type TradingBoxOpen struct {
 	UpdatedAt      time.Time `gorm:"type:datetime;not null"`
 }
 
+type BinanceTraderHistory struct {
+	ID                  uint64  `gorm:"primarykey;type:int"`
+	TraderNum           uint64  `gorm:"type:bigint(20);not null"`
+	Time                uint64  `gorm:"type:bigint(20);not null"`
+	Symbol              string  `gorm:"type:varchar(45);not null"`
+	Side                string  `gorm:"type:varchar(45);not null"`
+	Price               float64 `gorm:"type:decimal(65,20);not null"`
+	Fee                 float64 `gorm:"type:decimal(65,20);not null"`
+	FeeAsset            string  `gorm:"type:varchar(45);not null"`
+	Quantity            float64 `gorm:"type:decimal(65,20);not null"`
+	QuantityAsset       string  `gorm:"type:varchar(45);not null"`
+	RealizedProfit      float64 `gorm:"type:decimal(65,20);not null"`
+	RealizedProfitAsset string  `gorm:"type:varchar(45);not null"`
+	BaseAsset           string  `gorm:"type:varchar(45);not null"`
+	Qty                 float64 `gorm:"type:decimal(65,20);not null"`
+	PositionSide        string  `gorm:"type:varchar(45);not null"`
+	ActiveBuy           string  `gorm:"type:varchar(45);not null"`
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
+}
+
+type BinanceTrader struct {
+	ID        uint64 `gorm:"primarykey;type:int"`
+	TraderNum uint64 `gorm:"type:bigint(20);not null"`
+	Status    uint64 `gorm:"type:bigint(20);not null"`
+}
+
 type BinanceUserRepo struct {
 	data *Data
 	log  *log.Helper
@@ -2396,6 +2423,100 @@ func (b *BinanceUserRepo) GetTradingBoxOpenMapByStatus(status uint64) (map[uint6
 	}
 
 	return res, nil
+}
+
+// GetBinanceTrader .
+func (b *BinanceUserRepo) GetBinanceTrader() ([]*biz.BinanceTrader, error) {
+	var binanceTrader []*BinanceTrader
+	if err := b.data.db.Table("new_binance_trader").Where("status=?", 0).Find(&binanceTrader).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_BINANCE_TRADER_ERROR", err.Error())
+	}
+
+	res := make([]*biz.BinanceTrader, 0)
+	for _, v := range binanceTrader {
+		res = append(res, &biz.BinanceTrader{
+			ID:        v.ID,
+			TraderNum: v.TraderNum,
+			Status:    v.Status,
+		})
+	}
+
+	return res, nil
+}
+
+// GetBinanceTraderHistory .
+func (b *BinanceUserRepo) GetBinanceTraderHistory(traderNum uint64) ([]*biz.BinanceTraderHistory, error) {
+	var binanceTraderHistory []*BinanceTraderHistory
+	if err := b.data.db.Table("new_binance_trade_history").Where("trader_num=?", traderNum).Find(&binanceTraderHistory).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_BINANCE_TRADER_HISTORY_ERROR", err.Error())
+	}
+
+	res := make([]*biz.BinanceTraderHistory, 0)
+	for _, v := range binanceTraderHistory {
+		res = append(res, &biz.BinanceTraderHistory{
+			ID:                  v.ID,
+			TraderNum:           v.TraderNum,
+			Time:                v.Time,
+			Symbol:              v.Symbol,
+			Side:                v.Side,
+			Price:               v.Price,
+			Fee:                 v.Fee,
+			FeeAsset:            v.FeeAsset,
+			Quantity:            v.Quantity,
+			QuantityAsset:       v.QuantityAsset,
+			RealizedProfit:      v.RealizedProfit,
+			RealizedProfitAsset: v.RealizedProfitAsset,
+			BaseAsset:           v.BaseAsset,
+			Qty:                 v.Qty,
+			PositionSide:        v.PositionSide,
+			ActiveBuy:           v.ActiveBuy,
+			CreatedAt:           v.CreatedAt,
+			UpdatedAt:           v.UpdatedAt,
+		})
+	}
+
+	return res, nil
+}
+
+// GetBinanceTraderHistoryByTraderNumNewest .
+func (b *BinanceUserRepo) GetBinanceTraderHistoryByTraderNumNewest(traderNum uint64) (*biz.BinanceTraderHistory, error) {
+	var binanceTraderHistory *BinanceTraderHistory
+	if err := b.data.db.Table("new_binance_trade_history").Where("trader_num=?", traderNum).Order("id desc").First(&binanceTraderHistory).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_BINANCE_TRADER_HISTORY_ERROR", err.Error())
+	}
+
+	return &biz.BinanceTraderHistory{
+		ID:                  binanceTraderHistory.ID,
+		TraderNum:           binanceTraderHistory.TraderNum,
+		Time:                binanceTraderHistory.Time,
+		Symbol:              binanceTraderHistory.Symbol,
+		Side:                binanceTraderHistory.Side,
+		Price:               binanceTraderHistory.Price,
+		Fee:                 binanceTraderHistory.Fee,
+		FeeAsset:            binanceTraderHistory.FeeAsset,
+		Quantity:            binanceTraderHistory.Quantity,
+		QuantityAsset:       binanceTraderHistory.QuantityAsset,
+		RealizedProfit:      binanceTraderHistory.RealizedProfit,
+		RealizedProfitAsset: binanceTraderHistory.RealizedProfitAsset,
+		BaseAsset:           binanceTraderHistory.BaseAsset,
+		Qty:                 binanceTraderHistory.Qty,
+		PositionSide:        binanceTraderHistory.PositionSide,
+		ActiveBuy:           binanceTraderHistory.ActiveBuy,
+		CreatedAt:           binanceTraderHistory.CreatedAt,
+		UpdatedAt:           binanceTraderHistory.UpdatedAt,
+	}, nil
 }
 
 // SAddOrderSetSellLongOrBuyShort 平仓订单信息放入缓存.
