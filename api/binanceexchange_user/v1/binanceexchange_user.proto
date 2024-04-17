@@ -127,6 +127,12 @@ service BinanceUser {
       get: "/api/binanceexchange_user/pull_binance_trade_history"
     };
   };
+
+  rpc GetBinanceTrader (PullBinanceTradeHistoryRequest) returns (PullBinanceTradeHistoryReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/pull_binance_trade_history"
+    };
+  };
 }
 
 message GetUserRequest {

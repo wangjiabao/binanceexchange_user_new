@@ -17,6 +17,7 @@ type User struct {
 	ApiSecret           string    `gorm:"type:varchar(200);not null"`
 	BindTraderStatus    uint64    `gorm:"type:int;not null"`
 	BindTraderStatusTfi uint64    `gorm:"type:int;not null"`
+	IsDai               uint64    `gorm:"type:int;not null"`
 	CreatedAt           time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt           time.Time `gorm:"type:datetime;not null"`
 }
@@ -186,6 +187,22 @@ type BinanceTradeHistory struct {
 	ActiveBuy           string  `gorm:"type:varchar(45);not null"`
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
+}
+
+type BinancePositionHistory struct {
+	ID              uint64  `gorm:"primarykey;type:int"`
+	TraderNum       uint64  `gorm:"type:bigint(20);not null"`
+	Symbol          string  `gorm:"type:varchar(45);not null"`
+	Side            string  `gorm:"type:varchar(45);not null"`
+	Closed          uint64  `gorm:"type:bigint(20);not null"`
+	Opened          uint64  `gorm:"type:bigint(20);not null"`
+	AvgCost         float64 `gorm:"type:decimal(65,20);not null"`
+	AvgClosePrice   float64 `gorm:"type:decimal(65,20);not null"`
+	ClosingPnl      float64 `gorm:"type:decimal(65,20);not null"`
+	MaxOpenInterest float64 `gorm:"type:decimal(65,20);not null"`
+	ClosedVolume    float64 `gorm:"type:decimal(65,20);not null"`
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }
 
 type BinanceTrade struct {
@@ -970,6 +987,7 @@ func (b *BinanceUserRepo) GetUsersByUserIds(userIds []uint64) (map[uint64]*biz.U
 			ApiStatus:        v.ApiStatus,
 			BindTraderStatus: v.BindTraderStatus,
 			ApiSecret:        v.ApiSecret,
+			IsDai:            v.IsDai,
 			CreatedAt:        v.CreatedAt,
 			UpdatedAt:        v.UpdatedAt,
 		}
@@ -2427,8 +2445,8 @@ func (b *BinanceUserRepo) GetTradingBoxOpenMapByStatus(status uint64) (map[uint6
 
 // GetBinanceTrade .
 func (b *BinanceUserRepo) GetBinanceTrade() ([]*biz.BinanceTrade, error) {
-	var BinanceTrade []*BinanceTrade
-	if err := b.data.db.Table("new_binance_trader").Where("status=?", 0).Find(&BinanceTrade).Error; err != nil {
+	var binanceTrade []*BinanceTrade
+	if err := b.data.db.Table("new_binance_trader").Where("status=?", 0).Find(&binanceTrade).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -2437,7 +2455,7 @@ func (b *BinanceUserRepo) GetBinanceTrade() ([]*biz.BinanceTrade, error) {
 	}
 
 	res := make([]*biz.BinanceTrade, 0)
-	for _, v := range BinanceTrade {
+	for _, v := range binanceTrade {
 		res = append(res, &biz.BinanceTrade{
 			ID:        v.ID,
 			TraderNum: v.TraderNum,
@@ -2450,8 +2468,8 @@ func (b *BinanceUserRepo) GetBinanceTrade() ([]*biz.BinanceTrade, error) {
 
 // GetBinanceTradeHistory .
 func (b *BinanceUserRepo) GetBinanceTradeHistory(traderNum uint64) ([]*biz.BinanceTradeHistory, error) {
-	var BinanceTradeHistory []*BinanceTradeHistory
-	if err := b.data.db.Table("new_binance_trade_history").Where("trader_num=?", traderNum).Find(&BinanceTradeHistory).Error; err != nil {
+	var binanceTradeHistory []*BinanceTradeHistory
+	if err := b.data.db.Table("new_binance_trade_history").Where("trader_num=?", traderNum).Find(&binanceTradeHistory).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -2460,7 +2478,7 @@ func (b *BinanceUserRepo) GetBinanceTradeHistory(traderNum uint64) ([]*biz.Binan
 	}
 
 	res := make([]*biz.BinanceTradeHistory, 0)
-	for _, v := range BinanceTradeHistory {
+	for _, v := range binanceTradeHistory {
 		res = append(res, &biz.BinanceTradeHistory{
 			ID:                  v.ID,
 			TraderNum:           v.TraderNum,
@@ -2563,6 +2581,104 @@ func (b *BinanceUserRepo) InsertBinanceTradeHistory(ctx context.Context, history
 		ActiveBuy:           insert.ActiveBuy,
 		CreatedAt:           insert.CreatedAt,
 		UpdatedAt:           insert.UpdatedAt,
+	}, nil
+}
+
+// GetBinancePositionHistory .
+func (b *BinanceUserRepo) GetBinancePositionHistory(traderNum uint64) ([]*biz.BinancePositionHistory, error) {
+	var binancePositionHistory []*BinancePositionHistory
+	if err := b.data.db.Table("new_binance_position_history").Where("trader_num=?", traderNum).Find(&binancePositionHistory).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_BINANCE_POSITION_HISTORY_ERROR", err.Error())
+	}
+
+	res := make([]*biz.BinancePositionHistory, 0)
+	for _, v := range binancePositionHistory {
+		res = append(res, &biz.BinancePositionHistory{
+			ID:              v.ID,
+			TraderNum:       v.TraderNum,
+			Symbol:          v.Symbol,
+			Side:            v.Side,
+			Closed:          v.Closed,
+			Opened:          v.Opened,
+			AvgCost:         v.AvgCost,
+			AvgClosePrice:   v.AvgClosePrice,
+			ClosingPnl:      v.ClosingPnl,
+			MaxOpenInterest: v.MaxOpenInterest,
+			ClosedVolume:    v.ClosedVolume,
+			CreatedAt:       v.CreatedAt,
+			UpdatedAt:       v.UpdatedAt,
+		})
+	}
+
+	return res, nil
+}
+
+// GetBinancePositionHistoryByTraderNumNewest .
+func (b *BinanceUserRepo) GetBinancePositionHistoryByTraderNumNewest(traderNum uint64) (*biz.BinancePositionHistory, error) {
+	var binancePositionHistory *BinancePositionHistory
+	if err := b.data.db.Table("new_binance_position_history").Where("trader_num=?", traderNum).Order("id desc").First(&binancePositionHistory).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_BINANCE_POSITION_HISTORY_ERROR", err.Error())
+	}
+
+	return &biz.BinancePositionHistory{
+		ID:              binancePositionHistory.ID,
+		TraderNum:       binancePositionHistory.TraderNum,
+		Symbol:          binancePositionHistory.Symbol,
+		Side:            binancePositionHistory.Side,
+		Closed:          binancePositionHistory.Closed,
+		Opened:          binancePositionHistory.Opened,
+		AvgCost:         binancePositionHistory.AvgCost,
+		AvgClosePrice:   binancePositionHistory.AvgClosePrice,
+		ClosingPnl:      binancePositionHistory.ClosingPnl,
+		MaxOpenInterest: binancePositionHistory.MaxOpenInterest,
+		ClosedVolume:    binancePositionHistory.ClosedVolume,
+		CreatedAt:       binancePositionHistory.CreatedAt,
+		UpdatedAt:       binancePositionHistory.UpdatedAt,
+	}, nil
+}
+
+// InsertBinancePositionHistory .
+func (b *BinanceUserRepo) InsertBinancePositionHistory(ctx context.Context, binancePositionHistory *biz.BinancePositionHistory) (*biz.BinancePositionHistory, error) {
+	insert := &BinancePositionHistory{
+		TraderNum:       binancePositionHistory.TraderNum,
+		Symbol:          binancePositionHistory.Symbol,
+		Side:            binancePositionHistory.Side,
+		Closed:          binancePositionHistory.Closed,
+		Opened:          binancePositionHistory.Opened,
+		AvgCost:         binancePositionHistory.AvgCost,
+		AvgClosePrice:   binancePositionHistory.AvgClosePrice,
+		ClosingPnl:      binancePositionHistory.ClosingPnl,
+		MaxOpenInterest: binancePositionHistory.MaxOpenInterest,
+		ClosedVolume:    binancePositionHistory.ClosedVolume,
+	}
+
+	res := b.data.DB(ctx).Table("new_binance_position_history").Create(&insert)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_BINANCE_POSITION_HISTORY_ERROR", "创建数据失败")
+	}
+
+	return &biz.BinancePositionHistory{
+		ID:              insert.ID,
+		TraderNum:       insert.TraderNum,
+		Symbol:          insert.Symbol,
+		Side:            insert.Side,
+		Closed:          insert.Closed,
+		Opened:          insert.Opened,
+		AvgCost:         insert.AvgCost,
+		AvgClosePrice:   insert.AvgClosePrice,
+		ClosingPnl:      insert.ClosingPnl,
+		MaxOpenInterest: insert.MaxOpenInterest,
+		ClosedVolume:    insert.ClosedVolume,
+		CreatedAt:       insert.CreatedAt,
+		UpdatedAt:       insert.UpdatedAt,
 	}, nil
 }
 
