@@ -38,7 +38,7 @@ const (
 	BinanceUser_AdminOverOrderAfterBindTwo_FullMethodName = "/BinanceUser/AdminOverOrderAfterBindTwo"
 	BinanceUser_PullTradingBoxOpen_FullMethodName         = "/BinanceUser/PullTradingBoxOpen"
 	BinanceUser_SettleTradingBoxOpen_FullMethodName       = "/BinanceUser/SettleTradingBoxOpen"
-	BinanceUser_PullBinanceTraderHistory_FullMethodName   = "/BinanceUser/PullBinanceTraderHistory"
+	BinanceUser_PullBinanceTradeHistory_FullMethodName    = "/BinanceUser/PullBinanceTradeHistory"
 )
 
 // BinanceUserClient is the client API for BinanceUser service.
@@ -64,7 +64,7 @@ type BinanceUserClient interface {
 	AdminOverOrderAfterBindTwo(ctx context.Context, in *OverOrderAfterBindRequest, opts ...grpc.CallOption) (*OverOrderAfterBindReply, error)
 	PullTradingBoxOpen(ctx context.Context, in *PullTradingBoxOpenRequest, opts ...grpc.CallOption) (*PullTradingBoxOpenReply, error)
 	SettleTradingBoxOpen(ctx context.Context, in *SettleTradingBoxOpenRequest, opts ...grpc.CallOption) (*SettleTradingBoxOpenReply, error)
-	PullBinanceTraderHistory(ctx context.Context, in *PullBinanceTraderHistoryRequest, opts ...grpc.CallOption) (*PullBinanceTraderHistoryReply, error)
+	PullBinanceTradeHistory(ctx context.Context, in *PullBinanceTradeHistoryRequest, opts ...grpc.CallOption) (*PullBinanceTradeHistoryReply, error)
 }
 
 type binanceUserClient struct {
@@ -246,9 +246,9 @@ func (c *binanceUserClient) SettleTradingBoxOpen(ctx context.Context, in *Settle
 	return out, nil
 }
 
-func (c *binanceUserClient) PullBinanceTraderHistory(ctx context.Context, in *PullBinanceTraderHistoryRequest, opts ...grpc.CallOption) (*PullBinanceTraderHistoryReply, error) {
-	out := new(PullBinanceTraderHistoryReply)
-	err := c.cc.Invoke(ctx, BinanceUser_PullBinanceTraderHistory_FullMethodName, in, out, opts...)
+func (c *binanceUserClient) PullBinanceTradeHistory(ctx context.Context, in *PullBinanceTradeHistoryRequest, opts ...grpc.CallOption) (*PullBinanceTradeHistoryReply, error) {
+	out := new(PullBinanceTradeHistoryReply)
+	err := c.cc.Invoke(ctx, BinanceUser_PullBinanceTradeHistory_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -278,7 +278,7 @@ type BinanceUserServer interface {
 	AdminOverOrderAfterBindTwo(context.Context, *OverOrderAfterBindRequest) (*OverOrderAfterBindReply, error)
 	PullTradingBoxOpen(context.Context, *PullTradingBoxOpenRequest) (*PullTradingBoxOpenReply, error)
 	SettleTradingBoxOpen(context.Context, *SettleTradingBoxOpenRequest) (*SettleTradingBoxOpenReply, error)
-	PullBinanceTraderHistory(context.Context, *PullBinanceTraderHistoryRequest) (*PullBinanceTraderHistoryReply, error)
+	PullBinanceTradeHistory(context.Context, *PullBinanceTradeHistoryRequest) (*PullBinanceTradeHistoryReply, error)
 	mustEmbedUnimplementedBinanceUserServer()
 }
 
@@ -343,8 +343,8 @@ func (UnimplementedBinanceUserServer) PullTradingBoxOpen(context.Context, *PullT
 func (UnimplementedBinanceUserServer) SettleTradingBoxOpen(context.Context, *SettleTradingBoxOpenRequest) (*SettleTradingBoxOpenReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SettleTradingBoxOpen not implemented")
 }
-func (UnimplementedBinanceUserServer) PullBinanceTraderHistory(context.Context, *PullBinanceTraderHistoryRequest) (*PullBinanceTraderHistoryReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PullBinanceTraderHistory not implemented")
+func (UnimplementedBinanceUserServer) PullBinanceTradeHistory(context.Context, *PullBinanceTradeHistoryRequest) (*PullBinanceTradeHistoryReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PullBinanceTradeHistory not implemented")
 }
 func (UnimplementedBinanceUserServer) mustEmbedUnimplementedBinanceUserServer() {}
 
@@ -701,20 +701,20 @@ func _BinanceUser_SettleTradingBoxOpen_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BinanceUser_PullBinanceTraderHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PullBinanceTraderHistoryRequest)
+func _BinanceUser_PullBinanceTradeHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PullBinanceTradeHistoryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BinanceUserServer).PullBinanceTraderHistory(ctx, in)
+		return srv.(BinanceUserServer).PullBinanceTradeHistory(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: BinanceUser_PullBinanceTraderHistory_FullMethodName,
+		FullMethod: BinanceUser_PullBinanceTradeHistory_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BinanceUserServer).PullBinanceTraderHistory(ctx, req.(*PullBinanceTraderHistoryRequest))
+		return srv.(BinanceUserServer).PullBinanceTradeHistory(ctx, req.(*PullBinanceTradeHistoryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -803,8 +803,8 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _BinanceUser_SettleTradingBoxOpen_Handler,
 		},
 		{
-			MethodName: "PullBinanceTraderHistory",
-			Handler:    _BinanceUser_PullBinanceTraderHistory_Handler,
+			MethodName: "PullBinanceTradeHistory",
+			Handler:    _BinanceUser_PullBinanceTradeHistory_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

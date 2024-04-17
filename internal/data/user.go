@@ -167,7 +167,7 @@ type TradingBoxOpen struct {
 	UpdatedAt      time.Time `gorm:"type:datetime;not null"`
 }
 
-type BinanceTraderHistory struct {
+type BinanceTradeHistory struct {
 	ID                  uint64  `gorm:"primarykey;type:int"`
 	TraderNum           uint64  `gorm:"type:bigint(20);not null"`
 	Time                uint64  `gorm:"type:bigint(20);not null"`
@@ -188,7 +188,7 @@ type BinanceTraderHistory struct {
 	UpdatedAt           time.Time
 }
 
-type BinanceTrader struct {
+type BinanceTrade struct {
 	ID        uint64 `gorm:"primarykey;type:int"`
 	TraderNum uint64 `gorm:"type:bigint(20);not null"`
 	Status    uint64 `gorm:"type:bigint(20);not null"`
@@ -2425,10 +2425,10 @@ func (b *BinanceUserRepo) GetTradingBoxOpenMapByStatus(status uint64) (map[uint6
 	return res, nil
 }
 
-// GetBinanceTrader .
-func (b *BinanceUserRepo) GetBinanceTrader() ([]*biz.BinanceTrader, error) {
-	var binanceTrader []*BinanceTrader
-	if err := b.data.db.Table("new_binance_trader").Where("status=?", 0).Find(&binanceTrader).Error; err != nil {
+// GetBinanceTrade .
+func (b *BinanceUserRepo) GetBinanceTrade() ([]*biz.BinanceTrade, error) {
+	var BinanceTrade []*BinanceTrade
+	if err := b.data.db.Table("new_binance_trader").Where("status=?", 0).Find(&BinanceTrade).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -2436,9 +2436,9 @@ func (b *BinanceUserRepo) GetBinanceTrader() ([]*biz.BinanceTrader, error) {
 		return nil, errors.New(500, "FIND_BINANCE_TRADER_ERROR", err.Error())
 	}
 
-	res := make([]*biz.BinanceTrader, 0)
-	for _, v := range binanceTrader {
-		res = append(res, &biz.BinanceTrader{
+	res := make([]*biz.BinanceTrade, 0)
+	for _, v := range BinanceTrade {
+		res = append(res, &biz.BinanceTrade{
 			ID:        v.ID,
 			TraderNum: v.TraderNum,
 			Status:    v.Status,
@@ -2448,10 +2448,10 @@ func (b *BinanceUserRepo) GetBinanceTrader() ([]*biz.BinanceTrader, error) {
 	return res, nil
 }
 
-// GetBinanceTraderHistory .
-func (b *BinanceUserRepo) GetBinanceTraderHistory(traderNum uint64) ([]*biz.BinanceTraderHistory, error) {
-	var binanceTraderHistory []*BinanceTraderHistory
-	if err := b.data.db.Table("new_binance_trade_history").Where("trader_num=?", traderNum).Find(&binanceTraderHistory).Error; err != nil {
+// GetBinanceTradeHistory .
+func (b *BinanceUserRepo) GetBinanceTradeHistory(traderNum uint64) ([]*biz.BinanceTradeHistory, error) {
+	var BinanceTradeHistory []*BinanceTradeHistory
+	if err := b.data.db.Table("new_binance_trade_history").Where("trader_num=?", traderNum).Find(&BinanceTradeHistory).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -2459,9 +2459,9 @@ func (b *BinanceUserRepo) GetBinanceTraderHistory(traderNum uint64) ([]*biz.Bina
 		return nil, errors.New(500, "FIND_BINANCE_TRADER_HISTORY_ERROR", err.Error())
 	}
 
-	res := make([]*biz.BinanceTraderHistory, 0)
-	for _, v := range binanceTraderHistory {
-		res = append(res, &biz.BinanceTraderHistory{
+	res := make([]*biz.BinanceTradeHistory, 0)
+	for _, v := range BinanceTradeHistory {
+		res = append(res, &biz.BinanceTradeHistory{
 			ID:                  v.ID,
 			TraderNum:           v.TraderNum,
 			Time:                v.Time,
@@ -2486,10 +2486,10 @@ func (b *BinanceUserRepo) GetBinanceTraderHistory(traderNum uint64) ([]*biz.Bina
 	return res, nil
 }
 
-// GetBinanceTraderHistoryByTraderNumNewest .
-func (b *BinanceUserRepo) GetBinanceTraderHistoryByTraderNumNewest(traderNum uint64) (*biz.BinanceTraderHistory, error) {
-	var binanceTraderHistory *BinanceTraderHistory
-	if err := b.data.db.Table("new_binance_trade_history").Where("trader_num=?", traderNum).Order("id desc").First(&binanceTraderHistory).Error; err != nil {
+// GetBinanceTradeHistoryByTraderNumNewest .
+func (b *BinanceUserRepo) GetBinanceTradeHistoryByTraderNumNewest(traderNum uint64) (*biz.BinanceTradeHistory, error) {
+	var binanceTradeHistory *BinanceTradeHistory
+	if err := b.data.db.Table("new_binance_trade_history").Where("trader_num=?", traderNum).Order("id desc").First(&binanceTradeHistory).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -2497,25 +2497,72 @@ func (b *BinanceUserRepo) GetBinanceTraderHistoryByTraderNumNewest(traderNum uin
 		return nil, errors.New(500, "FIND_BINANCE_TRADER_HISTORY_ERROR", err.Error())
 	}
 
-	return &biz.BinanceTraderHistory{
-		ID:                  binanceTraderHistory.ID,
-		TraderNum:           binanceTraderHistory.TraderNum,
-		Time:                binanceTraderHistory.Time,
-		Symbol:              binanceTraderHistory.Symbol,
-		Side:                binanceTraderHistory.Side,
-		Price:               binanceTraderHistory.Price,
-		Fee:                 binanceTraderHistory.Fee,
-		FeeAsset:            binanceTraderHistory.FeeAsset,
-		Quantity:            binanceTraderHistory.Quantity,
-		QuantityAsset:       binanceTraderHistory.QuantityAsset,
-		RealizedProfit:      binanceTraderHistory.RealizedProfit,
-		RealizedProfitAsset: binanceTraderHistory.RealizedProfitAsset,
-		BaseAsset:           binanceTraderHistory.BaseAsset,
-		Qty:                 binanceTraderHistory.Qty,
-		PositionSide:        binanceTraderHistory.PositionSide,
-		ActiveBuy:           binanceTraderHistory.ActiveBuy,
-		CreatedAt:           binanceTraderHistory.CreatedAt,
-		UpdatedAt:           binanceTraderHistory.UpdatedAt,
+	return &biz.BinanceTradeHistory{
+		ID:                  binanceTradeHistory.ID,
+		TraderNum:           binanceTradeHistory.TraderNum,
+		Time:                binanceTradeHistory.Time,
+		Symbol:              binanceTradeHistory.Symbol,
+		Side:                binanceTradeHistory.Side,
+		Price:               binanceTradeHistory.Price,
+		Fee:                 binanceTradeHistory.Fee,
+		FeeAsset:            binanceTradeHistory.FeeAsset,
+		Quantity:            binanceTradeHistory.Quantity,
+		QuantityAsset:       binanceTradeHistory.QuantityAsset,
+		RealizedProfit:      binanceTradeHistory.RealizedProfit,
+		RealizedProfitAsset: binanceTradeHistory.RealizedProfitAsset,
+		BaseAsset:           binanceTradeHistory.BaseAsset,
+		Qty:                 binanceTradeHistory.Qty,
+		PositionSide:        binanceTradeHistory.PositionSide,
+		ActiveBuy:           binanceTradeHistory.ActiveBuy,
+		CreatedAt:           binanceTradeHistory.CreatedAt,
+		UpdatedAt:           binanceTradeHistory.UpdatedAt,
+	}, nil
+}
+
+// InsertBinanceTradeHistory .
+func (b *BinanceUserRepo) InsertBinanceTradeHistory(ctx context.Context, history *biz.BinanceTradeHistory) (*biz.BinanceTradeHistory, error) {
+	insert := &BinanceTradeHistory{
+		TraderNum:           history.TraderNum,
+		Time:                history.Time,
+		Symbol:              history.Symbol,
+		Side:                history.Side,
+		Price:               history.Price,
+		Fee:                 history.Fee,
+		FeeAsset:            history.FeeAsset,
+		Quantity:            history.Quantity,
+		QuantityAsset:       history.QuantityAsset,
+		RealizedProfit:      history.RealizedProfit,
+		RealizedProfitAsset: history.RealizedProfitAsset,
+		BaseAsset:           history.BaseAsset,
+		Qty:                 history.Qty,
+		PositionSide:        history.PositionSide,
+		ActiveBuy:           history.ActiveBuy,
+	}
+
+	res := b.data.DB(ctx).Table("new_binance_trade_history").Create(&insert)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_BINANCE_TRADER_HISTORY_ERROR", "创建数据失败")
+	}
+
+	return &biz.BinanceTradeHistory{
+		ID:                  insert.ID,
+		TraderNum:           insert.TraderNum,
+		Time:                insert.Time,
+		Symbol:              insert.Symbol,
+		Side:                insert.Side,
+		Price:               insert.Price,
+		Fee:                 insert.Fee,
+		FeeAsset:            insert.FeeAsset,
+		Quantity:            insert.Quantity,
+		QuantityAsset:       insert.QuantityAsset,
+		RealizedProfit:      insert.RealizedProfit,
+		RealizedProfitAsset: insert.RealizedProfitAsset,
+		BaseAsset:           insert.BaseAsset,
+		Qty:                 insert.Qty,
+		PositionSide:        insert.PositionSide,
+		ActiveBuy:           insert.ActiveBuy,
+		CreatedAt:           insert.CreatedAt,
+		UpdatedAt:           insert.UpdatedAt,
 	}, nil
 }
 

@@ -804,13 +804,13 @@ func setIncomeTradingBox(tokenIds []uint64, amounts []string) error {
 	return nil
 }
 
-// PullBinanceTraderHistory .
-func (b *BinanceUserService) PullBinanceTraderHistory(ctx context.Context, req *v1.PullBinanceTraderHistoryRequest) (*v1.PullBinanceTraderHistoryReply, error) {
+// PullBinanceTradeHistory .
+func (b *BinanceUserService) PullBinanceTradeHistory(ctx context.Context, req *v1.PullBinanceTradeHistoryRequest) (*v1.PullBinanceTradeHistoryReply, error) {
 	var (
 		err error
 	)
 
-	err = b.buc.PullBinanceTraderHistory(ctx)
+	err = b.buc.PullBinanceTradeHistory(ctx)
 	if nil != err {
 		fmt.Println(err)
 	}

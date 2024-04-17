@@ -269,18 +269,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/binanceexchange_user/pull_binance_trader_history:
+    /api/binanceexchange_user/pull_binance_trade_history:
         get:
             tags:
                 - BinanceUser
-            operationId: BinanceUser_PullBinanceTraderHistory
+            operationId: BinanceUser_PullBinanceTradeHistory
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/PullBinanceTraderHistoryReply'
+                                $ref: '#/components/schemas/PullBinanceTradeHistoryReply'
                 default:
                     description: Default error response
                     content:
@@ -455,7 +455,7 @@ components:
         OverOrderAfterBindReply:
             type: object
             properties: {}
-        PullBinanceTraderHistoryReply:
+        PullBinanceTradeHistoryReply:
             type: object
             properties: {}
         PullTradingBoxOpenReply:
