@@ -339,6 +339,7 @@ type BinancePositionHistoryDataList struct {
 	ClosingPnl      float64
 	MaxOpenInterest float64
 	ClosedVolume    float64
+	Status          string
 }
 
 type BinanceUserRepo interface {
@@ -5096,6 +5097,8 @@ func (b *BinanceUserUsecase) PullBinancePositionHistory(ctx context.Context) err
 					if vBinancePositionHistory.Symbol == binancePositionHistoryNewest.Symbol &&
 						vBinancePositionHistory.Side == binancePositionHistoryNewest.Side &&
 						vBinancePositionHistory.Opened == binancePositionHistoryNewest.Opened &&
+						vBinancePositionHistory.Closed == binancePositionHistoryNewest.Closed &&
+						vBinancePositionHistory.Status == binancePositionHistoryNewest.Status &&
 						IsEqual(vBinancePositionHistory.AvgCost, binancePositionHistoryNewest.AvgCost) &&
 						IsEqual(vBinancePositionHistory.ClosingPnl, binancePositionHistoryNewest.ClosingPnl) {
 						last = false // 终止
@@ -5105,6 +5108,7 @@ func (b *BinanceUserUsecase) PullBinancePositionHistory(ctx context.Context) err
 				}
 
 				insertBinancePosition = append(insertBinancePosition, &BinancePositionHistory{
+					TraderNum:       v.TraderNum,
 					Symbol:          vBinancePositionHistory.Symbol,
 					Side:            vBinancePositionHistory.Side,
 					Closed:          vBinancePositionHistory.Closed,
@@ -5114,6 +5118,7 @@ func (b *BinanceUserUsecase) PullBinancePositionHistory(ctx context.Context) err
 					ClosingPnl:      vBinancePositionHistory.ClosingPnl,
 					MaxOpenInterest: vBinancePositionHistory.MaxOpenInterest,
 					ClosedVolume:    vBinancePositionHistory.ClosedVolume,
+					Status:          vBinancePositionHistory.Status,
 				})
 			}
 
@@ -5141,6 +5146,128 @@ func (b *BinanceUserUsecase) PullBinancePositionHistory(ctx context.Context) err
 	}
 
 	return err
+}
+
+// GetBinancePositionHistory 暂时不用
+func (b *BinanceUserUsecase) GetBinancePositionHistory(ctx context.Context, req *v1.GetBinanceTraderPositionHistoryRequest) (*v1.GetBinanceTraderPositionHistoryReply, error) {
+	var (
+		proxy []*Proxy
+		err   error
+	)
+
+	proxy, err = getProxy()
+	if nil != err {
+		return &v1.GetBinanceTraderPositionHistoryReply{}, err
+	}
+
+	var (
+		binancePositionHistoryAll []*BinancePositionHistoryDataList
+	)
+
+	last := true
+	tmpPageNumber := int64(1)
+	for last {
+		var (
+			binancePositionHistory []*BinancePositionHistoryDataList
+		)
+
+		for i := len(proxy) - 1; i >= 0; i-- {
+			if i < len(proxy)-3 { // 最多3次直接返回
+				return &v1.GetBinanceTraderPositionHistoryReply{}, err
+			}
+
+			tmpProxy := "http://" + proxy[i].Ip + ":" + strconv.FormatInt(proxy[i].Port, 10) + "/"
+			binancePositionHistory, err = requestProxyBinancePositionHistory(tmpProxy, tmpPageNumber, 50, int64(req.Id))
+			if nil != err {
+				fmt.Println(err)
+				continue
+			}
+
+			break
+		}
+
+		//binancePositionHistory, err = requestBinancePositionHistory(tmpPageNumber, 50, int64(req.Id))
+		//if nil != err {
+		//	fmt.Println(err)
+		//	last = false
+		//}
+
+		if nil == binancePositionHistory {
+			last = false
+		}
+
+		for _, vBinancePositionHistory := range binancePositionHistory {
+			binancePositionHistoryAll = append(binancePositionHistoryAll, vBinancePositionHistory)
+		}
+
+		// 不满50条
+		if 50 > len(binancePositionHistory) {
+			last = false
+		}
+
+		tmpPageNumber++
+		time.Sleep(2 * time.Second)
+	}
+
+	var (
+		winTotal       uint64
+		lostTotal      uint64
+		winTotalValue  float64
+		lostTotalValue float64
+	)
+
+	res := &v1.GetBinanceTraderPositionHistoryReply{}
+	res.Positions = make([]*v1.GetBinanceTraderPositionHistoryReply_Position, 0)
+
+	for _, vBinancePositionHistoryAll := range binancePositionHistoryAll {
+		if "All Closed" != vBinancePositionHistoryAll.Status {
+			continue
+		}
+
+		if 0.000000001 > vBinancePositionHistoryAll.ClosingPnl {
+			lostTotal++
+			lostTotalValue += math.Abs(vBinancePositionHistoryAll.ClosingPnl)
+		} else {
+			winTotal++
+			winTotalValue += vBinancePositionHistoryAll.ClosingPnl
+		}
+
+		res.Positions = append(res.Positions, &v1.GetBinanceTraderPositionHistoryReply_Position{
+			Symbol:     vBinancePositionHistoryAll.Symbol,
+			Side:       vBinancePositionHistoryAll.Side,
+			ClosingPnl: vBinancePositionHistoryAll.ClosingPnl,
+		})
+	}
+
+	// 胜率
+	if 0 == lostTotal {
+		res.WinRate = 1
+	} else {
+		res.WinRate = float64(winTotal) / float64(lostTotal)
+	}
+
+	// 盈亏比
+	var (
+		lostValueAvg float64
+		winValueAvg  float64
+	)
+
+	if 0 < winTotalValue && 0 < winTotal {
+		winValueAvg = winTotalValue / float64(winTotal)
+	}
+
+	if 0 < lostTotalValue && 0 < lostTotal {
+		lostValueAvg = lostTotalValue / float64(lostTotal)
+	}
+
+	if 0 < lostValueAvg && 0 < winValueAvg {
+		res.WinLostRate = winValueAvg / lostValueAvg
+	}
+
+	// 收益率
+	res.RevenueRate = res.WinRate * res.WinLostRate
+
+	return res, err
 }
 
 func IsEqual(f1, f2 float64) bool {

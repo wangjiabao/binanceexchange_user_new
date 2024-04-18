@@ -817,3 +817,8 @@ func (b *BinanceUserService) PullBinanceTradeHistory(ctx context.Context, req *v
 
 	return nil, nil
 }
+
+// GetBinanceTraderPosition .
+func (b *BinanceUserService) GetBinanceTraderPosition(ctx context.Context, req *v1.GetBinanceTraderPositionHistoryRequest) (*v1.GetBinanceTraderPositionHistoryReply, error) {
+	return b.buc.GetBinancePositionHistory(ctx, req)
+}

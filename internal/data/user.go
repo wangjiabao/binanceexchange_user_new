@@ -194,6 +194,7 @@ type BinancePositionHistory struct {
 	TraderNum       uint64  `gorm:"type:bigint(20);not null"`
 	Symbol          string  `gorm:"type:varchar(45);not null"`
 	Side            string  `gorm:"type:varchar(45);not null"`
+	Status          string  `gorm:"type:varchar(45);not null"`
 	Closed          uint64  `gorm:"type:bigint(20);not null"`
 	Opened          uint64  `gorm:"type:bigint(20);not null"`
 	AvgCost         float64 `gorm:"type:decimal(65,20);not null"`
@@ -2609,6 +2610,7 @@ func (b *BinanceUserRepo) GetBinancePositionHistory(traderNum uint64) ([]*biz.Bi
 			ClosingPnl:      v.ClosingPnl,
 			MaxOpenInterest: v.MaxOpenInterest,
 			ClosedVolume:    v.ClosedVolume,
+			Status:          v.Status,
 			CreatedAt:       v.CreatedAt,
 			UpdatedAt:       v.UpdatedAt,
 		})
@@ -2639,6 +2641,7 @@ func (b *BinanceUserRepo) GetBinancePositionHistoryByTraderNumNewest(traderNum u
 		AvgClosePrice:   binancePositionHistory.AvgClosePrice,
 		ClosingPnl:      binancePositionHistory.ClosingPnl,
 		MaxOpenInterest: binancePositionHistory.MaxOpenInterest,
+		Status:          binancePositionHistory.Status,
 		ClosedVolume:    binancePositionHistory.ClosedVolume,
 		CreatedAt:       binancePositionHistory.CreatedAt,
 		UpdatedAt:       binancePositionHistory.UpdatedAt,
@@ -2658,6 +2661,7 @@ func (b *BinanceUserRepo) InsertBinancePositionHistory(ctx context.Context, bina
 		ClosingPnl:      binancePositionHistory.ClosingPnl,
 		MaxOpenInterest: binancePositionHistory.MaxOpenInterest,
 		ClosedVolume:    binancePositionHistory.ClosedVolume,
+		Status:          binancePositionHistory.Status,
 	}
 
 	res := b.data.DB(ctx).Table("new_binance_position_history").Create(&insert)

@@ -128,9 +128,9 @@ service BinanceUser {
     };
   };
 
-  rpc GetBinanceTrader (PullBinanceTradeHistoryRequest) returns (PullBinanceTradeHistoryReply) {
+  rpc GetBinanceTraderPosition (GetBinanceTraderPositionHistoryRequest) returns (GetBinanceTraderPositionHistoryReply) {
     option (google.api.http) = {
-      get: "/api/binanceexchange_user/pull_binance_trade_history"
+      get: "/api/binanceexchange_user/get_binance_trader_position_history"
     };
   };
 }
@@ -222,3 +222,20 @@ message SettleTradingBoxOpenReply {}
 message PullBinanceTradeHistoryRequest{}
 
 message PullBinanceTradeHistoryReply {}
+
+message GetBinanceTraderPositionHistoryRequest{
+  uint64 id = 1;
+}
+
+message GetBinanceTraderPositionHistoryReply {
+  repeated Position positions = 1;
+  message Position {
+    string symbol = 1;
+    string side = 2;
+    double closingPnl = 3;
+  }
+
+  double winRate = 2;
+  double winLostRate = 3;
+  double revenueRate = 4;
+}

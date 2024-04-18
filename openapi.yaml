@@ -114,6 +114,29 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/get_binance_trader_position_history:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_GetBinanceTraderPosition
+            parameters:
+                - name: id
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetBinanceTraderPositionHistoryReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/binanceexchange_user/get_user:
         get:
             tags:
@@ -273,7 +296,7 @@ paths:
         get:
             tags:
                 - BinanceUser
-            operationId: BinanceUser_GetBinanceTrader
+            operationId: BinanceUser_PullBinanceTradeHistory
             responses:
                 "200":
                     description: OK
@@ -388,6 +411,32 @@ components:
         CloseOrderAfterBindReply:
             type: object
             properties: {}
+        GetBinanceTraderPositionHistoryReply:
+            type: object
+            properties:
+                positions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetBinanceTraderPositionHistoryReply_Position'
+                winRate:
+                    type: number
+                    format: double
+                winLostRate:
+                    type: number
+                    format: double
+                revenueRate:
+                    type: number
+                    format: double
+        GetBinanceTraderPositionHistoryReply_Position:
+            type: object
+            properties:
+                symbol:
+                    type: string
+                side:
+                    type: string
+                closingPnl:
+                    type: number
+                    format: double
         GetUserReply:
             type: object
             properties:
