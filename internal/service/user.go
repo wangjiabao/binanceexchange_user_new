@@ -14,6 +14,7 @@ import (
 	"math/big"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // BinanceUserService is a BinanceData service .
@@ -428,7 +429,24 @@ func (b *BinanceUserService) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 }
 
 func (b *BinanceUserService) UserOrderDoHandlePrice(ctx context.Context, req *v1.UserOrderDoHandlePriceRequest) (*v1.UserOrderDoHandlePriceReply, error) {
-	return b.buc.UserOrderDoHandlePrice(ctx, req)
+	var err error
+	stop := time.Now().Add(55 * time.Second)
+	for i := 0; i < 29; i++ {
+		if stop.Before(time.Now()) {
+			break
+		}
+
+		_, err = b.buc.UserOrderDoHandlePrice(ctx, req)
+		if nil != err {
+			fmt.Println(err)
+			continue
+		}
+
+		time.Sleep(2 * time.Second)
+
+	}
+
+	return nil, nil
 }
 
 // PullTradingBoxOpen .
