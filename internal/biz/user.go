@@ -5865,11 +5865,11 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 		}
 
 		if priceFloatEth > vUserOrderDo.Price { // 多单，long，超过开单价
-			if priceFloatEth < vUserOrderDo.Price+vUserOrderDo.Price*0.01 {
+			if priceFloatEth < vUserOrderDo.Price+vUserOrderDo.Price*0.001 {
 				continue
 			}
 		} else if priceFloatEth < vUserOrderDo.PriceTwo { // 空单，short，低于开单价
-			if priceFloatEth > vUserOrderDo.PriceTwo-vUserOrderDo.Price*0.01 {
+			if priceFloatEth > vUserOrderDo.PriceTwo-vUserOrderDo.Price*0.001 {
 				continue
 			}
 		} else {
