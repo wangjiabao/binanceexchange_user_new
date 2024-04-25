@@ -259,6 +259,8 @@ message UserOrderDoRequest{
   string apiSecret = 2;
   string apiKeyTwo = 3;
   string apiSecretTwo = 4;
+  double amount = 5;
+  int64 num = 6;
 }
 
 message UserOrderDoHandlePriceReply {}

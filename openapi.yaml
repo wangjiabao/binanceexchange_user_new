@@ -422,6 +422,15 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: amount
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: num
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
