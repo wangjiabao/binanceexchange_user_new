@@ -5579,16 +5579,16 @@ func getProxy() ([]*Proxy, error) {
 // UserOrderDo 新增刷单
 func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
 	var (
-		err           error
-		usdtEth       = float64(20000)
-		usdtBtc       = float64(20000)
-		priceEth      *BinanceSymbolPrice
-		priceBtc      *BinanceSymbolPrice
+		err     error
+		usdtEth = float64(50)
+		//usdtBtc       = float64(20000)
+		priceEth *BinanceSymbolPrice
+		//priceBtc      *BinanceSymbolPrice
 		priceFloatEth float64
-		priceFloatBtc float64
-		qtyEth        float64
-		qtyBtc        float64
-		symbol        map[string]*Symbol
+		//priceFloatBtc float64
+		qtyEth float64
+		//qtyBtc        float64
+		symbol map[string]*Symbol
 	)
 	symbol, err = b.binanceUserRepo.GetSymbol()
 	if nil != err {
@@ -5596,26 +5596,26 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	}
 
 	// 精度
-	if _, ok := symbol["ETHUSDT"]; !ok {
-		return nil, errors.New(500, "ETHUSDT SYMBOL ERR", "不存在查询代币精度")
+	if _, ok := symbol["DOGEUSDT"]; !ok {
+		return nil, errors.New(500, "DOGEUSDT SYMBOL ERR", "不存在查询代币精度")
 	}
 	if _, ok := symbol["BTCUSDT"]; !ok {
 		return nil, errors.New(500, "BTCUSDT SYMBOL ERR", "不存在查询代币精度")
 	}
 
 	// 杠杆
-	_, err = requestBinanceLeverAge("ETHUSDT", int64(50), req.ApiKey, req.ApiSecret)
+	_, err = requestBinanceLeverAge("DOGEUSDT", int64(10), req.ApiKey, req.ApiSecret)
 	if nil != err {
 		return nil, err
 	}
 
-	_, err = requestBinanceLeverAge("ETHUSDT", int64(50), req.ApiKeyTwo, req.ApiSecretTwo)
+	_, err = requestBinanceLeverAge("DOGEUSDT", int64(10), req.ApiKeyTwo, req.ApiSecretTwo)
 	if nil != err {
 		return nil, err
 	}
 
 	// 查询币价
-	priceEth, err = requestBinanceSymbolPrice("ETHUSDT")
+	priceEth, err = requestBinanceSymbolPrice("DOGEUSDT")
 	if nil != err {
 		return nil, err
 	}
@@ -5632,18 +5632,18 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		binanceOrderEth    *BinanceOrder
 		binanceOrderEthTwo *BinanceOrder
 	)
-	if 0 >= symbol["ETHUSDT"].QuantityPrecision {
+	if 0 >= symbol["DOGEUSDT"].QuantityPrecision {
 		quantityEth = fmt.Sprintf("%d", int64(qtyEth))
 	} else {
-		quantityEth = strconv.FormatFloat(qtyEth, 'f', int(symbol["ETHUSDT"].QuantityPrecision), 64)
+		quantityEth = strconv.FormatFloat(qtyEth, 'f', int(symbol["DOGEUSDT"].QuantityPrecision), 64)
 	}
 
-	binanceOrderEth, _, err = requestBinanceOrder("ETHUSDT", "BUY", "MARKET", "LONG", quantityEth, req.ApiKey, req.ApiSecret)
+	binanceOrderEth, _, err = requestBinanceOrder("DOGEUSDT", "BUY", "MARKET", "LONG", quantityEth, req.ApiKey, req.ApiSecret)
 	if nil != err {
 		return nil, err
 	}
 
-	binanceOrderEthTwo, _, err = requestBinanceOrder("ETHUSDT", "SELL", "MARKET", "SHORT", quantityEth, req.ApiKeyTwo, req.ApiSecretTwo)
+	binanceOrderEthTwo, _, err = requestBinanceOrder("DOGEUSDT", "SELL", "MARKET", "SHORT", quantityEth, req.ApiKeyTwo, req.ApiSecretTwo)
 	if nil != err {
 		return nil, err
 	}
@@ -5690,7 +5690,7 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		ApiSecret:    req.ApiSecret,
 		ApiKeyTwo:    req.ApiKeyTwo,
 		ApiSecretTwo: req.ApiSecretTwo,
-		Symbol:       "ETHUSDT",
+		Symbol:       "DOGEUSDT",
 		Status:       1,
 		CloseRate:    0,
 		CloseBase:    0,
@@ -5708,111 +5708,111 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		return nil, err
 	}
 
-	// 杠杆
-	_, err = requestBinanceLeverAge("BTCUSDT", int64(50), req.ApiKey, req.ApiSecret)
-	if nil != err {
-		return nil, err
-	}
-
-	_, err = requestBinanceLeverAge("BTCUSDT", int64(50), req.ApiKeyTwo, req.ApiSecretTwo)
-	if nil != err {
-		return nil, err
-	}
-
-	// btc
-	priceBtc, err = requestBinanceSymbolPrice("BTCUSDT")
-	if nil != err {
-		return nil, err
-	}
-
-	priceFloatBtc, err = strconv.ParseFloat(priceBtc.Price, 64)
-	if nil != err {
-		return nil, err
-	}
-	qtyBtc = usdtBtc / priceFloatBtc
-
-	// 下单
-	// 精度调整
-	var (
-		quantityBtc        string
-		binanceOrderBtc    *BinanceOrder
-		binanceOrderBtcTwo *BinanceOrder
-	)
-	if 0 >= symbol["BTCUSDT"].QuantityPrecision {
-		quantityBtc = fmt.Sprintf("%d", int64(qtyBtc))
-	} else {
-		quantityBtc = strconv.FormatFloat(qtyBtc, 'f', int(symbol["BTCUSDT"].QuantityPrecision), 64)
-	}
-
-	binanceOrderBtc, _, err = requestBinanceOrder("BTCUSDT", "BUY", "MARKET", "LONG", quantityBtc, req.ApiKey, req.ApiSecret)
-	if nil != err {
-		return nil, err
-	}
-
-	binanceOrderBtcTwo, _, err = requestBinanceOrder("BTCUSDT", "SELL", "MARKET", "SHORT", quantityBtc, req.ApiKeyTwo, req.ApiSecretTwo)
-	if nil != err {
-		return nil, err
-	}
-
-	if 0 >= binanceOrderBtc.OrderId || 0 >= binanceOrderBtcTwo.OrderId {
-		fmt.Println(binanceOrderBtc, binanceOrderBtcTwo)
-		return nil, errors.New(500, "Order Err", "下单错误")
-	}
-
-	var (
-		userOrderDoBtc   *UserOrderDo
-		btcLongAvgPrice  float64
-		btcShortAvgPrice float64
-		btcLongQty       float64
-		btcShortQty      float64
-	)
-
-	btcLongAvgPrice, err = strconv.ParseFloat(binanceOrderBtc.AvgPrice, 64)
-	if nil != err {
-		fmt.Println(err, "btc long avg price", binanceOrderBtc)
-		return nil, errors.New(500, "Order Err", "下单错误")
-	}
-
-	btcLongQty, err = strconv.ParseFloat(binanceOrderBtc.ExecutedQty, 64)
-	if nil != err {
-		fmt.Println(err, "btc long qty", binanceOrderBtc)
-		return nil, errors.New(500, "Order Err", "下单错误")
-	}
-
-	btcShortAvgPrice, err = strconv.ParseFloat(binanceOrderBtcTwo.AvgPrice, 64)
-	if nil != err {
-		fmt.Println(err, "btc short avg price", binanceOrderBtcTwo)
-		return nil, errors.New(500, "Order Err", "下单错误")
-	}
-
-	btcShortQty, err = strconv.ParseFloat(binanceOrderBtcTwo.ExecutedQty, 64)
-	if nil != err {
-		fmt.Println(err, "btc short qty", binanceOrderBtcTwo)
-		return nil, errors.New(500, "Order Err", "下单错误")
-	}
-
-	userOrderDoBtc = &UserOrderDo{
-		ApiKey:       req.ApiKey,
-		ApiSecret:    req.ApiSecret,
-		ApiKeyTwo:    req.ApiKeyTwo,
-		ApiSecretTwo: req.ApiSecretTwo,
-		Symbol:       "BTCUSDT",
-		Status:       1,
-		CloseRate:    0,
-		CloseBase:    0,
-		Qty:          btcLongQty,
-		Price:        btcLongAvgPrice,
-		ClosePrice:   0,
-		Amount:       0,
-		QtyTwo:       btcShortQty,
-		PriceTwo:     btcShortAvgPrice,
-		AmountTwo:    0,
-	}
-
-	err = b.binanceUserRepo.InsertUserOrderDo(ctx, userOrderDoBtc)
-	if nil != err {
-		return nil, err
-	}
+	//// 杠杆
+	//_, err = requestBinanceLeverAge("BTCUSDT", int64(50), req.ApiKey, req.ApiSecret)
+	//if nil != err {
+	//	return nil, err
+	//}
+	//
+	//_, err = requestBinanceLeverAge("BTCUSDT", int64(50), req.ApiKeyTwo, req.ApiSecretTwo)
+	//if nil != err {
+	//	return nil, err
+	//}
+	//
+	//// btc
+	//priceBtc, err = requestBinanceSymbolPrice("BTCUSDT")
+	//if nil != err {
+	//	return nil, err
+	//}
+	//
+	//priceFloatBtc, err = strconv.ParseFloat(priceBtc.Price, 64)
+	//if nil != err {
+	//	return nil, err
+	//}
+	//qtyBtc = usdtBtc / priceFloatBtc
+	//
+	//// 下单
+	//// 精度调整
+	//var (
+	//	quantityBtc        string
+	//	binanceOrderBtc    *BinanceOrder
+	//	binanceOrderBtcTwo *BinanceOrder
+	//)
+	//if 0 >= symbol["BTCUSDT"].QuantityPrecision {
+	//	quantityBtc = fmt.Sprintf("%d", int64(qtyBtc))
+	//} else {
+	//	quantityBtc = strconv.FormatFloat(qtyBtc, 'f', int(symbol["BTCUSDT"].QuantityPrecision), 64)
+	//}
+	//
+	//binanceOrderBtc, _, err = requestBinanceOrder("BTCUSDT", "BUY", "MARKET", "LONG", quantityBtc, req.ApiKey, req.ApiSecret)
+	//if nil != err {
+	//	return nil, err
+	//}
+	//
+	//binanceOrderBtcTwo, _, err = requestBinanceOrder("BTCUSDT", "SELL", "MARKET", "SHORT", quantityBtc, req.ApiKeyTwo, req.ApiSecretTwo)
+	//if nil != err {
+	//	return nil, err
+	//}
+	//
+	//if 0 >= binanceOrderBtc.OrderId || 0 >= binanceOrderBtcTwo.OrderId {
+	//	fmt.Println(binanceOrderBtc, binanceOrderBtcTwo)
+	//	return nil, errors.New(500, "Order Err", "下单错误")
+	//}
+	//
+	//var (
+	//	userOrderDoBtc   *UserOrderDo
+	//	btcLongAvgPrice  float64
+	//	btcShortAvgPrice float64
+	//	btcLongQty       float64
+	//	btcShortQty      float64
+	//)
+	//
+	//btcLongAvgPrice, err = strconv.ParseFloat(binanceOrderBtc.AvgPrice, 64)
+	//if nil != err {
+	//	fmt.Println(err, "btc long avg price", binanceOrderBtc)
+	//	return nil, errors.New(500, "Order Err", "下单错误")
+	//}
+	//
+	//btcLongQty, err = strconv.ParseFloat(binanceOrderBtc.ExecutedQty, 64)
+	//if nil != err {
+	//	fmt.Println(err, "btc long qty", binanceOrderBtc)
+	//	return nil, errors.New(500, "Order Err", "下单错误")
+	//}
+	//
+	//btcShortAvgPrice, err = strconv.ParseFloat(binanceOrderBtcTwo.AvgPrice, 64)
+	//if nil != err {
+	//	fmt.Println(err, "btc short avg price", binanceOrderBtcTwo)
+	//	return nil, errors.New(500, "Order Err", "下单错误")
+	//}
+	//
+	//btcShortQty, err = strconv.ParseFloat(binanceOrderBtcTwo.ExecutedQty, 64)
+	//if nil != err {
+	//	fmt.Println(err, "btc short qty", binanceOrderBtcTwo)
+	//	return nil, errors.New(500, "Order Err", "下单错误")
+	//}
+	//
+	//userOrderDoBtc = &UserOrderDo{
+	//	ApiKey:       req.ApiKey,
+	//	ApiSecret:    req.ApiSecret,
+	//	ApiKeyTwo:    req.ApiKeyTwo,
+	//	ApiSecretTwo: req.ApiSecretTwo,
+	//	Symbol:       "BTCUSDT",
+	//	Status:       1,
+	//	CloseRate:    0,
+	//	CloseBase:    0,
+	//	Qty:          btcLongQty,
+	//	Price:        btcLongAvgPrice,
+	//	ClosePrice:   0,
+	//	Amount:       0,
+	//	QtyTwo:       btcShortQty,
+	//	PriceTwo:     btcShortAvgPrice,
+	//	AmountTwo:    0,
+	//}
+	//
+	//err = b.binanceUserRepo.InsertUserOrderDo(ctx, userOrderDoBtc)
+	//if nil != err {
+	//	return nil, err
+	//}
 
 	return nil, nil
 }
@@ -5832,7 +5832,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 	}
 
 	// 精度
-	if _, ok := symbol["ETHUSDT"]; !ok {
+	if _, ok := symbol["DOGEUSDT"]; !ok {
 		return nil, errors.New(500, "ETHUSDT SYMBOL ERR", "不存在查询代币精度")
 	}
 	if _, ok := symbol["BTCUSDT"]; !ok {
@@ -5850,7 +5850,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 	}
 
 	// 查询币价
-	priceEth, err = requestBinanceSymbolPrice("ETHUSDT")
+	priceEth, err = requestBinanceSymbolPrice("DOGEUSDT")
 	if nil != err {
 		return nil, err
 	}
@@ -5860,7 +5860,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 	}
 
 	for _, vUserOrderDo := range userOrderDo {
-		if "ETHUSDT" != vUserOrderDo.Symbol {
+		if "DOGEUSDT" != vUserOrderDo.Symbol {
 			continue
 		}
 
@@ -5876,14 +5876,14 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 			binanceOrderEth    *BinanceOrder
 			binanceOrderEthTwo *BinanceOrder
 		)
-		quantityEth := strconv.FormatFloat(vUserOrderDo.Qty, 'f', int(symbol["ETHUSDT"].QuantityPrecision), 64)
-		binanceOrderEth, _, err = requestBinanceOrder("ETHUSDT", "SELL", "MARKET", "LONG", quantityEth, vUserOrderDo.ApiKey, vUserOrderDo.ApiSecret)
+		quantityEth := strconv.FormatFloat(vUserOrderDo.Qty, 'f', int(symbol["DOGEUSDT"].QuantityPrecision), 64)
+		binanceOrderEth, _, err = requestBinanceOrder("DOGEUSDT", "SELL", "MARKET", "LONG", quantityEth, vUserOrderDo.ApiKey, vUserOrderDo.ApiSecret)
 		if nil != err {
 			return nil, err
 		}
 
-		quantityEthTwo := strconv.FormatFloat(vUserOrderDo.QtyTwo, 'f', int(symbol["ETHUSDT"].QuantityPrecision), 64)
-		binanceOrderEthTwo, _, err = requestBinanceOrder("ETHUSDT", "BUY", "MARKET", "SHORT", quantityEthTwo, vUserOrderDo.ApiKeyTwo, vUserOrderDo.ApiSecretTwo)
+		quantityEthTwo := strconv.FormatFloat(vUserOrderDo.QtyTwo, 'f', int(symbol["DOGEUSDT"].QuantityPrecision), 64)
+		binanceOrderEthTwo, _, err = requestBinanceOrder("DOGEUSDT", "BUY", "MARKET", "SHORT", quantityEthTwo, vUserOrderDo.ApiKeyTwo, vUserOrderDo.ApiSecretTwo)
 		if nil != err {
 			return nil, err
 		}
@@ -5910,70 +5910,70 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 
 	}
 
-	// btc
-	var (
-		priceBtc      *BinanceSymbolPrice
-		priceFloatBtc float64
-	)
-	priceBtc, err = requestBinanceSymbolPrice("BTCUSDT")
-	if nil != err {
-		return nil, err
-	}
-
-	priceFloatBtc, err = strconv.ParseFloat(priceBtc.Price, 64)
-	if nil != err {
-		return nil, err
-	}
-
-	for _, vUserOrderDo := range userOrderDo {
-		if "BTCUSDT" != vUserOrderDo.Symbol {
-			continue
-		}
-
-		//if priceFloatEth < vUserOrderDo.Price { // 多单，long，超过开单价
-		//	continue
-		//}
-
-		if priceFloatBtc < vUserOrderDo.Price+vUserOrderDo.Price*0.01 {
-			continue
-		}
-
-		var (
-			binanceOrderBtc    *BinanceOrder
-			binanceOrderBtcTwo *BinanceOrder
-		)
-		quantityEth := strconv.FormatFloat(vUserOrderDo.Qty, 'f', int(symbol["BTCUSDT"].QuantityPrecision), 64)
-		binanceOrderBtc, _, err = requestBinanceOrder("BTCUSDT", "SELL", "MARKET", "LONG", quantityEth, vUserOrderDo.ApiKey, vUserOrderDo.ApiSecret)
-		if nil != err {
-			return nil, err
-		}
-
-		quantityEthTwo := strconv.FormatFloat(vUserOrderDo.QtyTwo, 'f', int(symbol["BTCUSDT"].QuantityPrecision), 64)
-		binanceOrderBtcTwo, _, err = requestBinanceOrder("BTCUSDT", "BUY", "MARKET", "SHORT", quantityEthTwo, vUserOrderDo.ApiKeyTwo, vUserOrderDo.ApiSecretTwo)
-		if nil != err {
-			return nil, err
-		}
-
-		if 0 >= binanceOrderBtc.OrderId || 0 >= binanceOrderBtcTwo.OrderId {
-			fmt.Println(binanceOrderBtc, binanceOrderBtcTwo)
-			return nil, errors.New(500, "Order Err", "关仓下单错误")
-		}
-
-		var (
-			btcLongAvgPrice float64
-		)
-
-		btcLongAvgPrice, err = strconv.ParseFloat(binanceOrderBtc.AvgPrice, 64)
-		if nil != err {
-			fmt.Println(err, "btc long avg price", binanceOrderBtc)
-			return nil, errors.New(500, "Order Err", "关仓下单错误")
-		}
-
-		_, err = b.binanceUserRepo.UpdateUserOrderDo(ctx, vUserOrderDo.ID, btcLongAvgPrice)
-		if nil != err {
-			return nil, err
-		}
-	}
+	//// btc
+	//var (
+	//	priceBtc      *BinanceSymbolPrice
+	//	priceFloatBtc float64
+	//)
+	//priceBtc, err = requestBinanceSymbolPrice("BTCUSDT")
+	//if nil != err {
+	//	return nil, err
+	//}
+	//
+	//priceFloatBtc, err = strconv.ParseFloat(priceBtc.Price, 64)
+	//if nil != err {
+	//	return nil, err
+	//}
+	//
+	//for _, vUserOrderDo := range userOrderDo {
+	//	if "BTCUSDT" != vUserOrderDo.Symbol {
+	//		continue
+	//	}
+	//
+	//	//if priceFloatEth < vUserOrderDo.Price { // 多单，long，超过开单价
+	//	//	continue
+	//	//}
+	//
+	//	if priceFloatBtc < vUserOrderDo.Price+vUserOrderDo.Price*0.01 {
+	//		continue
+	//	}
+	//
+	//	var (
+	//		binanceOrderBtc    *BinanceOrder
+	//		binanceOrderBtcTwo *BinanceOrder
+	//	)
+	//	quantityEth := strconv.FormatFloat(vUserOrderDo.Qty, 'f', int(symbol["BTCUSDT"].QuantityPrecision), 64)
+	//	binanceOrderBtc, _, err = requestBinanceOrder("BTCUSDT", "SELL", "MARKET", "LONG", quantityEth, vUserOrderDo.ApiKey, vUserOrderDo.ApiSecret)
+	//	if nil != err {
+	//		return nil, err
+	//	}
+	//
+	//	quantityEthTwo := strconv.FormatFloat(vUserOrderDo.QtyTwo, 'f', int(symbol["BTCUSDT"].QuantityPrecision), 64)
+	//	binanceOrderBtcTwo, _, err = requestBinanceOrder("BTCUSDT", "BUY", "MARKET", "SHORT", quantityEthTwo, vUserOrderDo.ApiKeyTwo, vUserOrderDo.ApiSecretTwo)
+	//	if nil != err {
+	//		return nil, err
+	//	}
+	//
+	//	if 0 >= binanceOrderBtc.OrderId || 0 >= binanceOrderBtcTwo.OrderId {
+	//		fmt.Println(binanceOrderBtc, binanceOrderBtcTwo)
+	//		return nil, errors.New(500, "Order Err", "关仓下单错误")
+	//	}
+	//
+	//	var (
+	//		btcLongAvgPrice float64
+	//	)
+	//
+	//	btcLongAvgPrice, err = strconv.ParseFloat(binanceOrderBtc.AvgPrice, 64)
+	//	if nil != err {
+	//		fmt.Println(err, "btc long avg price", binanceOrderBtc)
+	//		return nil, errors.New(500, "Order Err", "关仓下单错误")
+	//	}
+	//
+	//	_, err = b.binanceUserRepo.UpdateUserOrderDo(ctx, vUserOrderDo.ID, btcLongAvgPrice)
+	//	if nil != err {
+	//		return nil, err
+	//	}
+	//}
 
 	return nil, nil
 }
