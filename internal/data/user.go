@@ -206,6 +206,27 @@ type BinancePositionHistory struct {
 	UpdatedAt       time.Time
 }
 
+type UserOrderDo struct {
+	ID           uint64  `gorm:"primarykey;type:int"`
+	ApiKey       string  `gorm:"type:varchar(200);not null"`
+	ApiSecret    string  `gorm:"type:varchar(200);not null"`
+	ApiKeyTwo    string  `gorm:"type:varchar(200);not null"`
+	ApiSecretTwo string  `gorm:"type:varchar(200);not null"`
+	Symbol       string  `gorm:"type:varchar(200);not null"`
+	Status       uint64  `gorm:"type:int;not null"`
+	CloseRate    uint64  `gorm:"type:int;not null"`
+	CloseBase    uint64  `gorm:"type:int;not null"`
+	Qty          float64 `gorm:"type:decimal(65,20);not null"`
+	Price        float64 `gorm:"type:decimal(65,20);not null"`
+	ClosePrice   float64 `gorm:"type:decimal(65,20);not null"`
+	Amount       float64 `gorm:"type:decimal(65,20);not null"`
+	QtyTwo       float64 `gorm:"type:decimal(65,20);not null"`
+	PriceTwo     float64 `gorm:"type:decimal(65,20);not null"`
+	AmountTwo    float64 `gorm:"type:decimal(65,20);not null"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
 type BinanceTrade struct {
 	ID        uint64 `gorm:"primarykey;type:int"`
 	TraderNum uint64 `gorm:"type:bigint(20);not null"`
@@ -2684,6 +2705,87 @@ func (b *BinanceUserRepo) InsertBinancePositionHistory(ctx context.Context, bina
 		CreatedAt:       insert.CreatedAt,
 		UpdatedAt:       insert.UpdatedAt,
 	}, nil
+}
+
+// InsertUserOrderDo .
+func (b *BinanceUserRepo) InsertUserOrderDo(ctx context.Context, userOrderDo *biz.UserOrderDo) error {
+	insert := &UserOrderDo{
+		ApiKey:       userOrderDo.ApiKey,
+		ApiSecret:    userOrderDo.ApiSecret,
+		ApiKeyTwo:    userOrderDo.ApiKeyTwo,
+		ApiSecretTwo: userOrderDo.ApiSecretTwo,
+		Symbol:       userOrderDo.Symbol,
+		Status:       userOrderDo.Status,
+		CloseRate:    userOrderDo.CloseRate,
+		CloseBase:    userOrderDo.CloseBase,
+		Qty:          userOrderDo.Qty,
+		Price:        userOrderDo.Price,
+		ClosePrice:   userOrderDo.ClosePrice,
+		Amount:       userOrderDo.Amount,
+		QtyTwo:       userOrderDo.QtyTwo,
+		PriceTwo:     userOrderDo.PriceTwo,
+		AmountTwo:    userOrderDo.AmountTwo,
+	}
+
+	res := b.data.DB(ctx).Table("new_user_order_do").Create(&insert)
+	if res.Error != nil {
+		return errors.New(500, "CREATE_USER_ORDER_DO_ERROR", "创建数据失败")
+	}
+
+	return nil
+}
+
+// UpdateUserOrderDo .
+func (b *BinanceUserRepo) UpdateUserOrderDo(ctx context.Context, id uint64, closePrice float64) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if err = b.data.DB(ctx).Table("new_user_order_do").Where("id=?", id).
+		Updates(map[string]interface{}{"status": 2, "close_price": closePrice, "updated_at": now}).Error; nil != err {
+		return false, errors.NotFound("UPDATE_USER_ORDER_DO_ERROR", "UPDATE_USER_ORDER_DO_ERROR")
+	}
+
+	return true, nil
+}
+
+// GetUserOrderDo .
+func (b *BinanceUserRepo) GetUserOrderDo() ([]*biz.UserOrderDo, error) {
+	var userOrderDo []*UserOrderDo
+	if err := b.data.db.Table("new_user_order_do").Where("status=?", 1).Find(&userOrderDo).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_USER_ORDER_DO_ERROR", err.Error())
+	}
+
+	res := make([]*biz.UserOrderDo, 0)
+	for _, v := range userOrderDo {
+		res = append(res, &biz.UserOrderDo{
+			ID:           v.ID,
+			ApiKey:       v.ApiKey,
+			ApiSecret:    v.ApiSecret,
+			ApiKeyTwo:    v.ApiKeyTwo,
+			ApiSecretTwo: v.ApiSecretTwo,
+			Symbol:       v.Symbol,
+			Status:       v.Status,
+			CloseRate:    v.CloseRate,
+			CloseBase:    v.CloseBase,
+			Qty:          v.Qty,
+			Price:        v.Price,
+			ClosePrice:   v.ClosePrice,
+			Amount:       v.Amount,
+			QtyTwo:       v.QtyTwo,
+			PriceTwo:     v.PriceTwo,
+			AmountTwo:    v.AmountTwo,
+			CreatedAt:    v.CreatedAt,
+			UpdatedAt:    v.UpdatedAt,
+		})
+	}
+
+	return res, nil
 }
 
 // SAddOrderSetSellLongOrBuyShort 平仓订单信息放入缓存.

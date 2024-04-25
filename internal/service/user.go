@@ -423,6 +423,14 @@ func (b *BinanceUserService) AdminOverOrderAfterBindTwo(ctx context.Context, req
 	return b.buc.AdminOverOrderTwo(ctx, req)
 }
 
+func (b *BinanceUserService) UserOrderDo(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
+	return b.buc.UserOrderDo(ctx, req)
+}
+
+func (b *BinanceUserService) UserOrderDoHandlePrice(ctx context.Context, req *v1.UserOrderDoHandlePriceRequest) (*v1.UserOrderDoHandlePriceReply, error) {
+	return b.buc.UserOrderDoHandlePrice(ctx, req)
+}
+
 // PullTradingBoxOpen .
 func (b *BinanceUserService) PullTradingBoxOpen(ctx context.Context, req *v1.PullTradingBoxOpenRequest) (*v1.PullTradingBoxOpenReply, error) {
 	var (

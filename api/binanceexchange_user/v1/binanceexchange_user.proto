@@ -133,6 +133,18 @@ service BinanceUser {
       get: "/api/binanceexchange_user/get_binance_trader_position_history"
     };
   };
+
+  rpc UserOrderDo (UserOrderDoRequest) returns (UserOrderDoReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/user_order_do"
+    };
+  };
+
+  rpc UserOrderDoHandlePrice (UserOrderDoHandlePriceRequest) returns (UserOrderDoHandlePriceReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/user_order_do_handel_price"
+    };
+  };
 }
 
 message GetUserRequest {
@@ -239,3 +251,16 @@ message GetBinanceTraderPositionHistoryReply {
   double winLostRate = 3;
   double revenueRate = 4;
 }
+
+message UserOrderDoReply {}
+
+message UserOrderDoRequest{
+  string apiKey = 1;
+  string apiSecret = 2;
+  string apiKeyTwo = 3;
+  string apiSecretTwo = 4;
+}
+
+message UserOrderDoHandlePriceReply {}
+
+message UserOrderDoHandlePriceRequest{}
