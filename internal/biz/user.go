@@ -363,6 +363,27 @@ type BinancePositionHistoryDataList struct {
 	Status          string
 }
 
+type FilData struct {
+	TotalCount uint64
+	Transfers  []*FilDataList
+}
+
+type FilDataList struct {
+	Timestamp uint64
+	From      string
+	To        string
+	Value     string
+	Type      string
+}
+
+type FilData2 struct {
+	ID       uint64
+	From     string
+	FromType uint64
+	To       string
+	Value    string
+}
+
 type BinanceUserRepo interface {
 	InsertUser(ctx context.Context, User *User) (*User, error)
 	UpdateUserApiStatus(ctx context.Context, userId uint64) (bool, error)
@@ -459,6 +480,8 @@ type BinanceUserRepo interface {
 	InsertUserOrderDo(ctx context.Context, userOrderDo *UserOrderDo) error
 	UpdateUserOrderDo(ctx context.Context, id uint64, closePrice float64) (bool, error)
 	GetUserOrderDo() ([]*UserOrderDo, error)
+	InsertFilData(ctx context.Context, filData *FilData2) error
+	GetFilData(address ...[]string) (map[string][]*FilData2, error)
 
 	SAddOrderSetSellLongOrBuyShort(ctx context.Context, OrderId int64) error
 	SMembersOrderSetSellLongOrBuyShort(ctx context.Context) ([]string, error)
@@ -5984,4 +6007,294 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 	//}
 
 	return nil, nil
+}
+
+// PullFilData .
+func (b *BinanceUserUsecase) PullFilData(ctx context.Context, req *v1.PullFilDataRequest) (*v1.PullFilDataReply, error) {
+	type AddressTypeAndData struct {
+		AddressType uint64
+		FilDataList []*FilDataList
+	}
+
+	var (
+		err error
+		// 全局人send记录
+		globalData map[string]*AddressTypeAndData
+	)
+	globalData = make(map[string]*AddressTypeAndData, 0)
+
+	var (
+		getSendFilDataList func(address string, globalData map[string]*AddressTypeAndData, num uint64) // 定义递归方法, 获取send数据
+	)
+	getSendFilDataList = func(address string, globalData map[string]*AddressTypeAndData, num uint64) {
+		fmt.Println("开始查询：", address)
+		var (
+			forCondition = true
+			filDataList  []*FilDataList
+		)
+
+		if 1 >= len(address) {
+			fmt.Println(address, "err address")
+			return
+		}
+
+		// 存在的地址信息，不再查询
+		if _, ok := globalData[address]; ok {
+			return
+		}
+
+		// 初始化
+		globalData[address] = &AddressTypeAndData{
+			AddressType: 1, // 1普通账户，2交易所账户，3f0地址
+		}
+		globalData[address].FilDataList = make([]*FilDataList, 0)
+		if "0" == string(address[1]) {
+			globalData[address].AddressType = 3
+			if 0 < num { // 非第一次节点查询，
+				return
+			}
+		}
+
+		filDataList = make([]*FilDataList, 0)
+		last := time.Now().Add(-259200 * time.Second).Unix() // 三天前时间戳
+		for i := int64(0); forCondition && i < 1000; i++ {
+			var (
+				total          uint64
+				tmpFilDataList []*FilDataList
+			)
+
+			tmpFilDataList, total, err = requestFilTransfer(address, 100, i)
+			if nil != err {
+				fmt.Println(err)
+				break
+			}
+
+			if 0 < num { // 非首次入参查询
+				// 交易所账户，时间线，3天以内仍在转账
+				if 0 < len(tmpFilDataList) && uint64(last) < tmpFilDataList[0].Timestamp {
+					globalData[address].AddressType = 2
+					break
+				}
+
+				// 交易所账户，总转账在1000以上
+				if 1000 < total {
+					globalData[address].AddressType = 2
+					break
+				}
+			}
+
+			// 遍历每一条
+			for _, v := range tmpFilDataList {
+				// 时间线以后的，直接返回
+				if v.Timestamp < 1646582400 {
+					// 结束循环，最外层查询
+					forCondition = false
+					break
+				}
+
+				// 只要发送订单
+				if "send" != v.Type {
+					continue
+				}
+
+				if v.From == v.To {
+					continue
+				}
+
+				// 最少1个fil
+				if 19 > len(v.Value) {
+					continue
+				}
+
+				// 追加
+				filDataList = append(filDataList, v)
+			}
+
+			// 不足100条，结束了
+			if 100 > len(tmpFilDataList) {
+				break
+			}
+		}
+
+		// 跟新全局信息
+		globalData[address].FilDataList = filDataList
+
+		// 递归
+		if 0 < len(filDataList) {
+			for _, vFilDataList := range filDataList {
+				getSendFilDataList(vFilDataList.To, globalData, 1)
+			}
+		}
+	}
+
+	getSendFilDataList(req.Address, globalData, 0)
+
+	//var (
+	//	filDataList []*FilDataList
+	//)
+
+	//for _, v := range getSendFilDataList(req.Address, globalData) {
+	//	fmt.Println(v)
+	//}
+
+	for _, vG := range globalData {
+		for _, vVG := range vG.FilDataList {
+			err = b.binanceUserRepo.InsertFilData(ctx, &FilData2{
+				From:     vVG.From,
+				FromType: vG.AddressType,
+				To:       vVG.To,
+				Value:    vVG.Value,
+			})
+			if nil != err {
+				fmt.Println(err)
+				continue
+			}
+		}
+	}
+
+	return nil, nil
+}
+
+// 获取fil交易历史
+func requestFilTransfer(address string, pageSize int64, page int64) ([]*FilDataList, uint64, error) {
+	var (
+		resp *http.Response
+		res  []*FilDataList
+		b    []byte
+		err  error
+	)
+
+	apiUrl := "https://filfox.info/api/v1/address/" + address + "/transfers?pageSize=" + strconv.FormatInt(pageSize, 10) + "&page=" + strconv.FormatInt(page, 10) + "&type=transfer"
+
+	// 构造请求
+	resp, err = http.Get(apiUrl)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// 结果
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	b, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil, 0, err
+	}
+
+	var l *FilData
+	err = json.Unmarshal(b, &l)
+	if err != nil {
+		fmt.Println(err)
+		return nil, 0, err
+	}
+
+	if 0 >= l.TotalCount {
+		return res, 0, nil
+	}
+
+	if nil == l.Transfers {
+		return res, 0, nil
+	}
+
+	res = make([]*FilDataList, 0)
+	for _, v := range l.Transfers {
+		res = append(res, v)
+	}
+
+	return res, l.TotalCount, nil
+}
+
+// GetFilData .
+func (b *BinanceUserUsecase) GetFilData(ctx context.Context, req *v1.GetFilDataRequest) (*v1.GetFilDataReply, error) {
+	var (
+		err error
+		//filDataF0 map[string][]*FilData2
+		globalFilData map[string][]*v1.GetFilDataReply_DataList
+	)
+
+	//f0 := make([]string, 0)
+	////f0 = append(f0, "f01050978", "f0693127", "f0490501", "f097432", "f01307626", "f02723", "f0515264", "f083920", "f02609", "f0165111", "f01236627", "f01368089")
+	//f0 = append(f0, req.Address)
+	//filDataF0, err = b.binanceUserRepo.GetFilData(f0)
+	//if nil != err {
+	//	return nil, err
+	//}
+
+	var (
+		getFilData func(address string, globalFilData map[string][]*v1.GetFilDataReply_DataList) []*v1.GetFilDataReply_DataList
+	)
+	getFilData = func(address string, globalFilData map[string][]*v1.GetFilDataReply_DataList) []*v1.GetFilDataReply_DataList {
+		var (
+			filData map[string][]*FilData2
+		)
+		fmt.Println(address)
+
+		// 	存在返回
+		if _, ok := globalFilData[address]; ok {
+			return globalFilData[address] // 已经查过的人already字段为true
+		}
+
+		tmp := make([]string, 0)
+		tmp = append(tmp, address)
+		filData, err = b.binanceUserRepo.GetFilData(tmp)
+		if nil != err {
+			fmt.Println(err)
+			return nil
+		}
+
+		if 0 >= len(filData) {
+			return nil
+		}
+
+		res := make([]*v1.GetFilDataReply_DataList, 0)
+		globalRes := make([]*v1.GetFilDataReply_DataList, 0)
+		for addressK, v := range filData {
+			for _, vFilData := range v {
+				globalRes = append(globalRes, &v1.GetFilDataReply_DataList{
+					To:        vFilData.To,
+					Value:     vFilData.Value,
+					ListChild: nil,  // 递归
+					Already:   true, // 标记链路上
+				})
+			}
+			// 挂上去，查过的
+			if _, ok := globalFilData[addressK]; !ok {
+				globalFilData[addressK] = globalRes
+			}
+
+			for _, vFilData := range v {
+				res = append(res, &v1.GetFilDataReply_DataList{
+					To:        vFilData.To,
+					Value:     vFilData.Value,
+					ListChild: getFilData(vFilData.To, globalFilData), // 递归
+				})
+			}
+		}
+
+		return res
+	}
+
+	//res := make([]*v1.GetFilDataReply_DataList, 0)
+	//for _, vFilDataF0 := range filDataF0 {
+	//	for _, vVFilDataF0 := range vFilDataF0 {
+	//		tmp := make([]string, 0)
+	//		tmp = append(tmp, vVFilDataF0.To)
+	//
+	//		res = append(res, &v1.GetFilDataReply_DataList{
+	//			To:        vVFilDataF0.To,
+	//			Value:     vVFilDataF0.Value,
+	//			ListChild: getFilData(tmp), // 递归
+	//		})
+	//	}
+	//}
+
+	globalFilData = make(map[string][]*v1.GetFilDataReply_DataList, 0)
+	return &v1.GetFilDataReply{
+		List: getFilData(req.Address, globalFilData),
+	}, nil
 }

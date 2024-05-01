@@ -137,6 +137,29 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/get_fil_data:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_GetFilData
+            parameters:
+                - name: address
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetFilDataReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/binanceexchange_user/get_user:
         get:
             tags:
@@ -304,6 +327,29 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/PullBinanceTradeHistoryReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/pull_fil_data:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_PullFilData
+            parameters:
+                - name: address
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PullFilDataReply'
                 default:
                     description: Default error response
                     content:
@@ -499,6 +545,28 @@ components:
                 closingPnl:
                     type: number
                     format: double
+        GetFilDataReply:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetFilDataReply_DataList'
+        GetFilDataReply_DataList:
+            type: object
+            properties:
+                to:
+                    type: string
+                value:
+                    type: string
+                canGet:
+                    type: string
+                listChild:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetFilDataReply_DataList'
+                already:
+                    type: boolean
         GetUserReply:
             type: object
             properties:
@@ -569,6 +637,9 @@ components:
             type: object
             properties: {}
         PullBinanceTradeHistoryReply:
+            type: object
+            properties: {}
+        PullFilDataReply:
             type: object
             properties: {}
         PullTradingBoxOpenReply:

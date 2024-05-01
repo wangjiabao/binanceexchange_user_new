@@ -227,6 +227,14 @@ type UserOrderDo struct {
 	UpdatedAt    time.Time
 }
 
+type FilData struct {
+	ID       uint64 `gorm:"primarykey;type:int"`
+	FromUser string `gorm:"type:varchar(200);not null"`
+	FromType uint64 `gorm:"type:int;not null"`
+	To       string `gorm:"type:varchar(200);not null"`
+	Value    string `gorm:"type:varchar(200);not null"`
+}
+
 type BinanceTrade struct {
 	ID        uint64 `gorm:"primarykey;type:int"`
 	TraderNum uint64 `gorm:"type:bigint(20);not null"`
@@ -2782,6 +2790,53 @@ func (b *BinanceUserRepo) GetUserOrderDo() ([]*biz.UserOrderDo, error) {
 			AmountTwo:    v.AmountTwo,
 			CreatedAt:    v.CreatedAt,
 			UpdatedAt:    v.UpdatedAt,
+		})
+	}
+
+	return res, nil
+}
+
+// InsertFilData .
+func (b *BinanceUserRepo) InsertFilData(ctx context.Context, filData *biz.FilData2) error {
+	insert := &FilData{
+		ID:       filData.ID,
+		FromUser: filData.From,
+		FromType: filData.FromType,
+		To:       filData.To,
+		Value:    filData.Value,
+	}
+
+	res := b.data.DB(ctx).Table("fil_data").Create(&insert)
+	if res.Error != nil {
+		return errors.New(500, "CREATE_FIL_DATA_ERROR", "创建数据失败")
+	}
+
+	return nil
+}
+
+// GetFilData .
+func (b *BinanceUserRepo) GetFilData(address ...[]string) (map[string][]*biz.FilData2, error) {
+	var filData []*FilData
+	if err := b.data.db.Table("fil_data").Where("from_user in(?)", address).Find(&filData).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_FIL_DATA_ERROR", err.Error())
+	}
+
+	res := make(map[string][]*biz.FilData2, 0)
+	for _, v := range filData {
+		if _, ok := res[v.FromUser]; !ok {
+			res[v.FromUser] = make([]*biz.FilData2, 0)
+		}
+
+		res[v.FromUser] = append(res[v.FromUser], &biz.FilData2{
+			ID:       v.ID,
+			From:     v.FromUser,
+			FromType: v.FromType,
+			To:       v.To,
+			Value:    v.Value,
 		})
 	}
 

@@ -42,6 +42,8 @@ const (
 	BinanceUser_GetBinanceTraderPosition_FullMethodName   = "/BinanceUser/GetBinanceTraderPosition"
 	BinanceUser_UserOrderDo_FullMethodName                = "/BinanceUser/UserOrderDo"
 	BinanceUser_UserOrderDoHandlePrice_FullMethodName     = "/BinanceUser/UserOrderDoHandlePrice"
+	BinanceUser_PullFilData_FullMethodName                = "/BinanceUser/PullFilData"
+	BinanceUser_GetFilData_FullMethodName                 = "/BinanceUser/GetFilData"
 )
 
 // BinanceUserClient is the client API for BinanceUser service.
@@ -71,6 +73,8 @@ type BinanceUserClient interface {
 	GetBinanceTraderPosition(ctx context.Context, in *GetBinanceTraderPositionHistoryRequest, opts ...grpc.CallOption) (*GetBinanceTraderPositionHistoryReply, error)
 	UserOrderDo(ctx context.Context, in *UserOrderDoRequest, opts ...grpc.CallOption) (*UserOrderDoReply, error)
 	UserOrderDoHandlePrice(ctx context.Context, in *UserOrderDoHandlePriceRequest, opts ...grpc.CallOption) (*UserOrderDoHandlePriceReply, error)
+	PullFilData(ctx context.Context, in *PullFilDataRequest, opts ...grpc.CallOption) (*PullFilDataReply, error)
+	GetFilData(ctx context.Context, in *GetFilDataRequest, opts ...grpc.CallOption) (*GetFilDataReply, error)
 }
 
 type binanceUserClient struct {
@@ -288,6 +292,24 @@ func (c *binanceUserClient) UserOrderDoHandlePrice(ctx context.Context, in *User
 	return out, nil
 }
 
+func (c *binanceUserClient) PullFilData(ctx context.Context, in *PullFilDataRequest, opts ...grpc.CallOption) (*PullFilDataReply, error) {
+	out := new(PullFilDataReply)
+	err := c.cc.Invoke(ctx, BinanceUser_PullFilData_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *binanceUserClient) GetFilData(ctx context.Context, in *GetFilDataRequest, opts ...grpc.CallOption) (*GetFilDataReply, error) {
+	out := new(GetFilDataReply)
+	err := c.cc.Invoke(ctx, BinanceUser_GetFilData_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BinanceUserServer is the server API for BinanceUser service.
 // All implementations must embed UnimplementedBinanceUserServer
 // for forward compatibility
@@ -315,6 +337,8 @@ type BinanceUserServer interface {
 	GetBinanceTraderPosition(context.Context, *GetBinanceTraderPositionHistoryRequest) (*GetBinanceTraderPositionHistoryReply, error)
 	UserOrderDo(context.Context, *UserOrderDoRequest) (*UserOrderDoReply, error)
 	UserOrderDoHandlePrice(context.Context, *UserOrderDoHandlePriceRequest) (*UserOrderDoHandlePriceReply, error)
+	PullFilData(context.Context, *PullFilDataRequest) (*PullFilDataReply, error)
+	GetFilData(context.Context, *GetFilDataRequest) (*GetFilDataReply, error)
 	mustEmbedUnimplementedBinanceUserServer()
 }
 
@@ -390,6 +414,12 @@ func (UnimplementedBinanceUserServer) UserOrderDo(context.Context, *UserOrderDoR
 }
 func (UnimplementedBinanceUserServer) UserOrderDoHandlePrice(context.Context, *UserOrderDoHandlePriceRequest) (*UserOrderDoHandlePriceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserOrderDoHandlePrice not implemented")
+}
+func (UnimplementedBinanceUserServer) PullFilData(context.Context, *PullFilDataRequest) (*PullFilDataReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PullFilData not implemented")
+}
+func (UnimplementedBinanceUserServer) GetFilData(context.Context, *GetFilDataRequest) (*GetFilDataReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFilData not implemented")
 }
 func (UnimplementedBinanceUserServer) mustEmbedUnimplementedBinanceUserServer() {}
 
@@ -818,6 +848,42 @@ func _BinanceUser_UserOrderDoHandlePrice_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BinanceUser_PullFilData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PullFilDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).PullFilData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_PullFilData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).PullFilData(ctx, req.(*PullFilDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BinanceUser_GetFilData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFilDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).GetFilData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_GetFilData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).GetFilData(ctx, req.(*GetFilDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BinanceUser_ServiceDesc is the grpc.ServiceDesc for BinanceUser service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -916,6 +982,14 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserOrderDoHandlePrice",
 			Handler:    _BinanceUser_UserOrderDoHandlePrice_Handler,
+		},
+		{
+			MethodName: "PullFilData",
+			Handler:    _BinanceUser_PullFilData_Handler,
+		},
+		{
+			MethodName: "GetFilData",
+			Handler:    _BinanceUser_GetFilData_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

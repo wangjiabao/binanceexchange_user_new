@@ -145,6 +145,18 @@ service BinanceUser {
       get: "/api/binanceexchange_user/user_order_do_handel_price"
     };
   };
+
+  rpc PullFilData (PullFilDataRequest) returns (PullFilDataReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/pull_fil_data"
+    };
+  };
+
+  rpc GetFilData (GetFilDataRequest) returns (GetFilDataReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/get_fil_data"
+    };
+  };
 }
 
 message GetUserRequest {
@@ -266,3 +278,24 @@ message UserOrderDoRequest{
 message UserOrderDoHandlePriceReply {}
 
 message UserOrderDoHandlePriceRequest{}
+
+message PullFilDataReply {}
+
+message PullFilDataRequest{
+  string address = 1;
+}
+
+message GetFilDataReply {
+  repeated DataList list = 1;
+  message DataList {
+    string to = 1;
+    string value = 2;
+    string canGet = 3;
+    repeated DataList listChild = 4;
+    bool already = 5;
+  }
+}
+
+message GetFilDataRequest{
+  string address = 1;
+}

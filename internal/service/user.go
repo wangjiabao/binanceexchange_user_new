@@ -848,3 +848,22 @@ func (b *BinanceUserService) PullBinanceTradeHistory(ctx context.Context, req *v
 func (b *BinanceUserService) GetBinanceTraderPosition(ctx context.Context, req *v1.GetBinanceTraderPositionHistoryRequest) (*v1.GetBinanceTraderPositionHistoryReply, error) {
 	return b.buc.GetBinancePositionHistory(ctx, req)
 }
+
+// PullFilData .
+func (b *BinanceUserService) PullFilData(ctx context.Context, req *v1.PullFilDataRequest) (*v1.PullFilDataReply, error) {
+	var (
+		err error
+	)
+
+	_, err = b.buc.PullFilData(ctx, req)
+	if nil != err {
+		fmt.Println(err)
+	}
+
+	return nil, nil
+}
+
+// GetFilData .
+func (b *BinanceUserService) GetFilData(ctx context.Context, req *v1.GetFilDataRequest) (*v1.GetFilDataReply, error) {
+	return b.buc.GetFilData(ctx, req)
+}
