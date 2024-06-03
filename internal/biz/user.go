@@ -6600,10 +6600,10 @@ func (b *BinanceUserUsecase) GetUserBindData(ctx context.Context, req *v1.GetUse
 	if nil != err {
 		return nil, nil
 	}
-	var (
-		res *v1.GetUserBindDataReply
-	)
-	res.List = make([]*v1.GetUserBindDataReply_DataList, 0)
+
+	res := &v1.GetUserBindDataReply{
+		List: make([]*v1.GetUserBindDataReply_DataList, 0),
+	}
 
 	for traderId, vUserBindTraders := range NewUserBindTraderTwo {
 		var (
