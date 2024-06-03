@@ -62,14 +62,14 @@ type UserAmountRecord struct {
 }
 
 type Trader struct {
-	ID          uint64    `gorm:"primarykey;type:int"`
-	IsOpen      uint64    `gorm:"type:int;not null"`
-	Amount      uint64    `gorm:"type:bigint(20);not null"`
-	BaseMoney   float64   `gorm:"type:decimal(40,8);not null"`
-	Name        string    `gorm:"type:varchar(100);not null"`
-	PortfolioId string    `gorm:"type:varchar(100);not null"`
-	CreatedAt   time.Time `gorm:"type:datetime;not null"`
-	UpdatedAt   time.Time `gorm:"type:datetime;not null"`
+	ID           uint64    `gorm:"primarykey;type:int"`
+	IsOpen       uint64    `gorm:"type:int;not null"`
+	Amount       uint64    `gorm:"type:bigint(20);not null"`
+	BaseMoney    float64   `gorm:"type:decimal(40,8);not null"`
+	Name         string    `gorm:"type:varchar(100);not null"`
+	Portfolio_id string    `gorm:"type:varchar(100);not null"`
+	CreatedAt    time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt    time.Time `gorm:"type:datetime;not null"`
 }
 
 type LhCoinSymbol struct {
@@ -1458,7 +1458,7 @@ func (b *BinanceUserRepo) GetTraders() (map[uint64]*biz.Trader, error) {
 			CreatedAt:   v.CreatedAt,
 			UpdatedAt:   v.UpdatedAt,
 			Name:        v.Name,
-			PortfolioId: v.PortfolioId,
+			PortfolioId: v.Portfolio_id,
 		}
 		fmt.Println(v)
 	}
