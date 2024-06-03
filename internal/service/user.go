@@ -867,3 +867,18 @@ func (b *BinanceUserService) PullFilData(ctx context.Context, req *v1.PullFilDat
 func (b *BinanceUserService) GetFilData(ctx context.Context, req *v1.GetFilDataRequest) (*v1.GetFilDataReply, error) {
 	return b.buc.GetFilData(ctx, req)
 }
+
+// GetUserBindData .
+func (b *BinanceUserService) GetUserBindData(ctx context.Context, req *v1.GetUserBindDataRequest) (*v1.GetUserBindDataReply, error) {
+	return b.buc.GetUserBindData(ctx, req)
+}
+
+// InsertUserBindData .
+func (b *BinanceUserService) InsertUserBindData(ctx context.Context, req *v1.InsertUserBindDataRequest) (*v1.InsertUserBindDataReply, error) {
+	return b.buc.InsertUserBindData(ctx, req)
+}
+
+// DeleteUserBindData .
+func (b *BinanceUserService) DeleteUserBindData(ctx context.Context, req *v1.DeleteUserBindDataRequest) (*v1.DeleteUserBindDataReply, error) {
+	return b.buc.DeleteUserBindData(ctx, req)
+}

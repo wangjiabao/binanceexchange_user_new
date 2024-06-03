@@ -6,6 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"gorm.io/gorm"
+	"strconv"
 	"time"
 )
 
@@ -60,12 +61,14 @@ type UserAmountRecord struct {
 }
 
 type Trader struct {
-	ID        uint64    `gorm:"primarykey;type:int"`
-	IsOpen    uint64    `gorm:"type:int;not null"`
-	Amount    uint64    `gorm:"type:bigint(20);not null"`
-	BaseMoney float64   `gorm:"type:decimal(40,8);not null"`
-	CreatedAt time.Time `gorm:"type:datetime;not null"`
-	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+	ID          uint64    `gorm:"primarykey;type:int"`
+	IsOpen      uint64    `gorm:"type:int;not null"`
+	Amount      uint64    `gorm:"type:bigint(20);not null"`
+	BaseMoney   float64   `gorm:"type:decimal(40,8);not null"`
+	Name        string    `gorm:"type:varchar(100);not null"`
+	PortfolioId string    `gorm:"type:varchar(100);not null"`
+	CreatedAt   time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt   time.Time `gorm:"type:datetime;not null"`
 }
 
 type LhCoinSymbol struct {
@@ -191,7 +194,6 @@ type BinanceTradeHistory struct {
 
 type BinancePositionHistory struct {
 	ID              uint64  `gorm:"primarykey;type:int"`
-	TraderNum       uint64  `gorm:"type:bigint(20);not null"`
 	Symbol          string  `gorm:"type:varchar(45);not null"`
 	Side            string  `gorm:"type:varchar(45);not null"`
 	Status          string  `gorm:"type:varchar(45);not null"`
@@ -562,6 +564,29 @@ func (b *BinanceUserRepo) InsertUserBindTrader(ctx context.Context, userId uint6
 	}, nil
 }
 
+// InsertUserBindTraderTwo .
+func (b *BinanceUserRepo) InsertUserBindTraderTwo(ctx context.Context, userId uint64, traderId uint64, amount uint64) (*biz.UserBindTrader, error) {
+	insertUserBindTrader := &UserBindTrader{
+		UserId:   userId,
+		TraderId: traderId,
+		Amount:   amount,
+	}
+
+	res := b.data.DB(ctx).Table("new_user_bind_trader_two").Create(&insertUserBindTrader)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_USER_BIND_TRADER_ERROR", "创建数据失败")
+	}
+
+	return &biz.UserBindTrader{
+		ID:        insertUserBindTrader.ID,
+		UserId:    insertUserBindTrader.UserId,
+		TraderId:  insertUserBindTrader.TraderId,
+		Amount:    insertUserBindTrader.Amount,
+		CreatedAt: insertUserBindTrader.CreatedAt,
+		UpdatedAt: insertUserBindTrader.UpdatedAt,
+	}, nil
+}
+
 // UpdatesUserBindTraderStatus .
 func (b *BinanceUserRepo) UpdatesUserBindTraderStatus(ctx context.Context, userId uint64, status uint64) (bool, error) {
 	var (
@@ -616,6 +641,51 @@ func (b *BinanceUserRepo) UpdatesUserBindTraderTwoInitOrderById(ctx context.Cont
 
 	if err = b.data.DB(ctx).Table("new_user_bind_trader_two").Where("id=?", id).
 		Updates(map[string]interface{}{"init_order": 1, "updated_at": now}).Error; nil != err {
+		return false, errors.NotFound("UPDATE_USER_BIND_TRADER_TWO_ERROR", "UPDATE_USER_BIND_TRADER_ERROR")
+	}
+
+	return true, nil
+}
+
+// UpdatesUserBindTraderTwoById .
+func (b *BinanceUserRepo) UpdatesUserBindTraderTwoById(ctx context.Context, id uint64, amount uint64) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if err = b.data.DB(ctx).Table("new_user_bind_trader_two").Where("id=?", id).
+		Updates(map[string]interface{}{"init_order": 0, "status": 0, "amount": amount, "updated_at": now}).Error; nil != err {
+		return false, errors.NotFound("UPDATE_USER_BIND_TRADER_TWO_ERROR", "UPDATE_USER_BIND_TRADER_ERROR")
+	}
+
+	return true, nil
+}
+
+// UpdatesUserBindTraderTwoAdminOverOrderById .
+func (b *BinanceUserRepo) UpdatesUserBindTraderTwoAdminOverOrderById(ctx context.Context, id uint64) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if err = b.data.DB(ctx).Table("new_user_bind_trader_two").Where("id=?", id).
+		Updates(map[string]interface{}{"init_order": 2, "updated_at": now}).Error; nil != err {
+		return false, errors.NotFound("UPDATE_USER_BIND_TRADER_TWO_ERROR", "UPDATE_USER_BIND_TRADER_ERROR")
+	}
+
+	return true, nil
+}
+
+// UpdatesUserBindTraderTwoAfterAdminOverOrderById .
+func (b *BinanceUserRepo) UpdatesUserBindTraderTwoAfterAdminOverOrderById(ctx context.Context, id uint64) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if err = b.data.DB(ctx).Table("new_user_bind_trader_two").Where("id=?", id).
+		Updates(map[string]interface{}{"init_order": 1, "status": 1, "updated_at": now}).Error; nil != err {
 		return false, errors.NotFound("UPDATE_USER_BIND_TRADER_TWO_ERROR", "UPDATE_USER_BIND_TRADER_ERROR")
 	}
 
@@ -1380,13 +1450,66 @@ func (b *BinanceUserRepo) GetTraders() (map[uint64]*biz.Trader, error) {
 	res := make(map[uint64]*biz.Trader, 0)
 	for _, v := range traders {
 		res[v.ID] = &biz.Trader{
+			ID:          v.ID,
+			Status:      v.IsOpen,
+			Amount:      v.Amount,
+			BaseMoney:   v.BaseMoney,
+			CreatedAt:   v.CreatedAt,
+			UpdatedAt:   v.UpdatedAt,
+			Name:        v.Name,
+			PortfolioId: v.PortfolioId,
+		}
+	}
+
+	return res, nil
+}
+
+// GetUserBindTraderTwoById .
+func (b *BinanceUserRepo) GetUserBindTraderTwoById(id uint64) (*biz.UserBindTrader, error) {
+	var userBindTrader *UserBindTrader
+	if err := b.data.db.Table("new_user_bind_trader_two").Where("id=?", id).First(&userBindTrader).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_USER_BIND_TRADER_ERROR", err.Error())
+	}
+
+	return &biz.UserBindTrader{
+		ID:        userBindTrader.ID,
+		UserId:    userBindTrader.UserId,
+		TraderId:  userBindTrader.TraderId,
+		Amount:    userBindTrader.Amount,
+		Status:    userBindTrader.Status,
+		InitOrder: userBindTrader.InitOrder,
+		CreatedAt: userBindTrader.CreatedAt,
+		UpdatedAt: userBindTrader.UpdatedAt,
+	}, nil
+}
+
+// GetUserBindTraderTwoByUserId .
+func (b *BinanceUserRepo) GetUserBindTraderTwoByUserId(userId uint64) ([]*biz.UserBindTrader, error) {
+	var userBindTrader []*UserBindTrader
+	if err := b.data.db.Table("new_user_bind_trader_two").Where("user_id=?", userId).Find(&userBindTrader).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_USER_BIND_TRADER_ERROR", err.Error())
+	}
+
+	res := make([]*biz.UserBindTrader, 0)
+	for _, v := range userBindTrader {
+		res = append(res, &biz.UserBindTrader{
 			ID:        v.ID,
-			Status:    v.IsOpen,
+			UserId:    v.UserId,
+			TraderId:  v.TraderId,
 			Amount:    v.Amount,
-			BaseMoney: v.BaseMoney,
+			InitOrder: v.InitOrder,
 			CreatedAt: v.CreatedAt,
 			UpdatedAt: v.UpdatedAt,
-		}
+			Status:    v.Status,
+		})
 	}
 
 	return res, nil
@@ -2511,7 +2634,6 @@ func (b *BinanceUserRepo) GetBinanceTradeHistory(traderNum uint64) ([]*biz.Binan
 	for _, v := range binanceTradeHistory {
 		res = append(res, &biz.BinanceTradeHistory{
 			ID:                  v.ID,
-			TraderNum:           v.TraderNum,
 			Time:                v.Time,
 			Symbol:              v.Symbol,
 			Side:                v.Side,
@@ -2535,42 +2657,47 @@ func (b *BinanceUserRepo) GetBinanceTradeHistory(traderNum uint64) ([]*biz.Binan
 }
 
 // GetBinanceTradeHistoryByTraderNumNewest .
-func (b *BinanceUserRepo) GetBinanceTradeHistoryByTraderNumNewest(traderNum uint64) (*biz.BinanceTradeHistory, error) {
-	var binanceTradeHistory *BinanceTradeHistory
-	if err := b.data.db.Table("new_binance_trade_history").Where("trader_num=?", traderNum).Order("id desc").First(&binanceTradeHistory).Error; err != nil {
+func (b *BinanceUserRepo) GetBinanceTradeHistoryByTraderNumNewest(traderNum uint64, limit int) ([]*biz.BinanceTradeHistory, error) {
+	var binanceTradeHistory []*BinanceTradeHistory
+
+	res := make([]*biz.BinanceTradeHistory, 0)
+
+	tableName := "new_binance_trade_" + strconv.FormatInt(int64(traderNum), 10) + "_history"
+	if err := b.data.db.Table(tableName).Order("id desc").Limit(limit).Find(&binanceTradeHistory).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
+			return res, nil
 		}
 
-		return nil, errors.New(500, "FIND_BINANCE_TRADER_HISTORY_ERROR", err.Error())
+		return res, errors.New(500, "FIND_BINANCE_TRADER_HISTORY_ERROR", err.Error())
 	}
 
-	return &biz.BinanceTradeHistory{
-		ID:                  binanceTradeHistory.ID,
-		TraderNum:           binanceTradeHistory.TraderNum,
-		Time:                binanceTradeHistory.Time,
-		Symbol:              binanceTradeHistory.Symbol,
-		Side:                binanceTradeHistory.Side,
-		Price:               binanceTradeHistory.Price,
-		Fee:                 binanceTradeHistory.Fee,
-		FeeAsset:            binanceTradeHistory.FeeAsset,
-		Quantity:            binanceTradeHistory.Quantity,
-		QuantityAsset:       binanceTradeHistory.QuantityAsset,
-		RealizedProfit:      binanceTradeHistory.RealizedProfit,
-		RealizedProfitAsset: binanceTradeHistory.RealizedProfitAsset,
-		BaseAsset:           binanceTradeHistory.BaseAsset,
-		Qty:                 binanceTradeHistory.Qty,
-		PositionSide:        binanceTradeHistory.PositionSide,
-		ActiveBuy:           binanceTradeHistory.ActiveBuy,
-		CreatedAt:           binanceTradeHistory.CreatedAt,
-		UpdatedAt:           binanceTradeHistory.UpdatedAt,
-	}, nil
+	for _, v := range binanceTradeHistory {
+		res = append(res, &biz.BinanceTradeHistory{
+			ID:                  v.ID,
+			Time:                v.Time,
+			Symbol:              v.Symbol,
+			Side:                v.Side,
+			Price:               v.Price,
+			Fee:                 v.Fee,
+			FeeAsset:            v.FeeAsset,
+			Quantity:            v.Quantity,
+			QuantityAsset:       v.QuantityAsset,
+			RealizedProfit:      v.RealizedProfit,
+			RealizedProfitAsset: v.RealizedProfitAsset,
+			BaseAsset:           v.BaseAsset,
+			Qty:                 v.Qty,
+			PositionSide:        v.PositionSide,
+			ActiveBuy:           v.ActiveBuy,
+			CreatedAt:           v.CreatedAt,
+			UpdatedAt:           v.UpdatedAt,
+		})
+	}
+	return res, nil
 }
 
 // InsertBinanceTradeHistory .
-func (b *BinanceUserRepo) InsertBinanceTradeHistory(ctx context.Context, history *biz.BinanceTradeHistory) (*biz.BinanceTradeHistory, error) {
+func (b *BinanceUserRepo) InsertBinanceTradeHistory(ctx context.Context, history *biz.BinanceTradeHistory, traderNum uint64) (*biz.BinanceTradeHistory, error) {
 	insert := &BinanceTradeHistory{
-		TraderNum:           history.TraderNum,
 		Time:                history.Time,
 		Symbol:              history.Symbol,
 		Side:                history.Side,
@@ -2587,14 +2714,14 @@ func (b *BinanceUserRepo) InsertBinanceTradeHistory(ctx context.Context, history
 		ActiveBuy:           history.ActiveBuy,
 	}
 
-	res := b.data.DB(ctx).Table("new_binance_trade_history").Create(&insert)
+	tableName := "new_binance_trade_" + strconv.FormatInt(int64(traderNum), 10) + "_history"
+	res := b.data.DB(ctx).Table(tableName).Create(&insert)
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_BINANCE_TRADER_HISTORY_ERROR", "创建数据失败")
 	}
 
 	return &biz.BinanceTradeHistory{
 		ID:                  insert.ID,
-		TraderNum:           insert.TraderNum,
 		Time:                insert.Time,
 		Symbol:              insert.Symbol,
 		Side:                insert.Side,
@@ -2629,7 +2756,6 @@ func (b *BinanceUserRepo) GetBinancePositionHistory(traderNum uint64) ([]*biz.Bi
 	for _, v := range binancePositionHistory {
 		res = append(res, &biz.BinancePositionHistory{
 			ID:              v.ID,
-			TraderNum:       v.TraderNum,
 			Symbol:          v.Symbol,
 			Side:            v.Side,
 			Closed:          v.Closed,
@@ -2661,7 +2787,6 @@ func (b *BinanceUserRepo) GetBinancePositionHistoryByTraderNumNewest(traderNum u
 
 	return &biz.BinancePositionHistory{
 		ID:              binancePositionHistory.ID,
-		TraderNum:       binancePositionHistory.TraderNum,
 		Symbol:          binancePositionHistory.Symbol,
 		Side:            binancePositionHistory.Side,
 		Closed:          binancePositionHistory.Closed,
@@ -2680,7 +2805,6 @@ func (b *BinanceUserRepo) GetBinancePositionHistoryByTraderNumNewest(traderNum u
 // InsertBinancePositionHistory .
 func (b *BinanceUserRepo) InsertBinancePositionHistory(ctx context.Context, binancePositionHistory *biz.BinancePositionHistory) (*biz.BinancePositionHistory, error) {
 	insert := &BinancePositionHistory{
-		TraderNum:       binancePositionHistory.TraderNum,
 		Symbol:          binancePositionHistory.Symbol,
 		Side:            binancePositionHistory.Side,
 		Closed:          binancePositionHistory.Closed,
@@ -2700,7 +2824,6 @@ func (b *BinanceUserRepo) InsertBinancePositionHistory(ctx context.Context, bina
 
 	return &biz.BinancePositionHistory{
 		ID:              insert.ID,
-		TraderNum:       insert.TraderNum,
 		Symbol:          insert.Symbol,
 		Side:            insert.Side,
 		Closed:          insert.Closed,

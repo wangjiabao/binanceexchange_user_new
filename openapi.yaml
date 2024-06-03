@@ -114,6 +114,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/delete_user_bind_data:
+        post:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_DeleteUserBindData
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/DeleteUserBindDataRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteUserBindDataReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/binanceexchange_user/get_binance_trader_position_history:
         get:
             tags:
@@ -183,6 +207,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/get_user_bind_data:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_GetUserBindData
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserBindDataReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/binanceexchange_user/init_order_after_bind:
         get:
             tags:
@@ -213,6 +255,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/InitOrderAfterBindReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/insert_user_bind_data:
+        post:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_InsertUserBindData
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/InsertUserBindDataRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InsertUserBindDataReply'
                 default:
                     description: Default error response
                     content:
@@ -519,6 +585,18 @@ components:
         CloseOrderAfterBindReply:
             type: object
             properties: {}
+        DeleteUserBindDataReply:
+            type: object
+            properties:
+                msg:
+                    type: string
+                res:
+                    type: boolean
+        DeleteUserBindDataRequest_SendBody:
+            type: object
+            properties:
+                id:
+                    type: string
         GetBinanceTraderPositionHistoryReply:
             type: object
             properties:
@@ -567,6 +645,28 @@ components:
                         $ref: '#/components/schemas/GetFilDataReply_DataList'
                 already:
                     type: boolean
+        GetUserBindDataReply:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetUserBindDataReply_DataList'
+        GetUserBindDataReply_DataList:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                address:
+                    type: string
+                amount:
+                    type: string
+                traderNum:
+                    type: string
+                traderName:
+                    type: string
         GetUserReply:
             type: object
             properties:
@@ -593,6 +693,22 @@ components:
         InitOrderAfterBindReply:
             type: object
             properties: {}
+        InsertUserBindDataReply:
+            type: object
+            properties:
+                msg:
+                    type: string
+                res:
+                    type: boolean
+        InsertUserBindDataRequest_SendBody:
+            type: object
+            properties:
+                userId:
+                    type: string
+                traderNum:
+                    type: string
+                amount:
+                    type: string
         ListenTraderAndUserOrderReply:
             type: object
             properties:

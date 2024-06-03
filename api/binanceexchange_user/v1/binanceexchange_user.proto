@@ -157,6 +157,26 @@ service BinanceUser {
       get: "/api/binanceexchange_user/get_fil_data"
     };
   };
+
+  rpc GetUserBindData (GetUserBindDataRequest) returns (GetUserBindDataReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/get_user_bind_data"
+    };
+  };
+
+  rpc InsertUserBindData (InsertUserBindDataRequest) returns (InsertUserBindDataReply) {
+    option (google.api.http) = {
+      post: "/api/binanceexchange_user/insert_user_bind_data"
+      body: "send_body"
+    };
+  };
+
+  rpc DeleteUserBindData (DeleteUserBindDataRequest) returns (DeleteUserBindDataReply) {
+    option (google.api.http) = {
+      post: "/api/binanceexchange_user/delete_user_bind_data"
+      body: "send_body"
+    };
+  };
 }
 
 message GetUserRequest {
@@ -299,3 +319,47 @@ message GetFilDataReply {
 message GetFilDataRequest{
   string address = 1;
 }
+
+message GetUserBindDataReply {
+  repeated DataList list = 1;
+  message DataList {
+    uint64 id = 1;
+    uint64 userId = 6;
+    string address = 5;
+    uint64 amount = 2;
+    string traderNum = 3;
+    string traderName = 4;
+  }
+}
+
+message GetUserBindDataRequest {
+}
+
+message InsertUserBindDataRequest {
+  message SendBody {
+    uint64 user_id = 1;
+    string trader_num = 2;
+    uint64 amount = 3;
+  }
+
+  SendBody send_body = 1;
+}
+
+message InsertUserBindDataReply {
+  string msg = 1;
+  bool res = 2;
+}
+
+message DeleteUserBindDataRequest {
+  message SendBody {
+    uint64 id = 1;
+  }
+
+  SendBody send_body = 1;
+}
+
+message DeleteUserBindDataReply {
+  string msg = 1;
+  bool res = 2;
+}
+

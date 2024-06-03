@@ -74,12 +74,14 @@ type UserAmountRecord struct {
 }
 
 type Trader struct {
-	ID        uint64
-	Status    uint64
-	Amount    uint64
-	BaseMoney float64
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID          uint64
+	Status      uint64
+	Amount      uint64
+	BaseMoney   float64
+	PortfolioId string
+	Name        string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 type TraderPosition struct {
@@ -178,7 +180,6 @@ type TradingBoxOpen struct {
 
 type BinanceTradeHistory struct {
 	ID                  uint64
-	TraderNum           uint64
 	Time                uint64
 	Symbol              string
 	Side                string
@@ -199,7 +200,6 @@ type BinanceTradeHistory struct {
 
 type BinancePositionHistory struct {
 	ID              uint64
-	TraderNum       uint64
 	Symbol          string
 	Side            string
 	Closed          uint64
@@ -404,11 +404,15 @@ type BinanceUserRepo interface {
 	InsertUserAmountRecord(ctx context.Context, userAmount *UserAmountRecord) (bool, error)
 	InsertUserAmountRecordTwo(ctx context.Context, userAmount *UserAmountRecord) (bool, error)
 	InsertUserBindTrader(ctx context.Context, userId uint64, traderId uint64, amount uint64) (*UserBindTrader, error)
+	InsertUserBindTraderTwo(ctx context.Context, userId uint64, traderId uint64, amount uint64) (*UserBindTrader, error)
 	UpdatesUserBindTraderStatus(ctx context.Context, userId uint64, status uint64) (bool, error)
 	UpdatesUserBindTraderStatusById(ctx context.Context, id uint64, status uint64) (bool, error)
 	UpdatesUserBindTraderStatusAndInitOrderById(ctx context.Context, id uint64, status uint64, initOrder uint64, amount uint64) (bool, error)
 	UpdatesUserBindTraderInitOrderById(ctx context.Context, id uint64) (bool, error)
 	UpdatesUserBindTraderTwoInitOrderById(ctx context.Context, id uint64) (bool, error)
+	UpdatesUserBindTraderTwoById(ctx context.Context, id uint64, amount uint64) (bool, error)
+	UpdatesUserBindTraderTwoAdminOverOrderById(ctx context.Context, id uint64) (bool, error)
+	UpdatesUserBindTraderTwoAfterAdminOverOrderById(ctx context.Context, id uint64) (bool, error)
 	UpdatesUserBindTraderStatusAndAmountById(ctx context.Context, id uint64, status uint64, amount uint64) (bool, error)
 	DeleteUserBindTrader(ctx context.Context, userId uint64) (bool, error)
 	InsertUserOrder(ctx context.Context, order *UserOrder) (*UserOrder, error)
@@ -438,6 +442,8 @@ type BinanceUserRepo interface {
 	GetTradersOrderByAmountDesc() ([]*Trader, error)
 	GetTraders() (map[uint64]*Trader, error)
 	GetUserBindTraderByUserId(userId uint64) ([]*UserBindTrader, error)
+	GetUserBindTraderTwoByUserId(userId uint64) ([]*UserBindTrader, error)
+	GetUserBindTraderTwoById(id uint64) (*UserBindTrader, error)
 	GetUserBindTrader() (map[uint64][]*UserBindTrader, error)
 	GetUserBindTraderByStatus(status uint64) (map[uint64][]*UserBindTrader, error)
 	GetUserBindTraderMapByUserIds(userIds []uint64) (map[uint64][]*UserBindTrader, error)
@@ -471,9 +477,9 @@ type BinanceUserRepo interface {
 	GetTradingBoxOpenMap() (map[uint64]*TradingBoxOpen, error)
 	GetTradingBoxOpenMapByStatus(status uint64) (map[uint64]*TradingBoxOpen, error)
 	GetBinanceTradeHistory(traderNum uint64) ([]*BinanceTradeHistory, error)
-	GetBinanceTradeHistoryByTraderNumNewest(traderNum uint64) (*BinanceTradeHistory, error)
+	GetBinanceTradeHistoryByTraderNumNewest(traderNum uint64, limit int) ([]*BinanceTradeHistory, error)
 	GetBinanceTrade() ([]*BinanceTrade, error)
-	InsertBinanceTradeHistory(ctx context.Context, history *BinanceTradeHistory) (*BinanceTradeHistory, error)
+	InsertBinanceTradeHistory(ctx context.Context, history *BinanceTradeHistory, traderNum uint64) (*BinanceTradeHistory, error)
 	GetBinancePositionHistory(traderNum uint64) ([]*BinancePositionHistory, error)
 	GetBinancePositionHistoryByTraderNumNewest(traderNum uint64) (*BinancePositionHistory, error)
 	InsertBinancePositionHistory(ctx context.Context, binancePositionHistory *BinancePositionHistory) (*BinancePositionHistory, error)
@@ -4245,6 +4251,10 @@ func (b *BinanceUserUsecase) AdminOverOrder(ctx context.Context, req *v1.OverOrd
 
 // AdminOverOrderTwo 平仓
 func (b *BinanceUserUsecase) AdminOverOrderTwo(ctx context.Context, req *v1.OverOrderAfterBindRequest) (*v1.OverOrderAfterBindReply, error) {
+	return nil, b.handleAdminOverOrderTwo(ctx)
+}
+
+func (b *BinanceUserUsecase) handleAdminOverOrderTwo(ctx context.Context) error {
 	var (
 		wg              sync.WaitGroup
 		userBindTraders map[uint64][]*UserBindTrader
@@ -4257,7 +4267,7 @@ func (b *BinanceUserUsecase) AdminOverOrderTwo(ctx context.Context, req *v1.Over
 
 	userBindTraders, err = b.binanceUserRepo.GetUserBindTraderTwoByOverOrder()
 	if nil != err {
-		return nil, err
+		return err
 	}
 
 	userIds = make([]uint64, 0)
@@ -4274,18 +4284,18 @@ func (b *BinanceUserUsecase) AdminOverOrderTwo(ctx context.Context, req *v1.Over
 	}
 
 	if 0 >= len(userIds) {
-		return nil, nil
+		return nil
 	}
 
 	// 获取用户信息，余额信息，收益信息
 	users, err = b.binanceUserRepo.GetUsersByUserIds(userIds)
 	if nil != err {
-		return nil, nil
+		return nil
 	}
 
 	symbol, err = b.binanceUserRepo.GetSymbol()
 	if nil != err {
-		return nil, nil
+		return nil
 	}
 
 	for traderId, vUserBindTraders := range userBindTraders {
@@ -4345,7 +4355,7 @@ func (b *BinanceUserUsecase) AdminOverOrderTwo(ctx context.Context, req *v1.Over
 
 	wg.Wait()
 
-	return nil, nil
+	return nil
 }
 
 // GetTermBinanceCurrentBalance 平仓
@@ -4951,7 +4961,8 @@ func requestBinanceUserBalance(apiKey string, secretKey string) (*BinanceUserBal
 func (b *BinanceUserUsecase) PullBinanceTradeHistory(ctx context.Context) error {
 	var (
 		binanceTrade []*BinanceTrade
-		proxy        []*Proxy
+		wg           sync.WaitGroup
+		proxy        []*ProxyData
 		err          error
 	)
 
@@ -4960,121 +4971,305 @@ func (b *BinanceUserUsecase) PullBinanceTradeHistory(ctx context.Context) error 
 		return err
 	}
 
-	proxy, err = getProxy()
+	proxy, err = requestProxy()
 	if nil != err {
 		return err
 	}
 
-	for _, v := range binanceTrade {
-		var (
-			binanceTradeHistoryNewest *BinanceTradeHistory
-		)
-		binanceTradeHistoryNewest, err = b.binanceUserRepo.GetBinanceTradeHistoryByTraderNumNewest(v.TraderNum)
-		if nil != err {
-			return err
-		}
-
-		insertBinanceTrade := make([]*BinanceTradeHistory, 0)
-
-		last := true
-		tmpPageNumber := int64(1)
-		for last {
-			var (
-				binanceTradeHistory []*BinanceTradeHistoryDataList
-			)
-
-			for i := len(proxy) - 1; i >= 0; i-- {
-				if i < len(proxy)-3 { // 最多3次
-					break
-				}
-
-				tmpProxy := "http://" + proxy[i].Ip + ":" + strconv.FormatInt(proxy[i].Port, 10) + "/"
-				binanceTradeHistory, err = requestProxyBinanceTradeHistory(tmpProxy, tmpPageNumber, 50, int64(v.TraderNum))
-				if nil != err {
-					fmt.Println(err)
-					continue
-				}
-
-				break
-			}
-
-			//binanceTradeHistory, err = requestBinanceTradeHistory(tmpPageNumber, 50, int64(v.TraderNum))
-			//if nil != err {
-			//	fmt.Println(err)
-			//	continue
-			//}
-
-			if nil == binanceTradeHistory {
-				break
-			}
-
-			for _, vBinanceTradeHistory := range binanceTradeHistory {
-
-				if nil != binanceTradeHistoryNewest {
-					if vBinanceTradeHistory.Time == binanceTradeHistoryNewest.Time &&
-						vBinanceTradeHistory.Symbol == binanceTradeHistoryNewest.Symbol &&
-						vBinanceTradeHistory.Side == binanceTradeHistoryNewest.Side &&
-						vBinanceTradeHistory.PositionSide == binanceTradeHistoryNewest.PositionSide &&
-						IsEqual(vBinanceTradeHistory.Qty, binanceTradeHistoryNewest.Qty) && // 数量
-						IsEqual(vBinanceTradeHistory.Price, binanceTradeHistoryNewest.Price) && //价格
-						IsEqual(vBinanceTradeHistory.RealizedProfit, binanceTradeHistoryNewest.RealizedProfit) &&
-						IsEqual(vBinanceTradeHistory.Quantity, binanceTradeHistoryNewest.Quantity) &&
-						IsEqual(vBinanceTradeHistory.Fee, binanceTradeHistoryNewest.Fee) {
-
-						last = false // 终止
-						break
-					}
-
-				}
-
-				tmpActiveBuy := "false"
-				if vBinanceTradeHistory.ActiveBuy {
-					tmpActiveBuy = "true"
-				}
-
-				insertBinanceTrade = append(insertBinanceTrade, &BinanceTradeHistory{
-					TraderNum:           v.TraderNum,
-					Time:                vBinanceTradeHistory.Time,
-					Symbol:              vBinanceTradeHistory.Symbol,
-					Side:                vBinanceTradeHistory.Side,
-					Price:               vBinanceTradeHistory.Price,
-					Fee:                 vBinanceTradeHistory.Fee,
-					FeeAsset:            vBinanceTradeHistory.FeeAsset,
-					Quantity:            vBinanceTradeHistory.Quantity,
-					QuantityAsset:       vBinanceTradeHistory.QuantityAsset,
-					RealizedProfit:      vBinanceTradeHistory.RealizedProfit,
-					RealizedProfitAsset: vBinanceTradeHistory.RealizedProfitAsset,
-					BaseAsset:           vBinanceTradeHistory.BaseAsset,
-					Qty:                 vBinanceTradeHistory.Qty,
-					PositionSide:        vBinanceTradeHistory.PositionSide,
-					ActiveBuy:           tmpActiveBuy,
-				})
-			}
-
-			// 不满50条
-			if 50 > len(binanceTradeHistory) {
-				break
-			}
-
-			tmpPageNumber++
-			time.Sleep(2 * time.Second)
-		}
-
-		// insert
-		insertBinanceTradeLen := len(insertBinanceTrade)
-		if 0 < insertBinanceTradeLen {
-			for i := insertBinanceTradeLen - 1; i >= 0; i-- {
-				_, err = b.binanceUserRepo.InsertBinanceTradeHistory(ctx, insertBinanceTrade[i])
-				if nil != err {
-					fmt.Println(err)
-				}
-			}
-		}
-
-		time.Sleep(200 * time.Millisecond) // 200毫秒一个代单员，减小被封代理IP概率
+	for k, v := range binanceTrade {
+		wg.Add(1) // 启动一个goroutine就登记+1
+		go b.pullBinanceTradeGoroutine(ctx, &wg, k, v, proxy)
 	}
 
+	wg.Wait()
 	return err
+}
+
+func (b *BinanceUserUsecase) pullBinanceTradeGoroutine(ctx context.Context, wg *sync.WaitGroup, kProxy int, v *BinanceTrade, proxy []*ProxyData) {
+	defer wg.Done() // goroutine结束就登记-1
+
+	// 数据库对比数据
+	var (
+		compareMax                     = 50 // 预设最大对比条数，小于最大限制50条
+		currentCompareMax              int  // 实际获得对比条数
+		err                            error
+		binanceTradeHistoryNewestGroup []*BinanceTradeHistory
+	)
+
+	binanceTradeHistoryNewestGroup, err = b.binanceUserRepo.GetBinanceTradeHistoryByTraderNumNewest(v.TraderNum, compareMax)
+	if nil != err {
+		return
+	}
+	currentCompareMax = len(binanceTradeHistoryNewestGroup)
+	fmt.Println(currentCompareMax)
+
+	var (
+		wg1            sync.WaitGroup
+		requestMaxPage = int64(1) // 一次查10页，一页用俩ip，最多分20个ip一个号
+		proxyKMin      int64
+		proxyKMax      int64
+	)
+	// 每人人分20个代理
+	if kProxy*20+20 <= len(proxy) {
+		proxyKMin = int64(kProxy) * 20
+		proxyKMax = int64(kProxy)*20 + 19
+	} else {
+		fmt.Println("代理数量不足", kProxy, v, len(proxy))
+		return
+	}
+
+	var binanceTradeHistoryByPage sync.Map
+	//binanceTradeHistoryByPage = make(map[int64][]*BinanceTradeHistoryDataList, 0)
+	for i := int64(0); i < requestMaxPage; i++ {
+		if proxyKMin+i+requestMaxPage > proxyKMax {
+			fmt.Println("错误的分配ip", proxyKMax, proxyKMin+i+requestMaxPage)
+		}
+
+		// 分配ip
+		tmpProxy := make([]*ProxyData, 0)
+		tmpProxy = append(tmpProxy, proxy[proxyKMin+i])
+		tmpProxy = append(tmpProxy, proxy[proxyKMin+i+requestMaxPage])
+
+		wg1.Add(1) // 启动一个goroutine就登记+1
+		go handleGoroutine(ctx, &wg1, i+1, v, tmpProxy, &binanceTradeHistoryByPage)
+	}
+
+	wg1.Wait()
+
+	for i := int64(0); i < requestMaxPage; i++ {
+		tmpBinanceTradeHistoryByPage, ok := binanceTradeHistoryByPage.Load(i)
+		fmt.Println("页数:", i)
+		fmt.Println(tmpBinanceTradeHistoryByPage, ok)
+		//for _, vVBinanceTradeHistoryByPage := range tmpBinanceTradeHistoryByPage {
+		//	fmt.Println(vVBinanceTradeHistoryByPage)
+		//}
+	}
+
+	//for page, vBinanceTradeHistoryByPage := range binanceTradeHistoryByPage {
+	//	fmt.Println("页数:", page)
+	//	for _, vVBinanceTradeHistoryByPage := range vBinanceTradeHistoryByPage {
+	//		fmt.Println(vVBinanceTradeHistoryByPage)
+	//	}
+	//}
+
+	//insertBinanceTrade := make([]*BinanceTradeHistory, 0)
+
+	//// 不断爬数据，一直请求，直到和数据表中数据最后一条一致，预估一次有个几百条，每页50条，每两秒一次，期间可能有新数据，在本次可能被忽略
+	//last := true
+	//tmpPageNumber := int64(1)
+	//for last {
+	//	var (
+	//		binanceTradeHistory []*BinanceTradeHistoryDataList
+	//	)
+	//
+	//	for i := proxyKMin; i <= proxyKMax; i++ {
+	//		tmpProxy := "http://" + proxy[i].Ip + ":" + strconv.FormatInt(proxy[i].Port, 10) + "/"
+	//		binanceTradeHistory, err = requestProxyBinanceTradeHistory(tmpProxy, tmpPageNumber, 50, int64(v.TraderNum))
+	//		if nil != err {
+	//			fmt.Println(err)
+	//			continue
+	//		}
+	//
+	//		break
+	//	}
+	//
+	//	//binanceTradeHistory, err = requestBinanceTradeHistory(tmpPageNumber, 50, int64(v.TraderNum))
+	//	//if nil != err {
+	//	//	time.Sleep(2 * time.Second)
+	//	//	fmt.Println(err)
+	//	//	continue
+	//	//}
+	//
+	//	if nil == binanceTradeHistory {
+	//		return // 直接返回
+	//	}
+	//	if 0 >= len(binanceTradeHistory) {
+	//		return // 直接返回
+	//	}
+	//
+	//	//currentLen := len(binanceTradeHistory)
+	//	//for kPage, vBinanceTradeHistory := range binanceTradeHistory {
+	//	//	// 第1-n条一致认为是已有数据
+	//	//
+	//	//	if 0 == currentCompareMax { // 数据库无数据
+	//	//		// 不做限制
+	//	//	} else { // 有数据且不足对比条数
+	//	//
+	//	//		// 页面上的数据一定大于等于数据库中对比条数
+	//	//		for kDatabase, binanceTradeHistoryNewest := range binanceTradeHistoryNewestGroup {
+	//	//			if vBinanceTradeHistory.Time == binanceTradeHistoryNewest.Time &&
+	//	//				vBinanceTradeHistory.Symbol == binanceTradeHistoryNewest.Symbol &&
+	//	//				vBinanceTradeHistory.Side == binanceTradeHistoryNewest.Side &&
+	//	//				vBinanceTradeHistory.PositionSide == binanceTradeHistoryNewest.PositionSide &&
+	//	//				IsEqual(vBinanceTradeHistory.Qty, binanceTradeHistoryNewest.Qty) && // 数量
+	//	//				IsEqual(vBinanceTradeHistory.Price, binanceTradeHistoryNewest.Price) && //价格
+	//	//				IsEqual(vBinanceTradeHistory.RealizedProfit, binanceTradeHistoryNewest.RealizedProfit) &&
+	//	//				IsEqual(vBinanceTradeHistory.Quantity, binanceTradeHistoryNewest.Quantity) &&
+	//	//				IsEqual(vBinanceTradeHistory.Fee, binanceTradeHistoryNewest.Fee) {
+	//	//
+	//	//			}
+	//	//		}
+	//	//
+	//	//		time.Sleep(2 * time.Second)
+	//	//		last = false // 终止
+	//	//		break
+	//	//	}
+	//	//
+	//	//	// 类型处理
+	//	//	tmpActiveBuy := "false"
+	//	//	if vBinanceTradeHistory.ActiveBuy {
+	//	//		tmpActiveBuy = "true"
+	//	//	}
+	//	//
+	//	//	// 追加
+	//	//	insertBinanceTrade = append(insertBinanceTrade, &BinanceTradeHistory{
+	//	//		Time:                vBinanceTradeHistory.Time,
+	//	//		Symbol:              vBinanceTradeHistory.Symbol,
+	//	//		Side:                vBinanceTradeHistory.Side,
+	//	//		Price:               vBinanceTradeHistory.Price,
+	//	//		Fee:                 vBinanceTradeHistory.Fee,
+	//	//		FeeAsset:            vBinanceTradeHistory.FeeAsset,
+	//	//		Quantity:            vBinanceTradeHistory.Quantity,
+	//	//		QuantityAsset:       vBinanceTradeHistory.QuantityAsset,
+	//	//		RealizedProfit:      vBinanceTradeHistory.RealizedProfit,
+	//	//		RealizedProfitAsset: vBinanceTradeHistory.RealizedProfitAsset,
+	//	//		BaseAsset:           vBinanceTradeHistory.BaseAsset,
+	//	//		Qty:                 vBinanceTradeHistory.Qty,
+	//	//		PositionSide:        vBinanceTradeHistory.PositionSide,
+	//	//		ActiveBuy:           tmpActiveBuy,
+	//	//	})
+	//	//}
+	//	//
+	//	//// 不满50条，查到了最后，一般出现在大于50条的初始化
+	//	//if 50 > len(binanceTradeHistory) {
+	//	//	break
+	//	//}
+	//	//
+	//	//tmpPageNumber++
+	//	//time.Sleep(2 * time.Second)
+	//}
+	//
+	//// insert
+	//insertBinanceTradeLen := len(insertBinanceTrade)
+	//if 0 < insertBinanceTradeLen {
+	//	for i := insertBinanceTradeLen - 1; i >= 0; i-- {
+	//		_, err = b.binanceUserRepo.InsertBinanceTradeHistory(ctx, insertBinanceTrade[i], v.TraderNum)
+	//		if nil != err {
+	//			fmt.Println(err)
+	//		}
+	//	}
+	//}
+}
+
+func handleGoroutine(ctx context.Context, wg1 *sync.WaitGroup, tmpPageNumber int64, v *BinanceTrade, proxy []*ProxyData, data *sync.Map) {
+	defer wg1.Done() // goroutine结束就登记-1
+
+	//if _, ok := data[tmpPageNumber]; !ok {
+	//	data[tmpPageNumber] = make([]*BinanceTradeHistoryDataList, 0)
+	//}
+
+	var (
+		err                 error
+		binanceTradeHistory []*BinanceTradeHistoryDataList
+	)
+
+	for _, vProxy := range proxy {
+		//tmpProxy := "http://" + vProxy.Ip + ":" + strconv.FormatInt(vProxy.Port, 10) + "/"
+		//fmt.Println(tmpProxy, "页数:", tmpPageNumber)
+		//binanceTradeHistory, err = requestProxyBinanceTradeHistory(tmpProxy, tmpPageNumber, 50, int64(v.TraderNum))
+		//if nil != err {
+		//	fmt.Println(err)
+		//	continue
+		//}
+
+		fmt.Println(vProxy)
+		binanceTradeHistory, err = requestBinanceTradeHistory(tmpPageNumber, 50, int64(v.TraderNum))
+		if nil != err {
+			time.Sleep(2 * time.Second)
+			fmt.Println(err)
+			continue
+		}
+
+		break
+	}
+
+	//binanceTradeHistory, err = requestBinanceTradeHistory(tmpPageNumber, 50, int64(v.TraderNum))
+	//if nil != err {
+	//	time.Sleep(2 * time.Second)
+	//	fmt.Println(err)
+	//	continue
+	//}
+
+	if nil == binanceTradeHistory {
+		return // 直接返回
+	}
+	if 0 >= len(binanceTradeHistory) {
+		return // 直接返回
+	}
+
+	data.Store(tmpPageNumber, binanceTradeHistory)
+	return
+
+	//currentLen := len(binanceTradeHistory)
+	//for kPage, vBinanceTradeHistory := range binanceTradeHistory {
+	//	// 第1-n条一致认为是已有数据
+	//
+	//	if 0 == currentCompareMax { // 数据库无数据
+	//		// 不做限制
+	//	} else { // 有数据且不足对比条数
+	//
+	//		// 页面上的数据一定大于等于数据库中对比条数
+	//		for kDatabase, binanceTradeHistoryNewest := range binanceTradeHistoryNewestGroup {
+	//			if vBinanceTradeHistory.Time == binanceTradeHistoryNewest.Time &&
+	//				vBinanceTradeHistory.Symbol == binanceTradeHistoryNewest.Symbol &&
+	//				vBinanceTradeHistory.Side == binanceTradeHistoryNewest.Side &&
+	//				vBinanceTradeHistory.PositionSide == binanceTradeHistoryNewest.PositionSide &&
+	//				IsEqual(vBinanceTradeHistory.Qty, binanceTradeHistoryNewest.Qty) && // 数量
+	//				IsEqual(vBinanceTradeHistory.Price, binanceTradeHistoryNewest.Price) && //价格
+	//				IsEqual(vBinanceTradeHistory.RealizedProfit, binanceTradeHistoryNewest.RealizedProfit) &&
+	//				IsEqual(vBinanceTradeHistory.Quantity, binanceTradeHistoryNewest.Quantity) &&
+	//				IsEqual(vBinanceTradeHistory.Fee, binanceTradeHistoryNewest.Fee) {
+	//
+	//			}
+	//		}
+	//
+	//		time.Sleep(2 * time.Second)
+	//		last = false // 终止
+	//		break
+	//	}
+	//
+	//	// 类型处理
+	//	tmpActiveBuy := "false"
+	//	if vBinanceTradeHistory.ActiveBuy {
+	//		tmpActiveBuy = "true"
+	//	}
+	//
+	//	// 追加
+	//	insertBinanceTrade = append(insertBinanceTrade, &BinanceTradeHistory{
+	//		Time:                vBinanceTradeHistory.Time,
+	//		Symbol:              vBinanceTradeHistory.Symbol,
+	//		Side:                vBinanceTradeHistory.Side,
+	//		Price:               vBinanceTradeHistory.Price,
+	//		Fee:                 vBinanceTradeHistory.Fee,
+	//		FeeAsset:            vBinanceTradeHistory.FeeAsset,
+	//		Quantity:            vBinanceTradeHistory.Quantity,
+	//		QuantityAsset:       vBinanceTradeHistory.QuantityAsset,
+	//		RealizedProfit:      vBinanceTradeHistory.RealizedProfit,
+	//		RealizedProfitAsset: vBinanceTradeHistory.RealizedProfitAsset,
+	//		BaseAsset:           vBinanceTradeHistory.BaseAsset,
+	//		Qty:                 vBinanceTradeHistory.Qty,
+	//		PositionSide:        vBinanceTradeHistory.PositionSide,
+	//		ActiveBuy:           tmpActiveBuy,
+	//	})
+	//}
+	//
+	//// 不满50条，查到了最后，一般出现在大于50条的初始化
+	//if 50 > len(binanceTradeHistory) {
+	//	break
+	//}
+	//
+	//tmpPageNumber++
+	//time.Sleep(2 * time.Second)
 }
 
 // PullBinancePositionHistory 暂时不用
@@ -5155,7 +5350,6 @@ func (b *BinanceUserUsecase) PullBinancePositionHistory(ctx context.Context) err
 				}
 
 				insertBinancePosition = append(insertBinancePosition, &BinancePositionHistory{
-					TraderNum:       v.TraderNum,
 					Symbol:          vBinancePositionHistory.Symbol,
 					Side:            vBinancePositionHistory.Side,
 					Closed:          vBinancePositionHistory.Closed,
@@ -5443,6 +5637,68 @@ func requestBinanceTradeHistory(pageNumber int64, pageSize int64, portfolioId in
 
 	res = make([]*BinanceTradeHistoryDataList, 0)
 	for _, v := range l.Data.List {
+		res = append(res, v)
+	}
+
+	return res, nil
+}
+
+type ProxyData struct {
+	Ip   string
+	Port int64
+}
+
+type ProxyRep struct {
+	Data []*ProxyData
+}
+
+// 拉取代理列表
+func requestProxy() ([]*ProxyData, error) {
+	var (
+		resp   *http.Response
+		b      []byte
+		res    []*ProxyData
+		err    error
+		apiUrl = "http://api.ipipgo.com/ip?cty=00&c=500&pt=1&ft=json&pat=\\n&rep=1&key=a37f63e3&ts=3"
+	)
+
+	httpClient := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	// 构造请求
+	resp, err = httpClient.Get(apiUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	// 结果
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	b, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	var l *ProxyRep
+	err = json.Unmarshal(b, &l)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	res = make([]*ProxyData, 0)
+	if nil == l.Data || 0 >= len(l.Data) {
+		return res, nil
+	}
+
+	for _, v := range l.Data {
 		res = append(res, v)
 	}
 
@@ -6296,5 +6552,244 @@ func (b *BinanceUserUsecase) GetFilData(ctx context.Context, req *v1.GetFilDataR
 	globalFilData = make(map[string][]*v1.GetFilDataReply_DataList, 0)
 	return &v1.GetFilDataReply{
 		List: getFilData(req.Address, globalFilData),
+	}, nil
+}
+
+// GetUserBindData .
+func (b *BinanceUserUsecase) GetUserBindData(ctx context.Context, req *v1.GetUserBindDataRequest) (*v1.GetUserBindDataReply, error) {
+	var (
+		err                  error
+		NewUserBindTraderTwo map[uint64][]*UserBindTrader
+		userIds              []uint64
+		userIdsMap           map[uint64]uint64
+	)
+
+	NewUserBindTraderTwo, err = b.binanceUserRepo.GetUserBindTraderTwoByAlreadyInitOrder()
+	if nil != err {
+		return nil, err
+	}
+
+	userIds = make([]uint64, 0)
+	userIdsMap = make(map[uint64]uint64, 0)
+	for _, vUserBindTrader := range NewUserBindTraderTwo {
+		for _, vVUserBindTrader := range vUserBindTrader {
+			if _, ok := userIdsMap[vVUserBindTrader.UserId]; ok {
+				continue
+			}
+
+			userIdsMap[vVUserBindTrader.UserId] = vVUserBindTrader.UserId
+			userIds = append(userIds, vVUserBindTrader.UserId)
+		}
+	}
+
+	if 0 >= len(userIds) {
+		return nil, nil
+	}
+
+	var (
+		traders map[uint64]*Trader
+		users   map[uint64]*User
+	)
+	traders, err = b.binanceUserRepo.GetTraders()
+	if nil != err {
+		return nil, nil
+	}
+
+	// 获取用户信息，余额信息，收益信息
+	users, err = b.binanceUserRepo.GetUsersByUserIds(userIds)
+	if nil != err {
+		return nil, nil
+	}
+	var (
+		res *v1.GetUserBindDataReply
+	)
+	res.List = make([]*v1.GetUserBindDataReply_DataList, 0)
+
+	for traderId, vUserBindTraders := range NewUserBindTraderTwo {
+		var (
+			traderName string
+			traderNum  string
+		)
+		if _, ok := traders[traderId]; ok {
+			traderNum = traders[traderId].PortfolioId
+			traderName = traders[traderId].Name
+		}
+
+		// 先更新状态
+		for _, vVUserBindTraders := range vUserBindTraders {
+			if _, ok := users[vVUserBindTraders.UserId]; !ok {
+				continue
+			}
+
+			// 带单
+			if 1 > users[vVUserBindTraders.UserId].IsDai {
+				continue
+			}
+
+			// 正在开启
+			if 0 != vVUserBindTraders.Status || 0 != vVUserBindTraders.InitOrder {
+				continue
+			}
+
+			res.List = append(res.List, &v1.GetUserBindDataReply_DataList{
+				Id:         vVUserBindTraders.ID,
+				UserId:     vVUserBindTraders.UserId,
+				Address:    users[vVUserBindTraders.UserId].Address,
+				Amount:     vVUserBindTraders.Amount,
+				TraderNum:  traderNum,
+				TraderName: traderName,
+			})
+		}
+	}
+
+	return res, nil
+}
+
+// InsertUserBindData .
+func (b *BinanceUserUsecase) InsertUserBindData(ctx context.Context, req *v1.InsertUserBindDataRequest) (*v1.InsertUserBindDataReply, error) {
+	var (
+		err             error
+		traders         map[uint64]*Trader
+		traderId        uint64
+		userBindTraders []*UserBindTrader
+	)
+	traders, err = b.binanceUserRepo.GetTraders()
+	if nil != err {
+		return &v1.InsertUserBindDataReply{
+			Msg: "未查询到交易员信息",
+			Res: false,
+		}, nil
+	}
+
+	for _, trader := range traders {
+		// 可用的
+		if 1 != trader.Status {
+			continue
+		}
+
+		if req.SendBody.TraderNum == trader.PortfolioId {
+			traderId = trader.ID
+		}
+	}
+
+	if 0 >= traderId {
+		return &v1.InsertUserBindDataReply{
+			Msg: "未查询到可用交易员信息",
+			Res: false,
+		}, nil
+	}
+
+	userBindTraders, err = b.binanceUserRepo.GetUserBindTraderTwoByUserId(req.SendBody.UserId)
+	if nil != err {
+		return &v1.InsertUserBindDataReply{
+			Msg: "未查询到用户信息",
+			Res: false,
+		}, nil
+	}
+
+	if nil == userBindTraders {
+		_, err = b.binanceUserRepo.InsertUserBindTraderTwo(ctx, req.SendBody.UserId, traderId, req.SendBody.Amount)
+		if nil != err {
+			return &v1.InsertUserBindDataReply{
+				Msg: "错误的添加",
+				Res: false,
+			}, nil
+		}
+	} else {
+
+		var tmpAlreadyBind *UserBindTrader
+		for _, vUserBindTraders := range userBindTraders {
+			if vUserBindTraders.TraderId == traderId {
+				tmpAlreadyBind = vUserBindTraders
+			}
+		}
+
+		if nil == tmpAlreadyBind {
+			_, err = b.binanceUserRepo.InsertUserBindTraderTwo(ctx, req.SendBody.UserId, traderId, req.SendBody.Amount)
+			if nil != err {
+				return &v1.InsertUserBindDataReply{
+					Msg: "错误的添加",
+					Res: false,
+				}, nil
+			}
+		} else {
+			// 正在运行的会被清理掉
+			if 1 == tmpAlreadyBind.InitOrder && 0 == tmpAlreadyBind.Status {
+				// 更新状态
+				_, err = b.binanceUserRepo.UpdatesUserBindTraderTwoAdminOverOrderById(ctx, tmpAlreadyBind.ID)
+				if nil != err {
+					return &v1.InsertUserBindDataReply{
+						Msg: "错误的更新",
+						Res: false,
+					}, nil
+				}
+
+				err = b.handleAdminOverOrderTwo(ctx)
+				if nil != err {
+					return &v1.InsertUserBindDataReply{
+						Msg: "错误的平仓",
+						Res: false,
+					}, nil
+				}
+			}
+
+			_, err = b.binanceUserRepo.UpdatesUserBindTraderTwoById(ctx, tmpAlreadyBind.ID, req.SendBody.Amount)
+			if nil != err {
+				return &v1.InsertUserBindDataReply{
+					Msg: "错误的更新",
+					Res: false,
+				}, nil
+			}
+		}
+	}
+
+	return &v1.InsertUserBindDataReply{
+		Msg: "ok",
+		Res: true,
+	}, nil
+}
+
+// DeleteUserBindData .
+func (b *BinanceUserUsecase) DeleteUserBindData(ctx context.Context, req *v1.DeleteUserBindDataRequest) (*v1.DeleteUserBindDataReply, error) {
+	var (
+		err             error
+		userBindTraders *UserBindTrader
+	)
+	userBindTraders, err = b.binanceUserRepo.GetUserBindTraderTwoById(req.SendBody.Id)
+	if nil != err || nil == userBindTraders {
+		return &v1.DeleteUserBindDataReply{
+			Msg: "未查询到信息",
+			Res: false,
+		}, nil
+	}
+
+	// 更新状态
+	_, err = b.binanceUserRepo.UpdatesUserBindTraderTwoAdminOverOrderById(ctx, userBindTraders.ID)
+	if nil != err {
+		return &v1.DeleteUserBindDataReply{
+			Msg: "错误的更新",
+			Res: false,
+		}, nil
+	}
+
+	err = b.handleAdminOverOrderTwo(ctx)
+	if nil != err {
+		return &v1.DeleteUserBindDataReply{
+			Msg: "错误的平仓",
+			Res: false,
+		}, nil
+	}
+
+	_, err = b.binanceUserRepo.UpdatesUserBindTraderTwoAfterAdminOverOrderById(ctx, userBindTraders.ID)
+	if nil != err {
+		return &v1.DeleteUserBindDataReply{
+			Msg: "错误的更新2",
+			Res: false,
+		}, nil
+	}
+
+	return &v1.DeleteUserBindDataReply{
+		Msg: "ok",
+		Res: true,
 	}, nil
 }
