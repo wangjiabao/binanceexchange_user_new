@@ -6627,18 +6627,16 @@ func (b *BinanceUserUsecase) GetUserBindData(ctx context.Context, req *v1.GetUse
 			}
 
 			// 正在开启
-			if 0 != vVUserBindTraders.Status || 0 != vVUserBindTraders.InitOrder {
-				continue
+			if 0 == vVUserBindTraders.Status && 1 == vVUserBindTraders.InitOrder {
+				res.List = append(res.List, &v1.GetUserBindDataReply_DataList{
+					Id:         vVUserBindTraders.ID,
+					UserId:     vVUserBindTraders.UserId,
+					Address:    users[vVUserBindTraders.UserId].Address,
+					Amount:     vVUserBindTraders.Amount,
+					TraderNum:  traderNum,
+					TraderName: traderName,
+				})
 			}
-
-			res.List = append(res.List, &v1.GetUserBindDataReply_DataList{
-				Id:         vVUserBindTraders.ID,
-				UserId:     vVUserBindTraders.UserId,
-				Address:    users[vVUserBindTraders.UserId].Address,
-				Amount:     vVUserBindTraders.Amount,
-				TraderNum:  traderNum,
-				TraderName: traderName,
-			})
 		}
 	}
 
