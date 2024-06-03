@@ -3,6 +3,7 @@ package data
 import (
 	"binanceexchange_user/internal/biz"
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"gorm.io/gorm"
@@ -1459,6 +1460,7 @@ func (b *BinanceUserRepo) GetTraders() (map[uint64]*biz.Trader, error) {
 			Name:        v.Name,
 			PortfolioId: v.PortfolioId,
 		}
+		fmt.Println(v)
 	}
 
 	return res, nil
