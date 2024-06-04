@@ -709,6 +709,8 @@ components:
                     type: string
                 amount:
                     type: string
+                address:
+                    type: string
         ListenTraderAndUserOrderReply:
             type: object
             properties:

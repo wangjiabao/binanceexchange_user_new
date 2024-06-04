@@ -321,6 +321,21 @@ func (b *BinanceUserRepo) UpdateUserBindTraderStatus(ctx context.Context, userId
 	return true, nil
 }
 
+// UpdateUserIsDai .
+func (b *BinanceUserRepo) UpdateUserIsDai(ctx context.Context, address string) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if err = b.data.DB(ctx).Table("new_user").Where("address=?", address).
+		Updates(map[string]interface{}{"is_dai": 1, "updated_at": now}).Error; nil != err {
+		return false, errors.NotFound("UPDATE_USER_ERROR", "UPDATE_USER_ERROR")
+	}
+
+	return true, nil
+}
+
 // UpdateUserBindTraderStatusNo .
 func (b *BinanceUserRepo) UpdateUserBindTraderStatusNo(ctx context.Context, userId uint64) (bool, error) {
 	var (
@@ -1173,6 +1188,7 @@ func (b *BinanceUserRepo) GetUserByAddress(ctx context.Context, address string) 
 		ApiSecret:        user.ApiSecret,
 		CreatedAt:        user.CreatedAt,
 		UpdatedAt:        user.UpdatedAt,
+		IsDai:            user.IsDai,
 	}, nil
 }
 

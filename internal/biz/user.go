@@ -389,6 +389,7 @@ type BinanceUserRepo interface {
 	UpdateUserApiStatus(ctx context.Context, userId uint64) (bool, error)
 	UpdateUser(ctx context.Context, userId uint64, apiKey string, apiSecret string) (bool, error)
 	UpdateUserBindTraderStatus(ctx context.Context, userId uint64) (bool, error)
+	UpdateUserIsDai(ctx context.Context, address string) (bool, error)
 	UpdateUserBindTraderStatusNo(ctx context.Context, userId uint64) (bool, error)
 	UpdateUserBindTraderStatusNoTfi(ctx context.Context, userId uint64) (bool, error)
 	InsertUserBalance(ctx context.Context, userBalance *UserBalance) (bool, error)
@@ -6649,6 +6650,7 @@ func (b *BinanceUserUsecase) InsertUserBindData(ctx context.Context, req *v1.Ins
 		err             error
 		traders         map[uint64]*Trader
 		traderId        uint64
+		userId          = req.SendBody.UserId
 		userBindTraders []*UserBindTrader
 	)
 	traders, err = b.binanceUserRepo.GetTraders()
@@ -6677,7 +6679,35 @@ func (b *BinanceUserUsecase) InsertUserBindData(ctx context.Context, req *v1.Ins
 		}, nil
 	}
 
-	userBindTraders, err = b.binanceUserRepo.GetUserBindTraderTwoByUserId(req.SendBody.UserId)
+	// 改为带单用户
+	if 0 < len(req.SendBody.Address) {
+		var (
+			user *User
+		)
+		user, err = b.binanceUserRepo.GetUserByAddress(ctx, req.SendBody.Address)
+		if nil != err {
+			return &v1.InsertUserBindDataReply{
+				Msg: "未查询到用户信息",
+				Res: false,
+			}, nil
+
+		}
+
+		if 1 > user.IsDai {
+			_, err = b.binanceUserRepo.UpdateUserIsDai(ctx, req.SendBody.Address)
+			if nil != err {
+				return &v1.InsertUserBindDataReply{
+					Msg: "修改未带单员状态失败",
+					Res: false,
+				}, nil
+
+			}
+		}
+
+		userId = user.ID
+	}
+
+	userBindTraders, err = b.binanceUserRepo.GetUserBindTraderTwoByUserId(userId)
 	if nil != err {
 		return &v1.InsertUserBindDataReply{
 			Msg: "未查询到用户信息",
@@ -6686,7 +6716,7 @@ func (b *BinanceUserUsecase) InsertUserBindData(ctx context.Context, req *v1.Ins
 	}
 
 	if nil == userBindTraders {
-		_, err = b.binanceUserRepo.InsertUserBindTraderTwo(ctx, req.SendBody.UserId, traderId, req.SendBody.Amount)
+		_, err = b.binanceUserRepo.InsertUserBindTraderTwo(ctx, userId, traderId, req.SendBody.Amount)
 		if nil != err {
 			return &v1.InsertUserBindDataReply{
 				Msg: "错误的添加",
@@ -6703,7 +6733,7 @@ func (b *BinanceUserUsecase) InsertUserBindData(ctx context.Context, req *v1.Ins
 		}
 
 		if nil == tmpAlreadyBind {
-			_, err = b.binanceUserRepo.InsertUserBindTraderTwo(ctx, req.SendBody.UserId, traderId, req.SendBody.Amount)
+			_, err = b.binanceUserRepo.InsertUserBindTraderTwo(ctx, userId, traderId, req.SendBody.Amount)
 			if nil != err {
 				return &v1.InsertUserBindDataReply{
 					Msg: "错误的添加",

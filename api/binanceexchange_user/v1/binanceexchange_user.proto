@@ -340,6 +340,7 @@ message InsertUserBindDataRequest {
     uint64 user_id = 1;
     string trader_num = 2;
     uint64 amount = 3;
+    string address = 4;
   }
 
   SendBody send_body = 1;
