@@ -27,6 +27,7 @@ const OperationBinanceUserCloseOrderAfterBind = "/BinanceUser/CloseOrderAfterBin
 const OperationBinanceUserCloseOrderAfterBindTwo = "/BinanceUser/CloseOrderAfterBindTwo"
 const OperationBinanceUserDeleteUserBindData = "/BinanceUser/DeleteUserBindData"
 const OperationBinanceUserGetBinanceTraderPosition = "/BinanceUser/GetBinanceTraderPosition"
+const OperationBinanceUserGetBinanceTradersTrade = "/BinanceUser/GetBinanceTradersTrade"
 const OperationBinanceUserGetFilData = "/BinanceUser/GetFilData"
 const OperationBinanceUserGetUser = "/BinanceUser/GetUser"
 const OperationBinanceUserGetUserBindData = "/BinanceUser/GetUserBindData"
@@ -57,6 +58,7 @@ type BinanceUserHTTPServer interface {
 	CloseOrderAfterBindTwo(context.Context, *CloseOrderAfterBindRequest) (*CloseOrderAfterBindReply, error)
 	DeleteUserBindData(context.Context, *DeleteUserBindDataRequest) (*DeleteUserBindDataReply, error)
 	GetBinanceTraderPosition(context.Context, *GetBinanceTraderPositionHistoryRequest) (*GetBinanceTraderPositionHistoryReply, error)
+	GetBinanceTradersTrade(context.Context, *GetBinanceTradersTradeRequest) (*GetBinanceTradersTradeRequest, error)
 	GetFilData(context.Context, *GetFilDataRequest) (*GetFilDataReply, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
 	GetUserBindData(context.Context, *GetUserBindDataRequest) (*GetUserBindDataReply, error)
@@ -107,6 +109,7 @@ func RegisterBinanceUserHTTPServer(s *http.Server, srv BinanceUserHTTPServer) {
 	r.GET("/api/binanceexchange_user/pull_fil_data", _BinanceUser_PullFilData0_HTTP_Handler(srv))
 	r.GET("/api/binanceexchange_user/get_fil_data", _BinanceUser_GetFilData0_HTTP_Handler(srv))
 	r.GET("/api/binanceexchange_user/get_user_bind_data", _BinanceUser_GetUserBindData0_HTTP_Handler(srv))
+	r.GET("/api/binanceexchange_user/get_binance_traders_trader", _BinanceUser_GetBinanceTradersTrade0_HTTP_Handler(srv))
 	r.POST("/api/binanceexchange_user/insert_user_bind_data", _BinanceUser_InsertUserBindData0_HTTP_Handler(srv))
 	r.POST("/api/binanceexchange_user/delete_user_bind_data", _BinanceUser_DeleteUserBindData0_HTTP_Handler(srv))
 }
@@ -608,6 +611,25 @@ func _BinanceUser_GetUserBindData0_HTTP_Handler(srv BinanceUserHTTPServer) func(
 	}
 }
 
+func _BinanceUser_GetBinanceTradersTrade0_HTTP_Handler(srv BinanceUserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetBinanceTradersTradeRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationBinanceUserGetBinanceTradersTrade)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetBinanceTradersTrade(ctx, req.(*GetBinanceTradersTradeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetBinanceTradersTradeRequest)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _BinanceUser_InsertUserBindData0_HTTP_Handler(srv BinanceUserHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in InsertUserBindDataRequest
@@ -661,6 +683,7 @@ type BinanceUserHTTPClient interface {
 	CloseOrderAfterBindTwo(ctx context.Context, req *CloseOrderAfterBindRequest, opts ...http.CallOption) (rsp *CloseOrderAfterBindReply, err error)
 	DeleteUserBindData(ctx context.Context, req *DeleteUserBindDataRequest, opts ...http.CallOption) (rsp *DeleteUserBindDataReply, err error)
 	GetBinanceTraderPosition(ctx context.Context, req *GetBinanceTraderPositionHistoryRequest, opts ...http.CallOption) (rsp *GetBinanceTraderPositionHistoryReply, err error)
+	GetBinanceTradersTrade(ctx context.Context, req *GetBinanceTradersTradeRequest, opts ...http.CallOption) (rsp *GetBinanceTradersTradeRequest, err error)
 	GetFilData(ctx context.Context, req *GetFilDataRequest, opts ...http.CallOption) (rsp *GetFilDataReply, err error)
 	GetUser(ctx context.Context, req *GetUserRequest, opts ...http.CallOption) (rsp *GetUserReply, err error)
 	GetUserBindData(ctx context.Context, req *GetUserBindDataRequest, opts ...http.CallOption) (rsp *GetUserBindDataReply, err error)
@@ -787,6 +810,19 @@ func (c *BinanceUserHTTPClientImpl) GetBinanceTraderPosition(ctx context.Context
 	pattern := "/api/binanceexchange_user/get_binance_trader_position_history"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationBinanceUserGetBinanceTraderPosition))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *BinanceUserHTTPClientImpl) GetBinanceTradersTrade(ctx context.Context, in *GetBinanceTradersTradeRequest, opts ...http.CallOption) (*GetBinanceTradersTradeRequest, error) {
+	var out GetBinanceTradersTradeRequest
+	pattern := "/api/binanceexchange_user/get_binance_traders_trader"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationBinanceUserGetBinanceTradersTrade))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

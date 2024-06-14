@@ -164,6 +164,12 @@ service BinanceUser {
     };
   };
 
+  rpc GetBinanceTradersTrade (GetBinanceTradersTradeRequest) returns (GetBinanceTradersTradeRequest) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/get_binance_traders_trader"
+    };
+  };
+
   rpc InsertUserBindData (InsertUserBindDataRequest) returns (InsertUserBindDataReply) {
     option (google.api.http) = {
       post: "/api/binanceexchange_user/insert_user_bind_data"
@@ -318,6 +324,22 @@ message GetFilDataReply {
 
 message GetFilDataRequest{
   string address = 1;
+}
+
+message GetBinanceTradersTradeReply {
+  repeated DataList list = 1;
+  message DataList {
+    uint64 time = 6;
+    string created_at = 5;
+    string symbol = 2;
+    string side = 3;
+    string position_side = 4;
+    double qty = 7;
+  }
+}
+
+message GetBinanceTradersTradeRequest {
+  uint64 traderNum = 1;
 }
 
 message GetUserBindDataReply {

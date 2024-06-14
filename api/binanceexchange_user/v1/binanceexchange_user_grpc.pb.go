@@ -45,6 +45,7 @@ const (
 	BinanceUser_PullFilData_FullMethodName                = "/BinanceUser/PullFilData"
 	BinanceUser_GetFilData_FullMethodName                 = "/BinanceUser/GetFilData"
 	BinanceUser_GetUserBindData_FullMethodName            = "/BinanceUser/GetUserBindData"
+	BinanceUser_GetBinanceTradersTrade_FullMethodName     = "/BinanceUser/GetBinanceTradersTrade"
 	BinanceUser_InsertUserBindData_FullMethodName         = "/BinanceUser/InsertUserBindData"
 	BinanceUser_DeleteUserBindData_FullMethodName         = "/BinanceUser/DeleteUserBindData"
 )
@@ -79,6 +80,7 @@ type BinanceUserClient interface {
 	PullFilData(ctx context.Context, in *PullFilDataRequest, opts ...grpc.CallOption) (*PullFilDataReply, error)
 	GetFilData(ctx context.Context, in *GetFilDataRequest, opts ...grpc.CallOption) (*GetFilDataReply, error)
 	GetUserBindData(ctx context.Context, in *GetUserBindDataRequest, opts ...grpc.CallOption) (*GetUserBindDataReply, error)
+	GetBinanceTradersTrade(ctx context.Context, in *GetBinanceTradersTradeRequest, opts ...grpc.CallOption) (*GetBinanceTradersTradeRequest, error)
 	InsertUserBindData(ctx context.Context, in *InsertUserBindDataRequest, opts ...grpc.CallOption) (*InsertUserBindDataReply, error)
 	DeleteUserBindData(ctx context.Context, in *DeleteUserBindDataRequest, opts ...grpc.CallOption) (*DeleteUserBindDataReply, error)
 }
@@ -325,6 +327,15 @@ func (c *binanceUserClient) GetUserBindData(ctx context.Context, in *GetUserBind
 	return out, nil
 }
 
+func (c *binanceUserClient) GetBinanceTradersTrade(ctx context.Context, in *GetBinanceTradersTradeRequest, opts ...grpc.CallOption) (*GetBinanceTradersTradeRequest, error) {
+	out := new(GetBinanceTradersTradeRequest)
+	err := c.cc.Invoke(ctx, BinanceUser_GetBinanceTradersTrade_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *binanceUserClient) InsertUserBindData(ctx context.Context, in *InsertUserBindDataRequest, opts ...grpc.CallOption) (*InsertUserBindDataReply, error) {
 	out := new(InsertUserBindDataReply)
 	err := c.cc.Invoke(ctx, BinanceUser_InsertUserBindData_FullMethodName, in, out, opts...)
@@ -373,6 +384,7 @@ type BinanceUserServer interface {
 	PullFilData(context.Context, *PullFilDataRequest) (*PullFilDataReply, error)
 	GetFilData(context.Context, *GetFilDataRequest) (*GetFilDataReply, error)
 	GetUserBindData(context.Context, *GetUserBindDataRequest) (*GetUserBindDataReply, error)
+	GetBinanceTradersTrade(context.Context, *GetBinanceTradersTradeRequest) (*GetBinanceTradersTradeRequest, error)
 	InsertUserBindData(context.Context, *InsertUserBindDataRequest) (*InsertUserBindDataReply, error)
 	DeleteUserBindData(context.Context, *DeleteUserBindDataRequest) (*DeleteUserBindDataReply, error)
 	mustEmbedUnimplementedBinanceUserServer()
@@ -459,6 +471,9 @@ func (UnimplementedBinanceUserServer) GetFilData(context.Context, *GetFilDataReq
 }
 func (UnimplementedBinanceUserServer) GetUserBindData(context.Context, *GetUserBindDataRequest) (*GetUserBindDataReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserBindData not implemented")
+}
+func (UnimplementedBinanceUserServer) GetBinanceTradersTrade(context.Context, *GetBinanceTradersTradeRequest) (*GetBinanceTradersTradeRequest, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBinanceTradersTrade not implemented")
 }
 func (UnimplementedBinanceUserServer) InsertUserBindData(context.Context, *InsertUserBindDataRequest) (*InsertUserBindDataReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InsertUserBindData not implemented")
@@ -947,6 +962,24 @@ func _BinanceUser_GetUserBindData_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BinanceUser_GetBinanceTradersTrade_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBinanceTradersTradeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).GetBinanceTradersTrade(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_GetBinanceTradersTrade_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).GetBinanceTradersTrade(ctx, req.(*GetBinanceTradersTradeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BinanceUser_InsertUserBindData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(InsertUserBindDataRequest)
 	if err := dec(in); err != nil {
@@ -1093,6 +1126,10 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserBindData",
 			Handler:    _BinanceUser_GetUserBindData_Handler,
+		},
+		{
+			MethodName: "GetBinanceTradersTrade",
+			Handler:    _BinanceUser_GetBinanceTradersTrade_Handler,
 		},
 		{
 			MethodName: "InsertUserBindData",

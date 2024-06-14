@@ -6556,6 +6556,32 @@ func (b *BinanceUserUsecase) GetFilData(ctx context.Context, req *v1.GetFilDataR
 	}, nil
 }
 
+// GetBinanceTradersTrade .
+func (b *BinanceUserUsecase) GetBinanceTradersTrade(ctx context.Context, req *v1.GetBinanceTradersTradeRequest) (*v1.GetBinanceTradersTradeReply, error) {
+	var (
+		NewBinanceTradeHistory []*BinanceTradeHistory
+		err                    error
+	)
+	NewBinanceTradeHistory, err = b.binanceUserRepo.GetBinanceTradeHistoryByTraderNumNewest(req.TraderNum, 300)
+	if nil != err {
+		return nil, err
+	}
+
+	res := &v1.GetBinanceTradersTradeReply{List: make([]*v1.GetBinanceTradersTradeReply_DataList, 0)}
+	for _, v := range NewBinanceTradeHistory {
+		res.List = append(res.List, &v1.GetBinanceTradersTradeReply_DataList{
+			Time:         v.Time,
+			CreatedAt:    v.CreatedAt.String(),
+			Symbol:       v.Symbol,
+			Side:         v.Side,
+			PositionSide: v.PositionSide,
+			Qty:          v.Qty,
+		})
+	}
+
+	return res, err
+}
+
 // GetUserBindData .
 func (b *BinanceUserUsecase) GetUserBindData(ctx context.Context, req *v1.GetUserBindDataRequest) (*v1.GetUserBindDataReply, error) {
 	var (

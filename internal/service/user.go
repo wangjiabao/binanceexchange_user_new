@@ -868,6 +868,11 @@ func (b *BinanceUserService) GetFilData(ctx context.Context, req *v1.GetFilDataR
 	return b.buc.GetFilData(ctx, req)
 }
 
+// GetBinanceTradersTrade .
+func (b *BinanceUserService) GetBinanceTradersTrade(ctx context.Context, req *v1.GetBinanceTradersTradeRequest) (*v1.GetBinanceTradersTradeReply, error) {
+	return b.buc.GetBinanceTradersTrade(ctx, req)
+}
+
 // GetUserBindData .
 func (b *BinanceUserService) GetUserBindData(ctx context.Context, req *v1.GetUserBindDataRequest) (*v1.GetUserBindDataReply, error) {
 	return b.buc.GetUserBindData(ctx, req)
