@@ -177,7 +177,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetBinanceTradersTradeRequest'
+                                $ref: '#/components/schemas/GetBinanceTradersTradeReply'
                 default:
                     description: Default error response
                     content:
@@ -646,11 +646,29 @@ components:
                 closingPnl:
                     type: number
                     format: double
-        GetBinanceTradersTradeRequest:
+        GetBinanceTradersTradeReply:
             type: object
             properties:
-                traderNum:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetBinanceTradersTradeReply_DataList'
+        GetBinanceTradersTradeReply_DataList:
+            type: object
+            properties:
+                time:
                     type: string
+                createdAt:
+                    type: string
+                symbol:
+                    type: string
+                side:
+                    type: string
+                positionSide:
+                    type: string
+                qty:
+                    type: number
+                    format: double
         GetFilDataReply:
             type: object
             properties:

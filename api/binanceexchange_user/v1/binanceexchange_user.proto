@@ -164,7 +164,7 @@ service BinanceUser {
     };
   };
 
-  rpc GetBinanceTradersTrade (GetBinanceTradersTradeRequest) returns (GetBinanceTradersTradeRequest) {
+  rpc GetBinanceTradersTrade (GetBinanceTradersTradeRequest) returns (GetBinanceTradersTradeReply) {
     option (google.api.http) = {
       get: "/api/binanceexchange_user/get_binance_traders_trader"
     };

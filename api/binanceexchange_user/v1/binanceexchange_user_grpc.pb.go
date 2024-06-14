@@ -80,7 +80,7 @@ type BinanceUserClient interface {
 	PullFilData(ctx context.Context, in *PullFilDataRequest, opts ...grpc.CallOption) (*PullFilDataReply, error)
 	GetFilData(ctx context.Context, in *GetFilDataRequest, opts ...grpc.CallOption) (*GetFilDataReply, error)
 	GetUserBindData(ctx context.Context, in *GetUserBindDataRequest, opts ...grpc.CallOption) (*GetUserBindDataReply, error)
-	GetBinanceTradersTrade(ctx context.Context, in *GetBinanceTradersTradeRequest, opts ...grpc.CallOption) (*GetBinanceTradersTradeRequest, error)
+	GetBinanceTradersTrade(ctx context.Context, in *GetBinanceTradersTradeRequest, opts ...grpc.CallOption) (*GetBinanceTradersTradeReply, error)
 	InsertUserBindData(ctx context.Context, in *InsertUserBindDataRequest, opts ...grpc.CallOption) (*InsertUserBindDataReply, error)
 	DeleteUserBindData(ctx context.Context, in *DeleteUserBindDataRequest, opts ...grpc.CallOption) (*DeleteUserBindDataReply, error)
 }
@@ -327,8 +327,8 @@ func (c *binanceUserClient) GetUserBindData(ctx context.Context, in *GetUserBind
 	return out, nil
 }
 
-func (c *binanceUserClient) GetBinanceTradersTrade(ctx context.Context, in *GetBinanceTradersTradeRequest, opts ...grpc.CallOption) (*GetBinanceTradersTradeRequest, error) {
-	out := new(GetBinanceTradersTradeRequest)
+func (c *binanceUserClient) GetBinanceTradersTrade(ctx context.Context, in *GetBinanceTradersTradeRequest, opts ...grpc.CallOption) (*GetBinanceTradersTradeReply, error) {
+	out := new(GetBinanceTradersTradeReply)
 	err := c.cc.Invoke(ctx, BinanceUser_GetBinanceTradersTrade_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -384,7 +384,7 @@ type BinanceUserServer interface {
 	PullFilData(context.Context, *PullFilDataRequest) (*PullFilDataReply, error)
 	GetFilData(context.Context, *GetFilDataRequest) (*GetFilDataReply, error)
 	GetUserBindData(context.Context, *GetUserBindDataRequest) (*GetUserBindDataReply, error)
-	GetBinanceTradersTrade(context.Context, *GetBinanceTradersTradeRequest) (*GetBinanceTradersTradeRequest, error)
+	GetBinanceTradersTrade(context.Context, *GetBinanceTradersTradeRequest) (*GetBinanceTradersTradeReply, error)
 	InsertUserBindData(context.Context, *InsertUserBindDataRequest) (*InsertUserBindDataReply, error)
 	DeleteUserBindData(context.Context, *DeleteUserBindDataRequest) (*DeleteUserBindDataReply, error)
 	mustEmbedUnimplementedBinanceUserServer()
@@ -472,7 +472,7 @@ func (UnimplementedBinanceUserServer) GetFilData(context.Context, *GetFilDataReq
 func (UnimplementedBinanceUserServer) GetUserBindData(context.Context, *GetUserBindDataRequest) (*GetUserBindDataReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserBindData not implemented")
 }
-func (UnimplementedBinanceUserServer) GetBinanceTradersTrade(context.Context, *GetBinanceTradersTradeRequest) (*GetBinanceTradersTradeRequest, error) {
+func (UnimplementedBinanceUserServer) GetBinanceTradersTrade(context.Context, *GetBinanceTradersTradeRequest) (*GetBinanceTradersTradeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBinanceTradersTrade not implemented")
 }
 func (UnimplementedBinanceUserServer) InsertUserBindData(context.Context, *InsertUserBindDataRequest) (*InsertUserBindDataReply, error) {
