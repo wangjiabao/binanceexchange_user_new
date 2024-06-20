@@ -4557,7 +4557,7 @@ func requestBinanceOrderStop(symbol string, side string, positionSide string, qu
 		fmt.Println(string(b), err)
 		return nil, nil, err
 	}
-
+	fmt.Println(string(b), err)
 	res = &BinanceOrder{
 		OrderId:       o.OrderId,
 		ExecutedQty:   o.ExecutedQty,
