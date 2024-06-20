@@ -6010,6 +6010,7 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	}
 	qtyEth = req.Amount / priceFloatEth
 	// 多空的止损价
+	fmt.Println(priceFloatEth, priceFloatEth*(req.Amount-10), req.Amount*float64(req.Num), priceFloatEth*(req.Amount-10)/req.Amount*float64(req.Num))
 	qtyEthLimitLong := priceFloatEth - priceFloatEth*(req.Amount-10)/req.Amount*float64(req.Num)
 	qtyEthLimitShort := priceFloatEth + priceFloatEth*(req.Amount-10)/req.Amount*float64(req.Num)
 
