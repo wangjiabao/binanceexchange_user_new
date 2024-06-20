@@ -430,7 +430,7 @@ func (b *BinanceUserService) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 
 func (b *BinanceUserService) UserOrderDoHandlePrice(ctx context.Context, req *v1.UserOrderDoHandlePriceRequest) (*v1.UserOrderDoHandlePriceReply, error) {
 	var err error
-	stop := time.Now().Add(55 * time.Second)
+	stop := time.Now().Add(57 * time.Second)
 	for i := 0; i < 29; i++ {
 		if stop.Before(time.Now()) {
 			break

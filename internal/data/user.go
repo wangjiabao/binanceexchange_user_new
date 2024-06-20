@@ -243,6 +243,8 @@ type UserOrderDoNew struct {
 	QtyTwo       float64 `gorm:"type:decimal(65,20);not null"`
 	Side         string  `gorm:"type:varchar(200);not null"`
 	SideTwo      string  `gorm:"type:varchar(200);not null"`
+	OrderId      string  `gorm:"type:varchar(200);not null"`
+	OrderIdTwo   string  `gorm:"type:varchar(200);not null"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -2915,6 +2917,8 @@ func (b *BinanceUserRepo) InsertUserOrderDoNew(ctx context.Context, userOrderDo 
 		QtyTwo:       userOrderDo.QtyTwo,
 		Side:         userOrderDo.Side,
 		SideTwo:      userOrderDo.SideTwo,
+		OrderIdTwo:   userOrderDo.OrderIdTwo,
+		OrderId:      userOrderDo.OrderId,
 	}
 
 	res := b.data.DB(ctx).Table("new_user_order_do_new").Create(&insert)
@@ -2926,18 +2930,54 @@ func (b *BinanceUserRepo) InsertUserOrderDoNew(ctx context.Context, userOrderDo 
 }
 
 // UpdateUserOrderDo .
-func (b *BinanceUserRepo) UpdateUserOrderDo(ctx context.Context, id uint64, closePrice float64) (bool, error) {
+func (b *BinanceUserRepo) UpdateUserOrderDo(ctx context.Context, id uint64, closeOrderId string) (bool, error) {
 	var (
 		err error
 		now = time.Now()
 	)
 
-	if err = b.data.DB(ctx).Table("new_user_order_do").Where("id=?", id).
-		Updates(map[string]interface{}{"status": 2, "close_price": closePrice, "updated_at": now}).Error; nil != err {
+	if err = b.data.DB(ctx).Table("new_user_order_do_new").Where("id=?", id).
+		Updates(map[string]interface{}{"status": 2, "close_order_id": closeOrderId, "updated_at": now}).Error; nil != err {
 		return false, errors.NotFound("UPDATE_USER_ORDER_DO_ERROR", "UPDATE_USER_ORDER_DO_ERROR")
 	}
 
 	return true, nil
+}
+
+// GetUserOrderDoNew .
+func (b *BinanceUserRepo) GetUserOrderDoNew() ([]*biz.UserOrderDoNew, error) {
+	var userOrderDo []*UserOrderDoNew
+	if err := b.data.db.Table("new_user_order_do_new").Where("status=?", 1).Find(&userOrderDo).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_USER_ORDER_DO_New_ERROR", err.Error())
+	}
+
+	res := make([]*biz.UserOrderDoNew, 0)
+	for _, v := range userOrderDo {
+		res = append(res, &biz.UserOrderDoNew{
+			ID:           v.ID,
+			ApiKey:       v.ApiKey,
+			ApiSecret:    v.ApiSecret,
+			ApiKeyTwo:    v.ApiKeyTwo,
+			ApiSecretTwo: v.ApiSecretTwo,
+			Symbol:       v.Symbol,
+			SymbolTwo:    v.SymbolTwo,
+			Status:       v.Status,
+			Qty:          v.Qty,
+			QtyTwo:       v.QtyTwo,
+			Side:         v.Side,
+			SideTwo:      v.SideTwo,
+			OrderId:      v.OrderId,
+			OrderIdTwo:   v.OrderId,
+			CreatedAt:    v.CreatedAt,
+			UpdatedAt:    v.UpdatedAt,
+		})
+	}
+
+	return res, nil
 }
 
 // GetUserOrderDo .
