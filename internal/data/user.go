@@ -2971,7 +2971,7 @@ func (b *BinanceUserRepo) GetUserOrderDoNew() ([]*biz.UserOrderDoNew, error) {
 			Side:         v.Side,
 			SideTwo:      v.SideTwo,
 			OrderId:      v.OrderId,
-			OrderIdTwo:   v.OrderId,
+			OrderIdTwo:   v.OrderIdTwo,
 			CreatedAt:    v.CreatedAt,
 			UpdatedAt:    v.UpdatedAt,
 		})

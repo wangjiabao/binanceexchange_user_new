@@ -6304,6 +6304,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 			orderInfo         *BinanceOrder
 			orderInfoTwo      *BinanceOrder
 			binanceOrderClose *BinanceOrder
+			closeOne          bool
 		)
 
 		// 检测哪个仓位平了
@@ -6315,7 +6316,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 				continue
 			}
 
-			if "NEW" != orderInfo.Status {
+			if 0 < len(orderInfo.Status) && "NEW" != orderInfo.Status {
 				closeSymbol = vUserOrderDo.SymbolTwo
 				positionSide = vUserOrderDo.SideTwo
 				if "LONG" == positionSide {
@@ -6326,6 +6327,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 				qty = vUserOrderDo.QtyTwo
 				apiKey = vUserOrderDo.ApiKeyTwo
 				apiSecret = vUserOrderDo.ApiSecretTwo
+				closeOne = true
 			}
 			fmt.Println(orderInfo)
 		} else {
@@ -6341,7 +6343,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 				continue
 			}
 
-			if "NEW" != orderInfoTwo.Status {
+			if 0 < len(orderInfoTwo.Status) && "NEW" != orderInfoTwo.Status {
 				closeSymbol = vUserOrderDo.Symbol
 				positionSide = vUserOrderDo.Side
 				if "LONG" == positionSide {
@@ -6352,6 +6354,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 				qty = vUserOrderDo.Qty
 				apiKey = vUserOrderDo.ApiKey
 				apiSecret = vUserOrderDo.ApiSecret
+				closeOne = true
 			}
 
 			fmt.Println(orderInfoTwo)
@@ -6360,21 +6363,23 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 			continue
 		}
 
-		// 关仓
-		qtyStr = strconv.FormatFloat(qty, 'f', int(symbol[closeSymbol].QuantityPrecision), 64)
-		binanceOrderClose, _, err = requestBinanceOrder(closeSymbol, side, "MARKET", positionSide, qtyStr, apiKey, apiSecret)
-		if nil != err {
-			return nil, err
-		}
+		if closeOne {
+			// 关仓
+			qtyStr = strconv.FormatFloat(qty, 'f', int(symbol[closeSymbol].QuantityPrecision), 64)
+			binanceOrderClose, _, err = requestBinanceOrder(closeSymbol, side, "MARKET", positionSide, qtyStr, apiKey, apiSecret)
+			if nil != err {
+				return nil, err
+			}
 
-		if 0 >= binanceOrderClose.OrderId {
-			fmt.Println(binanceOrderClose)
-			return nil, errors.New(500, "Order Err", "关仓下单错误")
-		}
+			if 0 >= binanceOrderClose.OrderId {
+				fmt.Println(binanceOrderClose)
+				return nil, errors.New(500, "Order Err", "关仓下单错误")
+			}
 
-		_, err = b.binanceUserRepo.UpdateUserOrderDo(ctx, vUserOrderDo.ID, strconv.FormatInt(binanceOrderClose.OrderId, 10))
-		if nil != err {
-			return nil, err
+			_, err = b.binanceUserRepo.UpdateUserOrderDo(ctx, vUserOrderDo.ID, strconv.FormatInt(binanceOrderClose.OrderId, 10))
+			if nil != err {
+				return nil, err
+			}
 		}
 	}
 
