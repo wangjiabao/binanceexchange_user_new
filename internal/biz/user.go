@@ -4498,7 +4498,7 @@ func requestBinanceOrder(symbol string, side string, orderType string, positionS
 	return res, resOrderInfo, nil
 }
 
-func requestBinanceOrderStop(symbol string, side string, positionSide string, quantity string, stopPrice string, apiKey string, secretKey string) (*BinanceOrder, *OrderInfo, error) {
+func requestBinanceOrderStop(symbol string, side string, positionSide string, quantity string, stopPrice string, price string, apiKey string, secretKey string) (*BinanceOrder, *OrderInfo, error) {
 	var (
 		client       *http.Client
 		req          *http.Request
@@ -4514,7 +4514,7 @@ func requestBinanceOrderStop(symbol string, side string, positionSide string, qu
 	// 时间
 	now := strconv.FormatInt(time.Now().UTC().UnixMilli(), 10)
 	// 拼请求数据
-	data = "symbol=" + symbol + "&side=" + side + "&type=STOP&stopPrice=" + stopPrice + "&price=" + stopPrice + "&positionSide=" + positionSide + "&newOrderRespType=" + "RESULT" + "&quantity=" + quantity + "&timestamp=" + now
+	data = "symbol=" + symbol + "&side=" + side + "&type=STOP&stopPrice=" + stopPrice + "&price=" + price + "&positionSide=" + positionSide + "&newOrderRespType=" + "RESULT" + "&quantity=" + quantity + "&timestamp=" + now
 
 	// 加密
 	h := hmac.New(sha256.New, []byte(secretKey))
@@ -6043,23 +6043,31 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	}
 
 	var (
-		positionSide    string // todo 变量名字反了 side对应的值是sell,long
-		limitPrice      string
-		positionSideTwo string
-		limitPriceTwo   string
+		positionSide         string // todo 变量名字反了 side对应的值是sell,long
+		positionSideClose    string // todo 变量名字反了 side对应的值是sell,long
+		limitPrice           string
+		positionSideTwo      string
+		positionSideTwoClose string
+		limitPriceTwo        string
 	)
 	if "SHORT" == req.Side { // 开空
 		positionSide = "SELL"
+		positionSideClose = "BUY"
 		limitPrice = strconv.FormatFloat(qtyEthLimitShort, 'f', int(symbol[req.Symbol].PricePrecision), 64)
 	} else if "LONG" == req.Side { // 开多
 		positionSide = "BUY"
+		positionSideClose = "SELL"
 		limitPrice = strconv.FormatFloat(qtyEthLimitLong, 'f', int(symbol[req.Symbol].PricePrecision), 64)
 	} else {
 		return nil, errors.New(500, "Side Err", "下单方向错误")
 	}
 
-	fmt.Println(symbol[req.Symbol], limitPrice, qtyEthLimitLong, qtyEthLimitShort, priceEth)
-	binanceOrderEth, _, err = requestBinanceOrderStop(req.Symbol, positionSide, req.Side, quantityEth, limitPrice, req.ApiKey, req.ApiSecret)
+	binanceOrderEth, _, err = requestBinanceOrder(req.Symbol, positionSide, "MARKET", req.Side, quantityEth, req.ApiKey, req.ApiSecret)
+	if nil != err {
+		return nil, err
+	}
+
+	_, _, err = requestBinanceOrderStop(req.Symbol, positionSideClose, req.Side, quantityEth, limitPrice, limitPrice, req.ApiKey, req.ApiSecret)
 	if nil != err {
 		return nil, err
 	}
@@ -6073,16 +6081,22 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 
 	if "SHORT" == req.SideTwo { // 开空
 		positionSideTwo = "SELL"
+		positionSideTwoClose = "BUY"
 		limitPriceTwo = strconv.FormatFloat(qtyEthLimitShortTwo, 'f', int(symbol[req.SymbolTwo].QuantityPrecision), 64)
 	} else if "LONG" == req.SideTwo { // 开多
 		positionSideTwo = "BUY"
+		positionSideTwoClose = "SELL"
 		limitPriceTwo = strconv.FormatFloat(qtyEthLimitLongTwo, 'f', int(symbol[req.SymbolTwo].QuantityPrecision), 64)
 	} else {
 		return nil, errors.New(500, "Side Err", "下单方向错误，第二单")
 	}
 
-	fmt.Println(symbol[req.SymbolTwo], limitPriceTwo, qtyEthLimitLongTwo, qtyEthLimitShortTwo, priceEthTwo)
-	binanceOrderEthTwo, _, err = requestBinanceOrderStop(req.SymbolTwo, positionSideTwo, req.SideTwo, quantityEthTwo, limitPriceTwo, req.ApiKeyTwo, req.ApiSecretTwo)
+	binanceOrderEthTwo, _, err = requestBinanceOrder(req.SymbolTwo, positionSideTwo, "MARKET", req.SideTwo, quantityEthTwo, req.ApiKeyTwo, req.ApiSecretTwo)
+	if nil != err {
+		return nil, err
+	}
+
+	_, _, err = requestBinanceOrderStop(req.SymbolTwo, positionSideTwoClose, req.SideTwo, quantityEthTwo, limitPriceTwo, limitPriceTwo, req.ApiKeyTwo, req.ApiSecretTwo)
 	if nil != err {
 		return nil, err
 	}
