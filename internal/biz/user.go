@@ -6010,8 +6010,8 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	}
 	qtyEth = req.Amount / priceFloatEth
 	// 多空的止损价
-	qtyEthLimitLong := qtyEth - qtyEth*(req.Amount-10)/req.Amount*float64(req.Num)
-	qtyEthLimitShort := qtyEth + qtyEth*(req.Amount-10)/req.Amount*float64(req.Num)
+	qtyEthLimitLong := priceFloatEth - priceFloatEth*(req.Amount-10)/req.Amount*float64(req.Num)
+	qtyEthLimitShort := priceFloatEth + priceFloatEth*(req.Amount-10)/req.Amount*float64(req.Num)
 
 	// 查询币价 第二个
 	priceEthTwo, err = requestBinanceSymbolPrice(req.SymbolTwo)
@@ -6024,8 +6024,8 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	}
 	qtyEthTwo = req.AmountTwo / priceFloatEthTwo
 	// 多空的止损价
-	qtyEthLimitLongTwo := qtyEthTwo - qtyEthTwo*(req.AmountTwo-10)/req.AmountTwo*float64(req.NumTwo)
-	qtyEthLimitShortTwo := qtyEthTwo + qtyEthTwo*(req.AmountTwo-10)/req.AmountTwo*float64(req.NumTwo)
+	qtyEthLimitLongTwo := priceFloatEthTwo - priceFloatEthTwo*(req.AmountTwo-10)/req.AmountTwo*float64(req.NumTwo)
+	qtyEthLimitShortTwo := priceFloatEthTwo + priceFloatEthTwo*(req.AmountTwo-10)/req.AmountTwo*float64(req.NumTwo)
 
 	// 下单
 	// 精度调整
