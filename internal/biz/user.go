@@ -6329,7 +6329,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 				apiSecret = vUserOrderDo.ApiSecretTwo
 				closeOne = true
 			}
-			//fmt.Println(orderInfo)
+			fmt.Println(orderInfo)
 		} else {
 			fmt.Println(vUserOrderDo, "刷单查询，错误信息")
 			continue
@@ -6357,7 +6357,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 				closeOne = true
 			}
 
-			//fmt.Println(orderInfoTwo)
+			fmt.Println(orderInfoTwo)
 		} else {
 			fmt.Println(vUserOrderDo, "刷单查询，错误信息")
 			continue
