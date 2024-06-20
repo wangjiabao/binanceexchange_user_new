@@ -75,6 +75,7 @@ type LhCoinSymbol struct {
 	ID                uint64 `gorm:"primarykey;type:int"`
 	Symbol            string `gorm:"type:varchar(100);not null"`
 	QuantityPrecision int64  `gorm:"type:int;not null"`
+	PricePrecision    int64  `gorm:"type:int;not null"`
 }
 
 type LhTraderPosition struct {
@@ -225,6 +226,23 @@ type UserOrderDo struct {
 	QtyTwo       float64 `gorm:"type:decimal(65,20);not null"`
 	PriceTwo     float64 `gorm:"type:decimal(65,20);not null"`
 	AmountTwo    float64 `gorm:"type:decimal(65,20);not null"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+type UserOrderDoNew struct {
+	ID           uint64  `gorm:"primarykey;type:int"`
+	ApiKey       string  `gorm:"type:varchar(200);not null"`
+	ApiSecret    string  `gorm:"type:varchar(200);not null"`
+	ApiKeyTwo    string  `gorm:"type:varchar(200);not null"`
+	ApiSecretTwo string  `gorm:"type:varchar(200);not null"`
+	Symbol       string  `gorm:"type:varchar(200);not null"`
+	SymbolTwo    string  `gorm:"type:varchar(200);not null"`
+	Status       uint64  `gorm:"type:int;not null"`
+	Qty          float64 `gorm:"type:decimal(65,20);not null"`
+	QtyTwo       float64 `gorm:"type:decimal(65,20);not null"`
+	Side         string  `gorm:"type:varchar(200);not null"`
+	SideTwo      string  `gorm:"type:varchar(200);not null"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -2444,6 +2462,7 @@ func (b *BinanceUserRepo) GetSymbol() (map[string]*biz.Symbol, error) {
 			ID:                v.ID,
 			Symbol:            v.Symbol,
 			QuantityPrecision: v.QuantityPrecision,
+			PricePrecision:    v.PricePrecision,
 		}
 	}
 
@@ -2877,6 +2896,30 @@ func (b *BinanceUserRepo) InsertUserOrderDo(ctx context.Context, userOrderDo *bi
 	res := b.data.DB(ctx).Table("new_user_order_do").Create(&insert)
 	if res.Error != nil {
 		return errors.New(500, "CREATE_USER_ORDER_DO_ERROR", "创建数据失败")
+	}
+
+	return nil
+}
+
+// InsertUserOrderDoNew .
+func (b *BinanceUserRepo) InsertUserOrderDoNew(ctx context.Context, userOrderDo *biz.UserOrderDoNew) error {
+	insert := &UserOrderDoNew{
+		ApiKey:       userOrderDo.ApiKey,
+		ApiSecret:    userOrderDo.ApiSecret,
+		ApiKeyTwo:    userOrderDo.ApiKeyTwo,
+		ApiSecretTwo: userOrderDo.ApiSecretTwo,
+		Symbol:       userOrderDo.Symbol,
+		SymbolTwo:    userOrderDo.SymbolTwo,
+		Status:       userOrderDo.Status,
+		Qty:          userOrderDo.Qty,
+		QtyTwo:       userOrderDo.QtyTwo,
+		Side:         userOrderDo.Side,
+		SideTwo:      userOrderDo.SideTwo,
+	}
+
+	res := b.data.DB(ctx).Table("new_user_order_do_new").Create(&insert)
+	if res.Error != nil {
+		return errors.New(500, "CREATE_USER_ORDER_DO_NEW_ERROR", "创建数据失败")
 	}
 
 	return nil

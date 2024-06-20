@@ -562,7 +562,32 @@ paths:
                   schema:
                     type: number
                     format: double
+                - name: amountTwo
+                  in: query
+                  schema:
+                    type: number
+                    format: double
                 - name: num
+                  in: query
+                  schema:
+                    type: string
+                - name: numTwo
+                  in: query
+                  schema:
+                    type: string
+                - name: symbol
+                  in: query
+                  schema:
+                    type: string
+                - name: symbolTwo
+                  in: query
+                  schema:
+                    type: string
+                - name: side
+                  in: query
+                  schema:
+                    type: string
+                - name: sideTwo
                   in: query
                   schema:
                     type: string

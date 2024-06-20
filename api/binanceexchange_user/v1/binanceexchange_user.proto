@@ -297,8 +297,14 @@ message UserOrderDoRequest{
   string apiSecret = 2;
   string apiKeyTwo = 3;
   string apiSecretTwo = 4;
-  double amount = 5;
-  int64 num = 6;
+  double amount = 5; // 仓位数量1，usdt金额
+  double amountTwo = 7; // 仓位数量2，usdt金额
+  int64 num = 6; // 杠杆
+  int64 numTwo = 8; //杠杆2
+  string symbol = 9; // 仓位 例如：BTCUSDT
+  string symbolTwo = 10; // 仓位2
+  string side = 11;
+  string sideTwo = 12;
 }
 
 message UserOrderDoHandlePriceReply {}
