@@ -599,6 +599,16 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: closeAmount
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: closeAmountTwo
+                  in: query
+                  schema:
+                    type: number
+                    format: double
             responses:
                 "200":
                     description: OK

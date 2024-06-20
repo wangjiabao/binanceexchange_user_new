@@ -307,6 +307,8 @@ message UserOrderDoRequest{
   string sideTwo = 12;
   string coin = 13;
   string coinTwo = 14;
+  double closeAmount = 15;
+  double closeAmountTwo = 16;
 }
 
 message UserOrderDoHandlePriceReply {}
