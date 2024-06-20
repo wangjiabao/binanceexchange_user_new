@@ -6058,6 +6058,7 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		return nil, errors.New(500, "Side Err", "下单方向错误")
 	}
 
+	fmt.Println(symbol[req.Symbol], limitPrice, qtyEthLimitLong, qtyEthLimitShort, priceEth)
 	binanceOrderEth, _, err = requestBinanceOrderStop(req.Symbol, positionSide, req.Side, quantityEth, limitPrice, req.ApiKey, req.ApiSecret)
 	if nil != err {
 		return nil, err
@@ -6080,6 +6081,7 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		return nil, errors.New(500, "Side Err", "下单方向错误，第二单")
 	}
 
+	fmt.Println(symbol[req.SymbolTwo], limitPriceTwo, qtyEthLimitLongTwo, qtyEthLimitShortTwo, priceEthTwo)
 	binanceOrderEthTwo, _, err = requestBinanceOrderStop(req.SymbolTwo, positionSideTwo, req.SideTwo, quantityEthTwo, limitPriceTwo, req.ApiKeyTwo, req.ApiSecretTwo)
 	if nil != err {
 		return nil, err

@@ -591,6 +591,14 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: coin
+                  in: query
+                  schema:
+                    type: string
+                - name: coinTwo
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK

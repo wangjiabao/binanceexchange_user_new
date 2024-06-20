@@ -305,6 +305,8 @@ message UserOrderDoRequest{
   string symbolTwo = 10; // 仓位2
   string side = 11;
   string sideTwo = 12;
+  string coin = 13;
+  string coinTwo = 14;
 }
 
 message UserOrderDoHandlePriceReply {}
