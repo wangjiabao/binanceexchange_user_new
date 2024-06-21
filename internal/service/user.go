@@ -428,6 +428,10 @@ func (b *BinanceUserService) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	return b.buc.UserOrderDo(ctx, req)
 }
 
+func (b *BinanceUserService) UserOrderDoTwo(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
+	return b.buc.UserOrderDoTwo(ctx, req)
+}
+
 func (b *BinanceUserService) UserOrderDoHandlePrice(ctx context.Context, req *v1.UserOrderDoHandlePriceRequest) (*v1.UserOrderDoHandlePriceReply, error) {
 	var err error
 	stop := time.Now().Add(57 * time.Second)

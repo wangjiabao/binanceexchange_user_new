@@ -140,6 +140,12 @@ service BinanceUser {
     };
   };
 
+  rpc UserOrderDoTwo (UserOrderDoRequest) returns (UserOrderDoReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/user_order_do_two"
+    };
+  };
+
   rpc UserOrderDoHandlePrice (UserOrderDoHandlePriceRequest) returns (UserOrderDoHandlePriceReply) {
     option (google.api.http) = {
       get: "/api/binanceexchange_user/user_order_do_handel_price"
@@ -309,6 +315,8 @@ message UserOrderDoRequest{
   string coinTwo = 14;
   double closeAmount = 15;
   double closeAmountTwo = 16;
+  double price = 17;
+  double priceTwo = 18;
 }
 
 message UserOrderDoHandlePriceReply {}

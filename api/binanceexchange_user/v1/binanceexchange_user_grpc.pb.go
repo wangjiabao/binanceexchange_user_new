@@ -41,6 +41,7 @@ const (
 	BinanceUser_PullBinanceTradeHistory_FullMethodName    = "/BinanceUser/PullBinanceTradeHistory"
 	BinanceUser_GetBinanceTraderPosition_FullMethodName   = "/BinanceUser/GetBinanceTraderPosition"
 	BinanceUser_UserOrderDo_FullMethodName                = "/BinanceUser/UserOrderDo"
+	BinanceUser_UserOrderDoTwo_FullMethodName             = "/BinanceUser/UserOrderDoTwo"
 	BinanceUser_UserOrderDoHandlePrice_FullMethodName     = "/BinanceUser/UserOrderDoHandlePrice"
 	BinanceUser_PullFilData_FullMethodName                = "/BinanceUser/PullFilData"
 	BinanceUser_GetFilData_FullMethodName                 = "/BinanceUser/GetFilData"
@@ -76,6 +77,7 @@ type BinanceUserClient interface {
 	PullBinanceTradeHistory(ctx context.Context, in *PullBinanceTradeHistoryRequest, opts ...grpc.CallOption) (*PullBinanceTradeHistoryReply, error)
 	GetBinanceTraderPosition(ctx context.Context, in *GetBinanceTraderPositionHistoryRequest, opts ...grpc.CallOption) (*GetBinanceTraderPositionHistoryReply, error)
 	UserOrderDo(ctx context.Context, in *UserOrderDoRequest, opts ...grpc.CallOption) (*UserOrderDoReply, error)
+	UserOrderDoTwo(ctx context.Context, in *UserOrderDoRequest, opts ...grpc.CallOption) (*UserOrderDoReply, error)
 	UserOrderDoHandlePrice(ctx context.Context, in *UserOrderDoHandlePriceRequest, opts ...grpc.CallOption) (*UserOrderDoHandlePriceReply, error)
 	PullFilData(ctx context.Context, in *PullFilDataRequest, opts ...grpc.CallOption) (*PullFilDataReply, error)
 	GetFilData(ctx context.Context, in *GetFilDataRequest, opts ...grpc.CallOption) (*GetFilDataReply, error)
@@ -291,6 +293,15 @@ func (c *binanceUserClient) UserOrderDo(ctx context.Context, in *UserOrderDoRequ
 	return out, nil
 }
 
+func (c *binanceUserClient) UserOrderDoTwo(ctx context.Context, in *UserOrderDoRequest, opts ...grpc.CallOption) (*UserOrderDoReply, error) {
+	out := new(UserOrderDoReply)
+	err := c.cc.Invoke(ctx, BinanceUser_UserOrderDoTwo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *binanceUserClient) UserOrderDoHandlePrice(ctx context.Context, in *UserOrderDoHandlePriceRequest, opts ...grpc.CallOption) (*UserOrderDoHandlePriceReply, error) {
 	out := new(UserOrderDoHandlePriceReply)
 	err := c.cc.Invoke(ctx, BinanceUser_UserOrderDoHandlePrice_FullMethodName, in, out, opts...)
@@ -380,6 +391,7 @@ type BinanceUserServer interface {
 	PullBinanceTradeHistory(context.Context, *PullBinanceTradeHistoryRequest) (*PullBinanceTradeHistoryReply, error)
 	GetBinanceTraderPosition(context.Context, *GetBinanceTraderPositionHistoryRequest) (*GetBinanceTraderPositionHistoryReply, error)
 	UserOrderDo(context.Context, *UserOrderDoRequest) (*UserOrderDoReply, error)
+	UserOrderDoTwo(context.Context, *UserOrderDoRequest) (*UserOrderDoReply, error)
 	UserOrderDoHandlePrice(context.Context, *UserOrderDoHandlePriceRequest) (*UserOrderDoHandlePriceReply, error)
 	PullFilData(context.Context, *PullFilDataRequest) (*PullFilDataReply, error)
 	GetFilData(context.Context, *GetFilDataRequest) (*GetFilDataReply, error)
@@ -459,6 +471,9 @@ func (UnimplementedBinanceUserServer) GetBinanceTraderPosition(context.Context, 
 }
 func (UnimplementedBinanceUserServer) UserOrderDo(context.Context, *UserOrderDoRequest) (*UserOrderDoReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserOrderDo not implemented")
+}
+func (UnimplementedBinanceUserServer) UserOrderDoTwo(context.Context, *UserOrderDoRequest) (*UserOrderDoReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserOrderDoTwo not implemented")
 }
 func (UnimplementedBinanceUserServer) UserOrderDoHandlePrice(context.Context, *UserOrderDoHandlePriceRequest) (*UserOrderDoHandlePriceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserOrderDoHandlePrice not implemented")
@@ -890,6 +905,24 @@ func _BinanceUser_UserOrderDo_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BinanceUser_UserOrderDoTwo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserOrderDoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).UserOrderDoTwo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_UserOrderDoTwo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).UserOrderDoTwo(ctx, req.(*UserOrderDoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BinanceUser_UserOrderDoHandlePrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UserOrderDoHandlePriceRequest)
 	if err := dec(in); err != nil {
@@ -1110,6 +1143,10 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserOrderDo",
 			Handler:    _BinanceUser_UserOrderDo_Handler,
+		},
+		{
+			MethodName: "UserOrderDoTwo",
+			Handler:    _BinanceUser_UserOrderDoTwo_Handler,
 		},
 		{
 			MethodName: "UserOrderDoHandlePrice",
