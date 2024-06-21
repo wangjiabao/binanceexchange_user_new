@@ -594,11 +594,13 @@ paths:
                 - name: coin
                   in: query
                   schema:
-                    type: string
+                    type: number
+                    format: double
                 - name: coinTwo
                   in: query
                   schema:
-                    type: string
+                    type: number
+                    format: double
                 - name: closeAmount
                   in: query
                   schema:
@@ -619,6 +621,14 @@ paths:
                   schema:
                     type: number
                     format: double
+                - name: redo
+                  in: query
+                  schema:
+                    type: string
+                - name: redoNum
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -709,11 +719,13 @@ paths:
                 - name: coin
                   in: query
                   schema:
-                    type: string
+                    type: number
+                    format: double
                 - name: coinTwo
                   in: query
                   schema:
-                    type: string
+                    type: number
+                    format: double
                 - name: closeAmount
                   in: query
                   schema:
@@ -734,6 +746,14 @@ paths:
                   schema:
                     type: number
                     format: double
+                - name: redo
+                  in: query
+                  schema:
+                    type: string
+                - name: redoNum
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK

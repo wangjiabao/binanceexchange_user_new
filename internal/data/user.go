@@ -2944,6 +2944,28 @@ func (b *BinanceUserRepo) UpdateUserOrderDo(ctx context.Context, id uint64, clos
 	return true, nil
 }
 
+// UpdateUserOrderDoTwo .
+func (b *BinanceUserRepo) UpdateUserOrderDoTwo(ctx context.Context, id uint64, orderId string, orderIdTwo string) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if 0 > len(orderId) {
+		if err = b.data.DB(ctx).Table("new_user_order_do_new").Where("id=?", id).
+			Updates(map[string]interface{}{"order_id": orderId, "updated_at": now}).Error; nil != err {
+			return false, errors.NotFound("UPDATE_USER_ORDER_DO_ERROR", "UPDATE_USER_ORDER_DO_ERROR")
+		}
+	} else if 0 > len(orderIdTwo) {
+		if err = b.data.DB(ctx).Table("new_user_order_do_new").Where("id=?", id).
+			Updates(map[string]interface{}{"order_id_two": orderIdTwo, "updated_at": now}).Error; nil != err {
+			return false, errors.NotFound("UPDATE_USER_ORDER_DO_ERROR", "UPDATE_USER_ORDER_DO_ERROR")
+		}
+	}
+
+	return true, nil
+}
+
 // GetUserOrderDoNew .
 func (b *BinanceUserRepo) GetUserOrderDoNew() ([]*biz.UserOrderDoNew, error) {
 	var userOrderDo []*UserOrderDoNew
@@ -2972,6 +2994,44 @@ func (b *BinanceUserRepo) GetUserOrderDoNew() ([]*biz.UserOrderDoNew, error) {
 			SideTwo:      v.SideTwo,
 			OrderId:      v.OrderId,
 			OrderIdTwo:   v.OrderIdTwo,
+			CreatedAt:    v.CreatedAt,
+			UpdatedAt:    v.UpdatedAt,
+		})
+	}
+
+	return res, nil
+}
+
+// GetUserOrderDoLast .
+func (b *BinanceUserRepo) GetUserOrderDoLast() ([]*biz.UserOrderDo, error) {
+	var userOrderDo []*UserOrderDo
+	if err := b.data.db.Table("new_user_order_do_new").Where("status=?", 0).Order("id desc").Find(&userOrderDo).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_USER_ORDER_DO_ERROR", err.Error())
+	}
+
+	res := make([]*biz.UserOrderDo, 0)
+	for _, v := range userOrderDo {
+		res = append(res, &biz.UserOrderDo{
+			ID:           v.ID,
+			ApiKey:       v.ApiKey,
+			ApiSecret:    v.ApiSecret,
+			ApiKeyTwo:    v.ApiKeyTwo,
+			ApiSecretTwo: v.ApiSecretTwo,
+			Symbol:       v.Symbol,
+			Status:       v.Status,
+			CloseRate:    v.CloseRate,
+			CloseBase:    v.CloseBase,
+			Qty:          v.Qty,
+			Price:        v.Price,
+			ClosePrice:   v.ClosePrice,
+			Amount:       v.Amount,
+			QtyTwo:       v.QtyTwo,
+			PriceTwo:     v.PriceTwo,
+			AmountTwo:    v.AmountTwo,
 			CreatedAt:    v.CreatedAt,
 			UpdatedAt:    v.UpdatedAt,
 		})
