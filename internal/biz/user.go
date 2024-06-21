@@ -4495,7 +4495,7 @@ func requestBinanceOrder(symbol string, side string, orderType string, positionS
 	}
 
 	if 0 >= res.OrderId {
-		fmt.Println(string(b))
+		//fmt.Println(string(b))
 		err = json.Unmarshal(b, &resOrderInfo)
 		if err != nil {
 			fmt.Println(string(b), err)
@@ -6139,11 +6139,24 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		if nil != err {
 			return nil, err
 		}
+
+		if 0 >= symbol[req.Symbol].QuantityPrecision {
+			quantityEth = fmt.Sprintf("%d", int64(qtyEth))
+		} else {
+			quantityEth = strconv.FormatFloat(qtyEth, 'f', int(symbol[req.Symbol].QuantityPrecision), 64)
+		}
+
 		priceFloatEthTwo, err = strconv.ParseFloat(priceEthTwo.Price, 64)
 		if nil != err {
 			return nil, err
 		}
 		qtyEthTwo = req.AmountTwo / priceFloatEthTwo
+
+		if 0 >= symbol[req.SymbolTwo].QuantityPrecision {
+			quantityEthTwo = fmt.Sprintf("%d", int64(qtyEthTwo))
+		} else {
+			quantityEthTwo = strconv.FormatFloat(qtyEthTwo, 'f', int(symbol[req.SymbolTwo].QuantityPrecision), 64)
+		}
 
 		var (
 			positionSide         string // todo 变量名字反了 side对应的值是sell,long
