@@ -5969,8 +5969,8 @@ func getProxy() ([]*Proxy, error) {
 	return p, nil
 }
 
-// UserOrderDo 新增刷单
-func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
+// UserOrderDoBak 新增刷单
+func (b *BinanceUserUsecase) UserOrderDoBak(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
 	var (
 		err error
 		//usdtBtc       = req.Amount
@@ -6088,11 +6088,11 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	if "SHORT" == req.SideTwo { // 开空
 		positionSideTwo = "SELL"
 		positionSideTwoClose = "BUY"
-		limitPriceTwo = strconv.FormatFloat(qtyEthLimitShortTwo, 'f', int(symbol[req.SymbolTwo].QuantityPrecision), 64)
+		limitPriceTwo = strconv.FormatFloat(qtyEthLimitShortTwo, 'f', int(symbol[req.SymbolTwo].PricePrecision), 64)
 	} else if "LONG" == req.SideTwo { // 开多
 		positionSideTwo = "BUY"
 		positionSideTwoClose = "SELL"
-		limitPriceTwo = strconv.FormatFloat(qtyEthLimitLongTwo, 'f', int(symbol[req.SymbolTwo].QuantityPrecision), 64)
+		limitPriceTwo = strconv.FormatFloat(qtyEthLimitLongTwo, 'f', int(symbol[req.SymbolTwo].PricePrecision), 64)
 	} else {
 		return nil, errors.New(500, "Side Err", "下单方向错误，第二单")
 	}
@@ -6150,8 +6150,8 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	return nil, nil
 }
 
-// UserOrderDoBak 新增刷单
-func (b *BinanceUserUsecase) UserOrderDoBak(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
+// UserOrderDo 新增刷单
+func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
 	var (
 		err error
 		//usdtBtc       = req.Amount
@@ -6258,9 +6258,9 @@ func (b *BinanceUserUsecase) UserOrderDoBak(ctx context.Context, req *v1.UserOrd
 		}
 
 		if "SHORT" == req.SideTwo { // 开空
-			limitPriceTwo = strconv.FormatFloat(qtyEthLimitShortTwo, 'f', int(symbol[req.SymbolTwo].QuantityPrecision), 64)
+			limitPriceTwo = strconv.FormatFloat(qtyEthLimitShortTwo, 'f', int(symbol[req.SymbolTwo].PricePrecision), 64)
 		} else if "LONG" == req.SideTwo { // 开多
-			limitPriceTwo = strconv.FormatFloat(qtyEthLimitLongTwo, 'f', int(symbol[req.SymbolTwo].QuantityPrecision), 64)
+			limitPriceTwo = strconv.FormatFloat(qtyEthLimitLongTwo, 'f', int(symbol[req.SymbolTwo].PricePrecision), 64)
 		} else {
 			return nil, errors.New(500, "Side Err", "下单方向错误，第二单")
 		}
@@ -6397,12 +6397,10 @@ func (b *BinanceUserUsecase) UserOrderDoBak(ctx context.Context, req *v1.UserOrd
 			return nil, errors.New(500, "Order Err", "下单错误，第2没下成功")
 		}
 
-		qtyEth = req.Amount / priceFloatEth
 		// 多空的止损价
 		qtyEthLimitLong := priceFloatEth - (priceFloatEth*(req.Amount/float64(req.Num)-req.CloseAmount))/(req.Amount*float64(req.Num))
 		qtyEthLimitShort := priceFloatEth + (priceFloatEth*(req.Amount/float64(req.Num)-req.CloseAmount))/(req.Amount*float64(req.Num))
 
-		qtyEthTwo = req.AmountTwo / priceFloatEthTwo
 		// 多空的止损价
 		qtyEthLimitLongTwo := priceFloatEthTwo - (priceFloatEthTwo*(req.AmountTwo/float64(req.NumTwo)-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
 		qtyEthLimitShortTwo := priceFloatEthTwo + (priceFloatEthTwo*(req.AmountTwo/float64(req.NumTwo)-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
@@ -6415,23 +6413,10 @@ func (b *BinanceUserUsecase) UserOrderDoBak(ctx context.Context, req *v1.UserOrd
 			return nil, errors.New(500, "Side Err", "下单方向错误")
 		}
 
-		if 0 >= symbol[req.Symbol].QuantityPrecision {
-			quantityEth = fmt.Sprintf("%d", int64(qtyEth))
-		} else {
-			quantityEth = strconv.FormatFloat(qtyEth, 'f', int(symbol[req.Symbol].QuantityPrecision), 64)
-		}
-
-		// 第二单
-		if 0 >= symbol[req.SymbolTwo].QuantityPrecision {
-			quantityEthTwo = fmt.Sprintf("%d", int64(qtyEthTwo))
-		} else {
-			quantityEthTwo = strconv.FormatFloat(qtyEthTwo, 'f', int(symbol[req.SymbolTwo].QuantityPrecision), 64)
-		}
-
 		if "SHORT" == req.SideTwo { // 开空
-			limitPriceTwo = strconv.FormatFloat(qtyEthLimitShortTwo, 'f', int(symbol[req.SymbolTwo].QuantityPrecision), 64)
+			limitPriceTwo = strconv.FormatFloat(qtyEthLimitShortTwo, 'f', int(symbol[req.SymbolTwo].PricePrecision), 64)
 		} else if "LONG" == req.SideTwo { // 开多
-			limitPriceTwo = strconv.FormatFloat(qtyEthLimitLongTwo, 'f', int(symbol[req.SymbolTwo].QuantityPrecision), 64)
+			limitPriceTwo = strconv.FormatFloat(qtyEthLimitLongTwo, 'f', int(symbol[req.SymbolTwo].PricePrecision), 64)
 		} else {
 			return nil, errors.New(500, "Side Err", "下单方向错误，第二单")
 		}
