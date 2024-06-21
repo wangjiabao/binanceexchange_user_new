@@ -6345,7 +6345,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 		}
 
 		orderIdTwo, err = strconv.ParseInt(vUserOrderDo.OrderIdTwo, 10, 64)
-		if 0 < orderId {
+		if 0 < orderIdTwo {
 			orderInfoTwo, err = requestBinanceOrderInfo(vUserOrderDo.SymbolTwo, orderIdTwo, vUserOrderDo.ApiKeyTwo, vUserOrderDo.ApiSecretTwo)
 			if nil != err || nil == orderInfoTwo {
 				fmt.Println(vUserOrderDo, "刷单查询，查询，错误信息", orderInfo, err)
@@ -6374,14 +6374,13 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 
 		if closeOne {
 			fmt.Println(orderInfo, orderInfoTwo)
-
 			// 关仓
 			qtyStr = strconv.FormatFloat(qty, 'f', int(symbol[closeSymbol].QuantityPrecision), 64)
 			fmt.Println(closeSymbol, side, "MARKET", positionSide, qtyStr, apiKey, apiSecret)
-			//binanceOrderClose, _, err = requestBinanceOrder(closeSymbol, side, "MARKET", positionSide, qtyStr, apiKey, apiSecret)
-			//if nil != err {
-			//	return nil, err
-			//}
+			binanceOrderClose, _, err = requestBinanceOrder(closeSymbol, side, "MARKET", positionSide, qtyStr, apiKey, apiSecret)
+			if nil != err {
+				return nil, err
+			}
 
 			if 0 >= binanceOrderClose.OrderId {
 				fmt.Println(binanceOrderClose)
