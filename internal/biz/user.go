@@ -4433,7 +4433,7 @@ func requestBinanceOrder(symbol string, side string, orderType string, positionS
 		apiUrl       = "https://fapi.binance.com/fapi/v1/order"
 	)
 
-	fmt.Println(symbol, side, orderType, positionSide, quantity, apiKey, secretKey)
+	//fmt.Println(symbol, side, orderType, positionSide, quantity, apiKey, secretKey)
 	// 时间
 	now := strconv.FormatInt(time.Now().UTC().UnixMilli(), 10)
 	// 拼请求数据
@@ -4507,7 +4507,7 @@ func requestBinanceOrder(symbol string, side string, orderType string, positionS
 }
 
 func requestBinanceOrderStop(symbol string, side string, positionSide string, quantity string, stopPrice string, price string, apiKey string, secretKey string) (*BinanceOrder, *OrderInfo, error) {
-	fmt.Println(symbol, side, positionSide, quantity, stopPrice, price, apiKey, secretKey)
+	//fmt.Println(symbol, side, positionSide, quantity, stopPrice, price, apiKey, secretKey)
 	var (
 		client       *http.Client
 		req          *http.Request
@@ -4566,7 +4566,7 @@ func requestBinanceOrderStop(symbol string, side string, positionSide string, qu
 		fmt.Println(string(b), err)
 		return nil, nil, err
 	}
-	fmt.Println(string(b), err)
+	//fmt.Println(string(b), err)
 	res = &BinanceOrder{
 		OrderId:       o.OrderId,
 		ExecutedQty:   o.ExecutedQty,
@@ -6582,7 +6582,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 			}
 		}
 
-		fmt.Println(orderInfo, orderInfoTwo)
+		//fmt.Println(orderInfo, orderInfoTwo)
 		if closeOne {
 			fmt.Println(orderInfo, orderInfoTwo)
 			// 关仓
