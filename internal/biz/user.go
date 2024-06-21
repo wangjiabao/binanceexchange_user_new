@@ -6079,6 +6079,8 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	//	return nil, err
 	//}
 
+	fmt.Println(binanceOrderEth, binanceOrderEthTwo)
+
 	// 第二单
 	if 0 >= symbol[req.SymbolTwo].QuantityPrecision {
 		quantityEthTwo = fmt.Sprintf("%d", int64(qtyEthTwo))
@@ -6109,6 +6111,7 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	//}
 
 	if 0 >= binanceOrderEth.OrderId || 0 >= binanceOrderEthTwo.OrderId {
+
 	}
 
 	var (
