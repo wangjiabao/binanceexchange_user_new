@@ -5969,8 +5969,8 @@ func getProxy() ([]*Proxy, error) {
 	return p, nil
 }
 
-// UserOrderDobak 新增刷单
-func (b *BinanceUserUsecase) UserOrderDobak(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
+// UserOrderDo 新增刷单
+func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
 	var (
 		err error
 		//usdtBtc       = req.Amount
@@ -6016,8 +6016,8 @@ func (b *BinanceUserUsecase) UserOrderDobak(ctx context.Context, req *v1.UserOrd
 	}
 	qtyEth = req.Amount / priceFloatEth
 	// 多空的止损价
-	qtyEthLimitLong := priceFloatEth - (priceFloatEth*(req.Amount-req.CloseAmount))/(req.Amount*float64(req.Num))
-	qtyEthLimitShort := priceFloatEth + (priceFloatEth*(req.Amount-req.CloseAmount))/(req.Amount*float64(req.Num))
+	qtyEthLimitLong := priceFloatEth - (priceFloatEth*(req.Amount/float64(req.Num)-req.CloseAmount))/(req.Amount*float64(req.Num))
+	qtyEthLimitShort := priceFloatEth + (priceFloatEth*(req.Amount/float64(req.Num)-req.CloseAmount))/(req.Amount*float64(req.Num))
 	// 查询币价 第二个
 	priceEthTwo, err = requestBinanceSymbolPrice(req.SymbolTwo)
 	if nil != err {
@@ -6029,9 +6029,13 @@ func (b *BinanceUserUsecase) UserOrderDobak(ctx context.Context, req *v1.UserOrd
 	}
 	qtyEthTwo = req.AmountTwo / priceFloatEthTwo
 	// 多空的止损价
-	fmt.Println(priceFloatEthTwo, priceFloatEthTwo*(req.AmountTwo-req.CloseAmountTwo), req.AmountTwo*float64(req.NumTwo))
-	qtyEthLimitLongTwo := priceFloatEthTwo - (priceFloatEthTwo*(req.AmountTwo-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
-	qtyEthLimitShortTwo := priceFloatEthTwo + (priceFloatEthTwo*(req.AmountTwo-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
+
+	fmt.Println(111111, priceFloatEthTwo, priceFloatEthTwo*(req.AmountTwo/float64(req.NumTwo)-req.CloseAmountTwo), req.AmountTwo*float64(req.NumTwo))
+
+	qtyEthLimitLongTwo := priceFloatEthTwo - (priceFloatEthTwo*(req.AmountTwo/float64(req.NumTwo)-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
+	qtyEthLimitShortTwo := priceFloatEthTwo + (priceFloatEthTwo*(req.AmountTwo/float64(req.NumTwo)-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
+
+	fmt.Println(22222, qtyEthLimitLong, qtyEthLimitShort, qtyEthLimitLongTwo, qtyEthLimitShortTwo)
 	// 下单
 	// 精度调整
 	var (
@@ -6146,8 +6150,8 @@ func (b *BinanceUserUsecase) UserOrderDobak(ctx context.Context, req *v1.UserOrd
 	return nil, nil
 }
 
-// UserOrderDo 新增刷单
-func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
+// UserOrderDoBak 新增刷单
+func (b *BinanceUserUsecase) UserOrderDoBak(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
 	var (
 		err error
 		//usdtBtc       = req.Amount
