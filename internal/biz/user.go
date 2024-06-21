@@ -6382,15 +6382,15 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 			//	return nil, err
 			//}
 
-			if 0 >= binanceOrderClose.OrderId {
-				fmt.Println(binanceOrderClose)
-				return nil, errors.New(500, "Order Err", "关仓下单错误")
-			}
-
-			_, err = b.binanceUserRepo.UpdateUserOrderDo(ctx, vUserOrderDo.ID, strconv.FormatInt(binanceOrderClose.OrderId, 10))
-			if nil != err {
-				return nil, err
-			}
+			//if 0 >= binanceOrderClose.OrderId {
+			//	fmt.Println(binanceOrderClose)
+			//	return nil, errors.New(500, "Order Err", "关仓下单错误")
+			//}
+			//
+			//_, err = b.binanceUserRepo.UpdateUserOrderDo(ctx, vUserOrderDo.ID, strconv.FormatInt(binanceOrderClose.OrderId, 10))
+			//if nil != err {
+			//	return nil, err
+			//}
 		}
 	}
 
