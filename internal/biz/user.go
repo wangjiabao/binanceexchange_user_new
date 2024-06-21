@@ -4507,6 +4507,7 @@ func requestBinanceOrder(symbol string, side string, orderType string, positionS
 }
 
 func requestBinanceOrderStop(symbol string, side string, positionSide string, quantity string, stopPrice string, price string, apiKey string, secretKey string) (*BinanceOrder, *OrderInfo, error) {
+	fmt.Println(symbol, side, positionSide, quantity, stopPrice, price, apiKey, secretKey)
 	var (
 		client       *http.Client
 		req          *http.Request
