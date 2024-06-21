@@ -6405,6 +6405,7 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		qtyEthLimitLongTwo := priceFloatEthTwo - (priceFloatEthTwo*(req.AmountTwo/float64(req.NumTwo)-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
 		qtyEthLimitShortTwo := priceFloatEthTwo + (priceFloatEthTwo*(req.AmountTwo/float64(req.NumTwo)-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
 
+		fmt.Println(priceFloatEthTwo, qtyEthLimitShortTwo, req.AmountTwo/float64(req.NumTwo)-req.CloseAmountTwo, req.AmountTwo*float64(req.NumTwo))
 		if "SHORT" == req.Side { // 开空
 			limitPrice = strconv.FormatFloat(qtyEthLimitShort, 'f', int(symbol[req.Symbol].PricePrecision), 64)
 		} else if "LONG" == req.Side { // 开多
