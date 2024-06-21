@@ -4494,7 +4494,7 @@ func requestBinanceOrder(symbol string, side string, orderType string, positionS
 	}
 
 	if 0 >= res.OrderId {
-		fmt.Println(string(b))
+		//fmt.Println(string(b))
 		err = json.Unmarshal(b, &resOrderInfo)
 		if err != nil {
 			fmt.Println(string(b), err)
@@ -6035,6 +6035,14 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 			return nil, errors.New(500, "Side Err", "下单方向错误")
 		}
 
+		if "SHORT" == req.SideTwo { // 开空
+			positionSideClose = "BUY"
+		} else if "LONG" == req.SideTwo { // 开多
+			positionSideClose = "SELL"
+		} else {
+			return nil, errors.New(500, "Side Err", "下单方向错误")
+		}
+
 		qtyEth = req.Amount / priceFloatEth
 		// 多空的止损价
 		qtyEthLimitLong := priceFloatEth - (priceFloatEth*(req.Amount-req.CloseAmount))/(req.Amount*float64(req.Num))
@@ -6151,6 +6159,16 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		} else if "LONG" == req.Side { // 开多
 			positionSide = "BUY"
 			positionSideClose = "SELL"
+		} else {
+			return nil, errors.New(500, "Side Err", "下单方向错误")
+		}
+
+		if "SHORT" == req.SideTwo { // 开空
+			positionSideTwo = "SELL"
+			positionSideTwoClose = "BUY"
+		} else if "LONG" == req.SideTwo { // 开多
+			positionSideTwo = "BUY"
+			positionSideTwoClose = "SELL"
 		} else {
 			return nil, errors.New(500, "Side Err", "下单方向错误")
 		}
