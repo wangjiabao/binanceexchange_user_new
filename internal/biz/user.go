@@ -4433,6 +4433,7 @@ func requestBinanceOrder(symbol string, side string, orderType string, positionS
 		apiUrl       = "https://fapi.binance.com/fapi/v1/order"
 	)
 
+	fmt.Println(symbol, side, orderType, positionSide, quantity, apiKey, secretKey)
 	// 时间
 	now := strconv.FormatInt(time.Now().UTC().UnixMilli(), 10)
 	// 拼请求数据
@@ -4494,7 +4495,7 @@ func requestBinanceOrder(symbol string, side string, orderType string, positionS
 	}
 
 	if 0 >= res.OrderId {
-		//fmt.Println(string(b))
+		fmt.Println(string(b))
 		err = json.Unmarshal(b, &resOrderInfo)
 		if err != nil {
 			fmt.Println(string(b), err)
