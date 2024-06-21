@@ -429,7 +429,7 @@ func (b *BinanceUserService) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 }
 
 func (b *BinanceUserService) UserOrderDoTwo(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
-	return b.buc.UserOrderDoTwo(ctx, req)
+	return nil, nil
 }
 
 func (b *BinanceUserService) UserOrderDoHandlePrice(ctx context.Context, req *v1.UserOrderDoHandlePriceRequest) (*v1.UserOrderDoHandlePriceReply, error) {
