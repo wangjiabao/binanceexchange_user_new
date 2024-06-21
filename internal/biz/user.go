@@ -4494,6 +4494,7 @@ func requestBinanceOrder(symbol string, side string, orderType string, positionS
 	}
 
 	if 0 >= res.OrderId {
+		fmt.Println(string(b))
 		err = json.Unmarshal(b, &resOrderInfo)
 		if err != nil {
 			fmt.Println(string(b), err)
