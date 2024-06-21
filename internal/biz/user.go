@@ -6035,12 +6035,12 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	// 下单
 	// 精度调整
 	var (
-		quantityEth             string
-		quantityEthTwo          string
-		binanceOrderEth         *BinanceOrder
-		binanceOrderEthTwo      *BinanceOrder
-		binanceOrderEthClose    *BinanceOrder
-		binanceOrderEthTwoClose *BinanceOrder
+		quantityEth        string
+		quantityEthTwo     string
+		binanceOrderEth    *BinanceOrder
+		binanceOrderEthTwo *BinanceOrder
+		//binanceOrderEthClose    *BinanceOrder
+		//binanceOrderEthTwoClose *BinanceOrder
 	)
 
 	if 0 >= symbol[req.Symbol].QuantityPrecision {
@@ -6152,13 +6152,13 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		return nil, err
 	}
 
-	if 0 >= binanceOrderEthClose.OrderId {
-		return nil, errors.New(500, "Order Err", "下单错误，第1止损没下成功")
-	}
-
-	if 0 >= binanceOrderEthTwoClose.OrderId {
-		return nil, errors.New(500, "Order Err", "下单错误，第2止损没下成功")
-	}
+	//if 0 >= binanceOrderEthClose.OrderId {
+	//	return nil, errors.New(500, "Order Err", "下单错误，第1止损没下成功")
+	//}
+	//
+	//if 0 >= binanceOrderEthTwoClose.OrderId {
+	//	return nil, errors.New(500, "Order Err", "下单错误，第2止损没下成功")
+	//}
 	//
 	//// 杠杆
 	//_, err = requestBinanceLeverAge("BTCUSDT", int64(50), req.ApiKey, req.ApiSecret)
@@ -6371,7 +6371,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 			fmt.Println(vUserOrderDo, "刷单查询，错误信息")
 			continue
 		}
-
+		fmt.Println(orderInfo, orderInfoTwo)
 		if closeOne {
 			fmt.Println(orderInfo, orderInfoTwo)
 			// 关仓
