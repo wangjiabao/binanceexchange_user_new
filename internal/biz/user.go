@@ -6376,7 +6376,7 @@ func (b *BinanceUserUsecase) UserOrderDoHandlePrice(ctx context.Context, req *v1
 			fmt.Println(orderInfo, orderInfoTwo)
 			// 关仓
 			qtyStr = strconv.FormatFloat(qty, 'f', int(symbol[closeSymbol].QuantityPrecision), 64)
-			fmt.Println(closeSymbol, side, "MARKET", positionSide, qtyStr, apiKey, apiSecret)
+			fmt.Println(closeSymbol, side, "MARKET", positionSide, qtyStr, apiKey, apiSecret, binanceOrderClose)
 			//binanceOrderClose, _, err = requestBinanceOrder(closeSymbol, side, "MARKET", positionSide, qtyStr, apiKey, apiSecret)
 			//if nil != err {
 			//	return nil, err
