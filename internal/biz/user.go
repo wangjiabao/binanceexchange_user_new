@@ -6100,6 +6100,7 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		return nil, err
 	}
 	if 0 >= binanceOrderEth.OrderId || 0 >= binanceOrderEthTwo.OrderId {
+
 	}
 	var (
 		userOrderDoEth *UserOrderDoNew
@@ -6128,8 +6129,8 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		QtyTwo:       qtyTwo,
 		SideTwo:      req.SideTwo,
 		Side:         req.Side,
-		OrderId:      strconv.FormatInt(binanceOrderEth.OrderId, 10),
-		OrderIdTwo:   strconv.FormatInt(binanceOrderEthTwo.OrderId, 10),
+		OrderId:      strconv.FormatInt(binanceOrderEthClose.OrderId, 10),
+		OrderIdTwo:   strconv.FormatInt(binanceOrderEthTwoClose.OrderId, 10),
 	}
 	err = b.binanceUserRepo.InsertUserOrderDoNew(ctx, userOrderDoEth)
 	if nil != err {
@@ -6141,112 +6142,6 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	if 0 >= binanceOrderEthTwoClose.OrderId {
 		return nil, errors.New(500, "Order Err", "下单错误，第2止损没下成功")
 	}
-	//
-	//// 杠杆
-	//_, err = requestBinanceLeverAge("BTCUSDT", int64(50), req.ApiKey, req.ApiSecret)
-	//if nil != err {
-	//	return nil, err
-	//}
-	//
-	//_, err = requestBinanceLeverAge("BTCUSDT", int64(50), req.ApiKeyTwo, req.ApiSecretTwo)
-	//if nil != err {
-	//	return nil, err
-	//}
-	//
-	//// btc
-	//priceBtc, err = requestBinanceSymbolPrice("BTCUSDT")
-	//if nil != err {
-	//	return nil, err
-	//}
-	//
-	//priceFloatBtc, err = strconv.ParseFloat(priceBtc.Price, 64)
-	//if nil != err {
-	//	return nil, err
-	//}
-	//qtyBtc = usdtBtc / priceFloatBtc
-	//
-	//// 下单
-	//// 精度调整
-	//var (
-	//	quantityBtc        string
-	//	binanceOrderBtc    *BinanceOrder
-	//	binanceOrderBtcTwo *BinanceOrder
-	//)
-	//if 0 >= symbol["BTCUSDT"].QuantityPrecision {
-	//	quantityBtc = fmt.Sprintf("%d", int64(qtyBtc))
-	//} else {
-	//	quantityBtc = strconv.FormatFloat(qtyBtc, 'f', int(symbol["BTCUSDT"].QuantityPrecision), 64)
-	//}
-	//
-	//binanceOrderBtc, _, err = requestBinanceOrder("BTCUSDT", "BUY", "MARKET", "LONG", quantityBtc, req.ApiKey, req.ApiSecret)
-	//if nil != err {
-	//	return nil, err
-	//}
-	//
-	//binanceOrderBtcTwo, _, err = requestBinanceOrder("BTCUSDT", "SELL", "MARKET", "SHORT", quantityBtc, req.ApiKeyTwo, req.ApiSecretTwo)
-	//if nil != err {
-	//	return nil, err
-	//}
-	//
-	//if 0 >= binanceOrderBtc.OrderId || 0 >= binanceOrderBtcTwo.OrderId {
-	//	fmt.Println(binanceOrderBtc, binanceOrderBtcTwo)
-	//	return nil, errors.New(500, "Order Err", "下单错误")
-	//}
-	//
-	//var (
-	//	userOrderDoBtc   *UserOrderDo
-	//	btcLongAvgPrice  float64
-	//	btcShortAvgPrice float64
-	//	btcLongQty       float64
-	//	btcShortQty      float64
-	//)
-	//
-	//btcLongAvgPrice, err = strconv.ParseFloat(binanceOrderBtc.AvgPrice, 64)
-	//if nil != err {
-	//	fmt.Println(err, "btc long avg price", binanceOrderBtc)
-	//	return nil, errors.New(500, "Order Err", "下单错误")
-	//}
-	//
-	//btcLongQty, err = strconv.ParseFloat(binanceOrderBtc.ExecutedQty, 64)
-	//if nil != err {
-	//	fmt.Println(err, "btc long qty", binanceOrderBtc)
-	//	return nil, errors.New(500, "Order Err", "下单错误")
-	//}
-	//
-	//btcShortAvgPrice, err = strconv.ParseFloat(binanceOrderBtcTwo.AvgPrice, 64)
-	//if nil != err {
-	//	fmt.Println(err, "btc short avg price", binanceOrderBtcTwo)
-	//	return nil, errors.New(500, "Order Err", "下单错误")
-	//}
-	//
-	//btcShortQty, err = strconv.ParseFloat(binanceOrderBtcTwo.ExecutedQty, 64)
-	//if nil != err {
-	//	fmt.Println(err, "btc short qty", binanceOrderBtcTwo)
-	//	return nil, errors.New(500, "Order Err", "下单错误")
-	//}
-	//
-	//userOrderDoBtc = &UserOrderDo{
-	//	ApiKey:       req.ApiKey,
-	//	ApiSecret:    req.ApiSecret,
-	//	ApiKeyTwo:    req.ApiKeyTwo,
-	//	ApiSecretTwo: req.ApiSecretTwo,
-	//	Symbol:       "BTCUSDT",
-	//	Status:       1,
-	//	CloseRate:    0,
-	//	CloseBase:    0,
-	//	Qty:          btcLongQty,
-	//	Price:        btcLongAvgPrice,
-	//	ClosePrice:   0,
-	//	Amount:       0,
-	//	QtyTwo:       btcShortQty,
-	//	PriceTwo:     btcShortAvgPrice,
-	//	AmountTwo:    0,
-	//}
-	//
-	//err = b.binanceUserRepo.InsertUserOrderDo(ctx, userOrderDoBtc)
-	//if nil != err {
-	//	return nil, err
-	//}
 	return nil, nil
 }
 
