@@ -5969,8 +5969,8 @@ func getProxy() ([]*Proxy, error) {
 	return p, nil
 }
 
-// UserOrderDo 新增刷单
-func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
+// UserOrderDobak 新增刷单
+func (b *BinanceUserUsecase) UserOrderDobak(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
 	var (
 		err error
 		//usdtBtc       = req.Amount
@@ -6029,6 +6029,7 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	}
 	qtyEthTwo = req.AmountTwo / priceFloatEthTwo
 	// 多空的止损价
+	fmt.Println(priceFloatEthTwo, priceFloatEthTwo*(req.AmountTwo-req.CloseAmountTwo), req.AmountTwo*float64(req.NumTwo))
 	qtyEthLimitLongTwo := priceFloatEthTwo - (priceFloatEthTwo*(req.AmountTwo-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
 	qtyEthLimitShortTwo := priceFloatEthTwo + (priceFloatEthTwo*(req.AmountTwo-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
 	// 下单
@@ -6145,8 +6146,8 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 	return nil, nil
 }
 
-// UserOrderDobak 新增刷单
-func (b *BinanceUserUsecase) UserOrderDobak(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
+// UserOrderDo 新增刷单
+func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
 	var (
 		err error
 		//usdtBtc       = req.Amount
@@ -6223,13 +6224,13 @@ func (b *BinanceUserUsecase) UserOrderDobak(ctx context.Context, req *v1.UserOrd
 
 		qtyEth = req.Amount / priceFloatEth
 		// 多空的止损价
-		qtyEthLimitLong := priceFloatEth - (priceFloatEth*(req.Amount-req.CloseAmount))/(req.Amount*float64(req.Num))
-		qtyEthLimitShort := priceFloatEth + (priceFloatEth*(req.Amount-req.CloseAmount))/(req.Amount*float64(req.Num))
+		qtyEthLimitLong := priceFloatEth - (priceFloatEth*(req.Amount/float64(req.Num)-req.CloseAmount))/(req.Amount*float64(req.Num))
+		qtyEthLimitShort := priceFloatEth + (priceFloatEth*(req.Amount/float64(req.Num)-req.CloseAmount))/(req.Amount*float64(req.Num))
 
 		qtyEthTwo = req.AmountTwo / priceFloatEthTwo
 		// 多空的止损价
-		qtyEthLimitLongTwo := priceFloatEthTwo - (priceFloatEthTwo*(req.AmountTwo-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
-		qtyEthLimitShortTwo := priceFloatEthTwo + (priceFloatEthTwo*(req.AmountTwo-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
+		qtyEthLimitLongTwo := priceFloatEthTwo - (priceFloatEthTwo*(req.AmountTwo/float64(req.NumTwo)-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
+		qtyEthLimitShortTwo := priceFloatEthTwo + (priceFloatEthTwo*(req.AmountTwo/float64(req.NumTwo)-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
 
 		if "SHORT" == req.Side { // 开空
 			limitPrice = strconv.FormatFloat(qtyEthLimitShort, 'f', int(symbol[req.Symbol].PricePrecision), 64)
@@ -6394,13 +6395,13 @@ func (b *BinanceUserUsecase) UserOrderDobak(ctx context.Context, req *v1.UserOrd
 
 		qtyEth = req.Amount / priceFloatEth
 		// 多空的止损价
-		qtyEthLimitLong := priceFloatEth - (priceFloatEth*(req.Amount-req.CloseAmount))/(req.Amount*float64(req.Num))
-		qtyEthLimitShort := priceFloatEth + (priceFloatEth*(req.Amount-req.CloseAmount))/(req.Amount*float64(req.Num))
+		qtyEthLimitLong := priceFloatEth - (priceFloatEth*(req.Amount/float64(req.Num)-req.CloseAmount))/(req.Amount*float64(req.Num))
+		qtyEthLimitShort := priceFloatEth + (priceFloatEth*(req.Amount/float64(req.Num)-req.CloseAmount))/(req.Amount*float64(req.Num))
 
 		qtyEthTwo = req.AmountTwo / priceFloatEthTwo
 		// 多空的止损价
-		qtyEthLimitLongTwo := priceFloatEthTwo - (priceFloatEthTwo*(req.AmountTwo-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
-		qtyEthLimitShortTwo := priceFloatEthTwo + (priceFloatEthTwo*(req.AmountTwo-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
+		qtyEthLimitLongTwo := priceFloatEthTwo - (priceFloatEthTwo*(req.AmountTwo/float64(req.NumTwo)-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
+		qtyEthLimitShortTwo := priceFloatEthTwo + (priceFloatEthTwo*(req.AmountTwo/float64(req.NumTwo)-req.CloseAmountTwo))/(req.AmountTwo*float64(req.NumTwo))
 
 		if "SHORT" == req.Side { // 开空
 			limitPrice = strconv.FormatFloat(qtyEthLimitShort, 'f', int(symbol[req.Symbol].PricePrecision), 64)
