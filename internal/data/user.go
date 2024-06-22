@@ -3027,7 +3027,7 @@ func (b *BinanceUserRepo) GetUserOrderDoNew() ([]*biz.UserOrderDoNew, error) {
 // GetUserOrderDoLast .
 func (b *BinanceUserRepo) GetUserOrderDoLast() ([]*biz.UserOrderDo, error) {
 	var userOrderDo []*UserOrderDo
-	if err := b.data.db.Table("new_user_order_do_new").Where("status=?", 0).Order("id desc").Find(&userOrderDo).Error; err != nil {
+	if err := b.data.db.Table("new_user_order_do_new").Where("status=?", 1).Order("id desc").Find(&userOrderDo).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
