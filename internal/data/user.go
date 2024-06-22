@@ -2944,6 +2944,28 @@ func (b *BinanceUserRepo) UpdateUserOrderDo(ctx context.Context, id uint64, clos
 	return true, nil
 }
 
+// UpdateUserOrderDoThree .
+func (b *BinanceUserRepo) UpdateUserOrderDoThree(ctx context.Context, id uint64, qty float64, qtyTwo float64) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if 0 < qty {
+		if err = b.data.DB(ctx).Table("new_user_order_do_new").Where("id=?", id).
+			Updates(map[string]interface{}{"qty": qty, "updated_at": now}).Error; nil != err {
+			return false, errors.NotFound("UPDATE_USER_ORDER_DO_ERROR", "UPDATE_USER_ORDER_DO_ERROR")
+		}
+	} else if 0 < qtyTwo {
+		if err = b.data.DB(ctx).Table("new_user_order_do_new").Where("id=?", id).
+			Updates(map[string]interface{}{"qty_two": qtyTwo, "updated_at": now}).Error; nil != err {
+			return false, errors.NotFound("UPDATE_USER_ORDER_DO_ERROR", "UPDATE_USER_ORDER_DO_ERROR")
+		}
+	}
+
+	return true, nil
+}
+
 // UpdateUserOrderDoTwo .
 func (b *BinanceUserRepo) UpdateUserOrderDoTwo(ctx context.Context, id uint64, orderId string, orderIdTwo string) (bool, error) {
 	var (
@@ -2951,12 +2973,12 @@ func (b *BinanceUserRepo) UpdateUserOrderDoTwo(ctx context.Context, id uint64, o
 		now = time.Now()
 	)
 
-	if 0 > len(orderId) {
+	if 0 < len(orderId) {
 		if err = b.data.DB(ctx).Table("new_user_order_do_new").Where("id=?", id).
 			Updates(map[string]interface{}{"order_id": orderId, "updated_at": now}).Error; nil != err {
 			return false, errors.NotFound("UPDATE_USER_ORDER_DO_ERROR", "UPDATE_USER_ORDER_DO_ERROR")
 		}
-	} else if 0 > len(orderIdTwo) {
+	} else if 0 < len(orderIdTwo) {
 		if err = b.data.DB(ctx).Table("new_user_order_do_new").Where("id=?", id).
 			Updates(map[string]interface{}{"order_id_two": orderIdTwo, "updated_at": now}).Error; nil != err {
 			return false, errors.NotFound("UPDATE_USER_ORDER_DO_ERROR", "UPDATE_USER_ORDER_DO_ERROR")

@@ -591,32 +591,22 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: coin
-                  in: query
-                  schema:
-                    type: number
-                    format: double
-                - name: coinTwo
-                  in: query
-                  schema:
-                    type: number
-                    format: double
-                - name: closeAmount
-                  in: query
-                  schema:
-                    type: number
-                    format: double
-                - name: closeAmountTwo
-                  in: query
-                  schema:
-                    type: number
-                    format: double
                 - name: price
                   in: query
                   schema:
                     type: number
                     format: double
                 - name: priceTwo
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: priceOpen
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: priceOpenTwo
                   in: query
                   schema:
                     type: number
@@ -716,32 +706,22 @@ paths:
                   in: query
                   schema:
                     type: string
-                - name: coin
-                  in: query
-                  schema:
-                    type: number
-                    format: double
-                - name: coinTwo
-                  in: query
-                  schema:
-                    type: number
-                    format: double
-                - name: closeAmount
-                  in: query
-                  schema:
-                    type: number
-                    format: double
-                - name: closeAmountTwo
-                  in: query
-                  schema:
-                    type: number
-                    format: double
                 - name: price
                   in: query
                   schema:
                     type: number
                     format: double
                 - name: priceTwo
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: priceOpen
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: priceOpenTwo
                   in: query
                   schema:
                     type: number
