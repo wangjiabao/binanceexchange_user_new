@@ -6189,30 +6189,30 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		}
 
 		var (
-			positionSide         string // todo 变量名字反了 side对应的值是sell,long
-			positionSideClose    string // todo 变量名字反了 side对应的值是sell,long
-			limitPrice           string
-			positionSideTwo      string
-			positionSideTwoClose string
-			limitPriceTwo        string
+			positionSide string // todo 变量名字反了 side对应的值是sell,long
+			//positionSideClose    string // todo 变量名字反了 side对应的值是sell,long
+			//limitPrice           string
+			positionSideTwo string
+			//positionSideTwoClose string
+			//limitPriceTwo        string
 		)
 
 		if "SHORT" == req.Side { // 开空
 			positionSide = "SELL"
-			positionSideClose = "BUY"
+			//positionSideClose = "BUY"
 		} else if "LONG" == req.Side { // 开多
 			positionSide = "BUY"
-			positionSideClose = "SELL"
+			//positionSideClose = "SELL"
 		} else {
 			return nil, errors.New(500, "Side Err", "下单方向错误")
 		}
 
 		if "SHORT" == req.SideTwo { // 开空
 			positionSideTwo = "SELL"
-			positionSideTwoClose = "BUY"
+			//positionSideTwoClose = "BUY"
 		} else if "LONG" == req.SideTwo { // 开多
 			positionSideTwo = "BUY"
-			positionSideTwoClose = "SELL"
+			//positionSideTwoClose = "SELL"
 		} else {
 			return nil, errors.New(500, "Side Err", "下单方向错误")
 		}
@@ -6270,17 +6270,17 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 		//	return nil, errors.New(500, "Side Err", "下单方向错误，第二单")
 		//}
 
-		limitPrice = strconv.FormatFloat(req.Price, 'f', int(symbol[req.Symbol].PricePrecision), 64)
-		binanceOrderEthClose, _, err = requestBinanceOrderStop(req.Symbol, positionSideClose, req.Side, quantityEth, limitPrice, limitPrice, req.ApiKey, req.ApiSecret)
-		if nil != err {
-			return nil, err
-		}
-
-		limitPriceTwo = strconv.FormatFloat(req.PriceTwo, 'f', int(symbol[req.SymbolTwo].PricePrecision), 64)
-		binanceOrderEthTwoClose, _, err = requestBinanceOrderStop(req.SymbolTwo, positionSideTwoClose, req.SideTwo, quantityEthTwo, limitPriceTwo, limitPriceTwo, req.ApiKeyTwo, req.ApiSecretTwo)
-		if nil != err {
-			return nil, err
-		}
+		//limitPrice = strconv.FormatFloat(req.Price, 'f', int(symbol[req.Symbol].PricePrecision), 64)
+		//binanceOrderEthClose, _, err = requestBinanceOrderStop(req.Symbol, positionSideClose, req.Side, quantityEth, limitPrice, limitPrice, req.ApiKey, req.ApiSecret)
+		//if nil != err {
+		//	return nil, err
+		//}
+		//
+		//limitPriceTwo = strconv.FormatFloat(req.PriceTwo, 'f', int(symbol[req.SymbolTwo].PricePrecision), 64)
+		//binanceOrderEthTwoClose, _, err = requestBinanceOrderStop(req.SymbolTwo, positionSideTwoClose, req.SideTwo, quantityEthTwo, limitPriceTwo, limitPriceTwo, req.ApiKeyTwo, req.ApiSecretTwo)
+		//if nil != err {
+		//	return nil, err
+		//}
 
 		var (
 			userOrderDoEth *UserOrderDoNew
@@ -6309,8 +6309,8 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 			QtyTwo:       qtyTwo,
 			SideTwo:      req.SideTwo,
 			Side:         req.Side,
-			OrderId:      strconv.FormatInt(binanceOrderEthClose.OrderId, 10),
-			OrderIdTwo:   strconv.FormatInt(binanceOrderEthTwoClose.OrderId, 10),
+			//OrderId:      strconv.FormatInt(binanceOrderEthClose.OrderId, 10),
+			//OrderIdTwo:   strconv.FormatInt(binanceOrderEthTwoClose.OrderId, 10),
 		}
 
 		err = b.binanceUserRepo.InsertUserOrderDoNew(ctx, userOrderDoEth)
@@ -6326,13 +6326,13 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 			return nil, errors.New(500, "Order Err", "下单错误，第2单没下成功")
 		}
 
-		if 0 >= binanceOrderEthClose.OrderId {
-			return nil, errors.New(500, "Order Err", "下单错误，第1止损没下成功")
-		}
-
-		if 0 >= binanceOrderEthTwoClose.OrderId {
-			return nil, errors.New(500, "Order Err", "下单错误，第2止损没下成功")
-		}
+		//if 0 >= binanceOrderEthClose.OrderId {
+		//	return nil, errors.New(500, "Order Err", "下单错误，第1止损没下成功")
+		//}
+		//
+		//if 0 >= binanceOrderEthTwoClose.OrderId {
+		//	return nil, errors.New(500, "Order Err", "下单错误，第2止损没下成功")
+		//}
 	}
 
 	return nil, nil
