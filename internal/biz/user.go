@@ -6141,6 +6141,36 @@ func (b *BinanceUserUsecase) UserOrderDo(ctx context.Context, req *v1.UserOrderD
 			if nil != err {
 				return nil, err
 			}
+		} else if 5 == req.RedoNum {
+			limitPrice = strconv.FormatFloat(req.Price, 'f', int(symbol[req.Symbol].PricePrecision), 64)
+			binanceOrderEthClose, _, err = requestBinanceOrderStop(req.Symbol, positionSideClose, req.Side, quantityEth, limitPrice, limitPrice, req.ApiKey, req.ApiSecret)
+			if nil != err {
+				return nil, err
+			}
+
+			if 0 >= binanceOrderEthClose.OrderId {
+				return nil, errors.New(500, "Order Err", "补单错误")
+			}
+
+			_, err = b.binanceUserRepo.UpdateUserOrderDoTwo(ctx, userOrderDo[0].ID, strconv.FormatInt(binanceOrderEthClose.OrderId, 10), "")
+			if nil != err {
+				return nil, err
+			}
+
+			limitPriceTwo = strconv.FormatFloat(req.PriceTwo, 'f', int(symbol[req.SymbolTwo].PricePrecision), 64)
+			binanceOrderEthTwoClose, _, err = requestBinanceOrderStop(req.SymbolTwo, positionSideTwoClose, req.SideTwo, quantityEthTwo, limitPriceTwo, limitPriceTwo, req.ApiKeyTwo, req.ApiSecretTwo)
+			if nil != err {
+				return nil, err
+			}
+
+			if 0 >= binanceOrderEthTwoClose.OrderId {
+				return nil, errors.New(500, "Order Err", "补单错误")
+			}
+
+			_, err = b.binanceUserRepo.UpdateUserOrderDoTwo(ctx, userOrderDo[0].ID, "", strconv.FormatInt(binanceOrderEthTwoClose.OrderId, 10))
+			if nil != err {
+				return nil, err
+			}
 		}
 
 	} else {
