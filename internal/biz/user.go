@@ -2510,17 +2510,18 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 						}
 					}
 
-					fmt.Println(tmpBaseMoney, users[vUserBindTrader.UserId], vOrdersData)
+					//
+					//fmt.Println(tmpBaseMoney, users[vUserBindTrader.UserId], vOrdersData)
 					// 发送订单
-					//wg.Add(1) // 启动一个goroutine就登记+1
-					//go b.userOrderGoroutineTwo(ctx, wg, &OrderData{
-					//	Coin:     vOrdersData.Symbol,
-					//	Type:     vOrdersData.Type,
-					//	Price:    vOrdersData.Price,
-					//	Side:     vOrdersData.Side,
-					//	Qty:      vOrdersData.Qty,
-					//	Position: vOrdersData.Position,
-					//}, tmpBaseMoney, users[vUserBindTrader.UserId], vUserBindTrader, symbol[vOrdersData.Symbol].QuantityPrecision, 0, 0, 0)
+					wg.Add(1) // 启动一个goroutine就登记+1
+					go b.userOrderGoroutineTwo(ctx, wg, &OrderData{
+						Coin:     vOrdersData.Symbol,
+						Type:     vOrdersData.Type,
+						Price:    vOrdersData.Price,
+						Side:     vOrdersData.Side,
+						Qty:      vOrdersData.Qty,
+						Position: vOrdersData.Position,
+					}, tmpBaseMoney, users[vUserBindTrader.UserId], vUserBindTrader, symbol[vOrdersData.Symbol].QuantityPrecision, 0, 0, 0)
 				}
 			}
 		}
