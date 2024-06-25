@@ -19,36 +19,37 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	BinanceUser_GetUser_FullMethodName                    = "/BinanceUser/GetUser"
-	BinanceUser_PullUserDeposit_FullMethodName            = "/BinanceUser/PullUserDeposit"
-	BinanceUser_PullUserDeposit2_FullMethodName           = "/BinanceUser/PullUserDeposit2"
-	BinanceUser_PullUserCredentialsBsc_FullMethodName     = "/BinanceUser/PullUserCredentialsBsc"
-	BinanceUser_BindTrader_FullMethodName                 = "/BinanceUser/BindTrader"
-	BinanceUser_ListenTraderAndUserOrder_FullMethodName   = "/BinanceUser/ListenTraderAndUserOrder"
-	BinanceUser_OrderHandle_FullMethodName                = "/BinanceUser/OrderHandle"
-	BinanceUser_OrderHandleTwo_FullMethodName             = "/BinanceUser/OrderHandleTwo"
-	BinanceUser_Analyze_FullMethodName                    = "/BinanceUser/Analyze"
-	BinanceUser_CloseOrderAfterBind_FullMethodName        = "/BinanceUser/CloseOrderAfterBind"
-	BinanceUser_CloseOrderAfterBindTwo_FullMethodName     = "/BinanceUser/CloseOrderAfterBindTwo"
-	BinanceUser_InitOrderAfterBind_FullMethodName         = "/BinanceUser/InitOrderAfterBind"
-	BinanceUser_InitOrderAfterBindTwo_FullMethodName      = "/BinanceUser/InitOrderAfterBindTwo"
-	BinanceUser_OverOrderAfterBind_FullMethodName         = "/BinanceUser/OverOrderAfterBind"
-	BinanceUser_OverOrderAfterBindTwo_FullMethodName      = "/BinanceUser/OverOrderAfterBindTwo"
-	BinanceUser_AdminOverOrderAfterBind_FullMethodName    = "/BinanceUser/AdminOverOrderAfterBind"
-	BinanceUser_AdminOverOrderAfterBindTwo_FullMethodName = "/BinanceUser/AdminOverOrderAfterBindTwo"
-	BinanceUser_PullTradingBoxOpen_FullMethodName         = "/BinanceUser/PullTradingBoxOpen"
-	BinanceUser_SettleTradingBoxOpen_FullMethodName       = "/BinanceUser/SettleTradingBoxOpen"
-	BinanceUser_PullBinanceTradeHistory_FullMethodName    = "/BinanceUser/PullBinanceTradeHistory"
-	BinanceUser_GetBinanceTraderPosition_FullMethodName   = "/BinanceUser/GetBinanceTraderPosition"
-	BinanceUser_UserOrderDo_FullMethodName                = "/BinanceUser/UserOrderDo"
-	BinanceUser_UserOrderDoTwo_FullMethodName             = "/BinanceUser/UserOrderDoTwo"
-	BinanceUser_UserOrderDoHandlePrice_FullMethodName     = "/BinanceUser/UserOrderDoHandlePrice"
-	BinanceUser_PullFilData_FullMethodName                = "/BinanceUser/PullFilData"
-	BinanceUser_GetFilData_FullMethodName                 = "/BinanceUser/GetFilData"
-	BinanceUser_GetUserBindData_FullMethodName            = "/BinanceUser/GetUserBindData"
-	BinanceUser_GetBinanceTradersTrade_FullMethodName     = "/BinanceUser/GetBinanceTradersTrade"
-	BinanceUser_InsertUserBindData_FullMethodName         = "/BinanceUser/InsertUserBindData"
-	BinanceUser_DeleteUserBindData_FullMethodName         = "/BinanceUser/DeleteUserBindData"
+	BinanceUser_GetUser_FullMethodName                     = "/BinanceUser/GetUser"
+	BinanceUser_PullUserDeposit_FullMethodName             = "/BinanceUser/PullUserDeposit"
+	BinanceUser_PullUserDeposit2_FullMethodName            = "/BinanceUser/PullUserDeposit2"
+	BinanceUser_PullUserCredentialsBsc_FullMethodName      = "/BinanceUser/PullUserCredentialsBsc"
+	BinanceUser_BindTrader_FullMethodName                  = "/BinanceUser/BindTrader"
+	BinanceUser_ListenTraderAndUserOrder_FullMethodName    = "/BinanceUser/ListenTraderAndUserOrder"
+	BinanceUser_ListenTraderAndUserOrderNew_FullMethodName = "/BinanceUser/ListenTraderAndUserOrderNew"
+	BinanceUser_OrderHandle_FullMethodName                 = "/BinanceUser/OrderHandle"
+	BinanceUser_OrderHandleTwo_FullMethodName              = "/BinanceUser/OrderHandleTwo"
+	BinanceUser_Analyze_FullMethodName                     = "/BinanceUser/Analyze"
+	BinanceUser_CloseOrderAfterBind_FullMethodName         = "/BinanceUser/CloseOrderAfterBind"
+	BinanceUser_CloseOrderAfterBindTwo_FullMethodName      = "/BinanceUser/CloseOrderAfterBindTwo"
+	BinanceUser_InitOrderAfterBind_FullMethodName          = "/BinanceUser/InitOrderAfterBind"
+	BinanceUser_InitOrderAfterBindTwo_FullMethodName       = "/BinanceUser/InitOrderAfterBindTwo"
+	BinanceUser_OverOrderAfterBind_FullMethodName          = "/BinanceUser/OverOrderAfterBind"
+	BinanceUser_OverOrderAfterBindTwo_FullMethodName       = "/BinanceUser/OverOrderAfterBindTwo"
+	BinanceUser_AdminOverOrderAfterBind_FullMethodName     = "/BinanceUser/AdminOverOrderAfterBind"
+	BinanceUser_AdminOverOrderAfterBindTwo_FullMethodName  = "/BinanceUser/AdminOverOrderAfterBindTwo"
+	BinanceUser_PullTradingBoxOpen_FullMethodName          = "/BinanceUser/PullTradingBoxOpen"
+	BinanceUser_SettleTradingBoxOpen_FullMethodName        = "/BinanceUser/SettleTradingBoxOpen"
+	BinanceUser_PullBinanceTradeHistory_FullMethodName     = "/BinanceUser/PullBinanceTradeHistory"
+	BinanceUser_GetBinanceTraderPosition_FullMethodName    = "/BinanceUser/GetBinanceTraderPosition"
+	BinanceUser_UserOrderDo_FullMethodName                 = "/BinanceUser/UserOrderDo"
+	BinanceUser_UserOrderDoTwo_FullMethodName              = "/BinanceUser/UserOrderDoTwo"
+	BinanceUser_UserOrderDoHandlePrice_FullMethodName      = "/BinanceUser/UserOrderDoHandlePrice"
+	BinanceUser_PullFilData_FullMethodName                 = "/BinanceUser/PullFilData"
+	BinanceUser_GetFilData_FullMethodName                  = "/BinanceUser/GetFilData"
+	BinanceUser_GetUserBindData_FullMethodName             = "/BinanceUser/GetUserBindData"
+	BinanceUser_GetBinanceTradersTrade_FullMethodName      = "/BinanceUser/GetBinanceTradersTrade"
+	BinanceUser_InsertUserBindData_FullMethodName          = "/BinanceUser/InsertUserBindData"
+	BinanceUser_DeleteUserBindData_FullMethodName          = "/BinanceUser/DeleteUserBindData"
 )
 
 // BinanceUserClient is the client API for BinanceUser service.
@@ -61,6 +62,7 @@ type BinanceUserClient interface {
 	PullUserCredentialsBsc(ctx context.Context, in *PullUserCredentialsBscRequest, opts ...grpc.CallOption) (*PullUserCredentialsBscReply, error)
 	BindTrader(ctx context.Context, in *BindTraderRequest, opts ...grpc.CallOption) (*BindTraderReply, error)
 	ListenTraderAndUserOrder(ctx context.Context, in *ListenTraderAndUserOrderRequest, opts ...grpc.CallOption) (*ListenTraderAndUserOrderReply, error)
+	ListenTraderAndUserOrderNew(ctx context.Context, in *ListenTraderAndUserOrderRequest, opts ...grpc.CallOption) (*ListenTraderAndUserOrderReply, error)
 	OrderHandle(ctx context.Context, in *OrderHandleRequest, opts ...grpc.CallOption) (*OrderHandleReply, error)
 	OrderHandleTwo(ctx context.Context, in *OrderHandleRequest, opts ...grpc.CallOption) (*OrderHandleReply, error)
 	Analyze(ctx context.Context, in *AnalyzeRequest, opts ...grpc.CallOption) (*AnalyzeReply, error)
@@ -143,6 +145,15 @@ func (c *binanceUserClient) BindTrader(ctx context.Context, in *BindTraderReques
 func (c *binanceUserClient) ListenTraderAndUserOrder(ctx context.Context, in *ListenTraderAndUserOrderRequest, opts ...grpc.CallOption) (*ListenTraderAndUserOrderReply, error) {
 	out := new(ListenTraderAndUserOrderReply)
 	err := c.cc.Invoke(ctx, BinanceUser_ListenTraderAndUserOrder_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *binanceUserClient) ListenTraderAndUserOrderNew(ctx context.Context, in *ListenTraderAndUserOrderRequest, opts ...grpc.CallOption) (*ListenTraderAndUserOrderReply, error) {
+	out := new(ListenTraderAndUserOrderReply)
+	err := c.cc.Invoke(ctx, BinanceUser_ListenTraderAndUserOrderNew_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -375,6 +386,7 @@ type BinanceUserServer interface {
 	PullUserCredentialsBsc(context.Context, *PullUserCredentialsBscRequest) (*PullUserCredentialsBscReply, error)
 	BindTrader(context.Context, *BindTraderRequest) (*BindTraderReply, error)
 	ListenTraderAndUserOrder(context.Context, *ListenTraderAndUserOrderRequest) (*ListenTraderAndUserOrderReply, error)
+	ListenTraderAndUserOrderNew(context.Context, *ListenTraderAndUserOrderRequest) (*ListenTraderAndUserOrderReply, error)
 	OrderHandle(context.Context, *OrderHandleRequest) (*OrderHandleReply, error)
 	OrderHandleTwo(context.Context, *OrderHandleRequest) (*OrderHandleReply, error)
 	Analyze(context.Context, *AnalyzeRequest) (*AnalyzeReply, error)
@@ -423,6 +435,9 @@ func (UnimplementedBinanceUserServer) BindTrader(context.Context, *BindTraderReq
 }
 func (UnimplementedBinanceUserServer) ListenTraderAndUserOrder(context.Context, *ListenTraderAndUserOrderRequest) (*ListenTraderAndUserOrderReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListenTraderAndUserOrder not implemented")
+}
+func (UnimplementedBinanceUserServer) ListenTraderAndUserOrderNew(context.Context, *ListenTraderAndUserOrderRequest) (*ListenTraderAndUserOrderReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListenTraderAndUserOrderNew not implemented")
 }
 func (UnimplementedBinanceUserServer) OrderHandle(context.Context, *OrderHandleRequest) (*OrderHandleReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method OrderHandle not implemented")
@@ -613,6 +628,24 @@ func _BinanceUser_ListenTraderAndUserOrder_Handler(srv interface{}, ctx context.
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BinanceUserServer).ListenTraderAndUserOrder(ctx, req.(*ListenTraderAndUserOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BinanceUser_ListenTraderAndUserOrderNew_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListenTraderAndUserOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).ListenTraderAndUserOrderNew(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_ListenTraderAndUserOrderNew_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).ListenTraderAndUserOrderNew(ctx, req.(*ListenTraderAndUserOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1079,6 +1112,10 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListenTraderAndUserOrder",
 			Handler:    _BinanceUser_ListenTraderAndUserOrder_Handler,
+		},
+		{
+			MethodName: "ListenTraderAndUserOrderNew",
+			Handler:    _BinanceUser_ListenTraderAndUserOrderNew_Handler,
 		},
 		{
 			MethodName: "OrderHandle",

@@ -44,6 +44,13 @@ service BinanceUser {
     };
   };
 
+  rpc ListenTraderAndUserOrderNew (ListenTraderAndUserOrderRequest) returns (ListenTraderAndUserOrderReply) {
+    option (google.api.http) = {
+      post: "/api/binanceexchange_user/listen_trader_and_user_order_new"
+      body: "*"
+    };
+  };
+
   rpc OrderHandle (OrderHandleRequest) returns (OrderHandleReply) {
     option (google.api.http) = {
       get: "/api/binanceexchange_user/order_handle"

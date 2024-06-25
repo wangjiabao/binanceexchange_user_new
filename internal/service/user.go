@@ -380,6 +380,10 @@ func (b *BinanceUserService) ListenTraderAndUserOrder(ctx context.Context, req *
 	return b.buc.ListenTraders(ctx, req)
 }
 
+func (b *BinanceUserService) ListenTraderAndUserOrderNew(ctx context.Context, req *v1.ListenTraderAndUserOrderRequest) (*v1.ListenTraderAndUserOrderReply, error) {
+	return b.buc.ListenTradersNew(ctx, req)
+}
+
 func (b *BinanceUserService) OrderHandle(ctx context.Context, req *v1.OrderHandleRequest) (*v1.OrderHandleReply, error) {
 	return b.buc.OrderHandle(ctx, req)
 }

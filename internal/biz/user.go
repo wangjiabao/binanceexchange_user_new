@@ -1895,6 +1895,21 @@ func (b *BinanceUserUsecase) ListenTraders(ctx context.Context, req *v1.ListenTr
 	}, nil
 }
 
+// ListenTradersNew 用户下单
+func (b *BinanceUserUsecase) ListenTradersNew(ctx context.Context, req *v1.ListenTraderAndUserOrderRequest) (*v1.ListenTraderAndUserOrderReply, error) {
+	var (
+		wg sync.WaitGroup
+	)
+
+	wg.Add(1) // 启动一个goroutine就登记+1
+	go b.ListenTradersHandleTwo(ctx, req, &wg)
+	wg.Wait() // 等待所有登记的goroutine都结束
+
+	return &v1.ListenTraderAndUserOrderReply{
+		Status: "ok",
+	}, nil
+}
+
 // ListenTradersHandle 用户下单
 func (b *BinanceUserUsecase) ListenTradersHandle(ctx context.Context, req *v1.ListenTraderAndUserOrderRequest, wg *sync.WaitGroup) {
 	defer wg.Done()
@@ -2495,16 +2510,17 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 						}
 					}
 
+					fmt.Println(tmpBaseMoney, users[vUserBindTrader.UserId], vOrdersData)
 					// 发送订单
-					wg.Add(1) // 启动一个goroutine就登记+1
-					go b.userOrderGoroutineTwo(ctx, wg, &OrderData{
-						Coin:     vOrdersData.Symbol,
-						Type:     vOrdersData.Type,
-						Price:    vOrdersData.Price,
-						Side:     vOrdersData.Side,
-						Qty:      vOrdersData.Qty,
-						Position: vOrdersData.Position,
-					}, tmpBaseMoney, users[vUserBindTrader.UserId], vUserBindTrader, symbol[vOrdersData.Symbol].QuantityPrecision, 0, 0, 0)
+					//wg.Add(1) // 启动一个goroutine就登记+1
+					//go b.userOrderGoroutineTwo(ctx, wg, &OrderData{
+					//	Coin:     vOrdersData.Symbol,
+					//	Type:     vOrdersData.Type,
+					//	Price:    vOrdersData.Price,
+					//	Side:     vOrdersData.Side,
+					//	Qty:      vOrdersData.Qty,
+					//	Position: vOrdersData.Position,
+					//}, tmpBaseMoney, users[vUserBindTrader.UserId], vUserBindTrader, symbol[vOrdersData.Symbol].QuantityPrecision, 0, 0, 0)
 				}
 			}
 		}
