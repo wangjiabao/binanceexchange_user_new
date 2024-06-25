@@ -246,6 +246,7 @@ message ListenTraderAndUserOrderRequest {
       repeated Data data = 3;
       uint64 init_order = 4;
       string rate = 5;
+      uint64 trader_num = 6;
 
       message Data {
         // Order 消息类型的字段

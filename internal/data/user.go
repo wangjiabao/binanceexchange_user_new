@@ -19,6 +19,7 @@ type User struct {
 	BindTraderStatus    uint64    `gorm:"type:int;not null"`
 	BindTraderStatusTfi uint64    `gorm:"type:int;not null"`
 	IsDai               uint64    `gorm:"type:int;not null"`
+	UseNewSystem        uint64    `gorm:"type:int;not null"`
 	CreatedAt           time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt           time.Time `gorm:"type:datetime;not null"`
 }
@@ -85,6 +86,15 @@ type LhTraderPosition struct {
 	Side     string  `gorm:"type:varchar(100);not null"`
 	Type     string  `gorm:"type:varchar(100);not null"`
 	Qty      float64 `gorm:"type:decimal(65,20);not null"`
+}
+
+type TraderPositionNew struct {
+	ID     uint64  `gorm:"primarykey;type:int"`
+	Closed uint64  `gorm:"type:bigint(20);not null"`
+	Opened uint64  `gorm:"type:bigint(20);not null"`
+	Symbol string  `gorm:"type:varchar(100);not null"`
+	Side   string  `gorm:"type:varchar(100);not null"`
+	Qty    float64 `gorm:"type:decimal(65,20);not null"`
 }
 
 type UserBindTrader struct {
@@ -1125,6 +1135,7 @@ func (b *BinanceUserRepo) GetUsersByUserIds(userIds []uint64) (map[uint64]*biz.U
 			IsDai:            v.IsDai,
 			CreatedAt:        v.CreatedAt,
 			UpdatedAt:        v.UpdatedAt,
+			UseNewSystem:     v.UseNewSystem,
 		}
 	}
 
@@ -1467,6 +1478,34 @@ func (b *BinanceUserRepo) GetTradersOrderByAmountDesc() ([]*biz.Trader, error) {
 			CreatedAt: v.CreatedAt,
 			UpdatedAt: v.UpdatedAt,
 		})
+	}
+
+	return res, nil
+}
+
+// GetTradersByTraderNum .
+func (b *BinanceUserRepo) GetTradersByTraderNum() (map[string]*biz.Trader, error) {
+	var traders []*Trader
+	res := make(map[string]*biz.Trader, 0)
+	if err := b.data.db.Table("trader").Find(&traders).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_TRADER_ERROR", err.Error())
+	}
+
+	for _, v := range traders {
+		res[v.PortfolioId] = &biz.Trader{
+			ID:          v.ID,
+			Status:      v.IsOpen,
+			Amount:      v.Amount,
+			BaseMoney:   v.BaseMoney,
+			CreatedAt:   v.CreatedAt,
+			UpdatedAt:   v.UpdatedAt,
+			Name:        v.Name,
+			PortfolioId: v.PortfolioId,
+		}
 	}
 
 	return res, nil
@@ -2491,6 +2530,34 @@ func (b *BinanceUserRepo) GetTraderPosition(traderId uint64) ([]*biz.TraderPosit
 			Qty:          v.Qty,
 			Side:         v.Side,
 			PositionSide: v.Type,
+		})
+	}
+
+	return res, nil
+}
+
+// GetOpeningTraderPositionNew .
+func (b *BinanceUserRepo) GetOpeningTraderPositionNew(traderNum string) ([]*biz.TraderPositionNew, error) {
+	var lhTraderPosition []*TraderPositionNew
+
+	res := make([]*biz.TraderPositionNew, 0)
+	tableName := "new_binance_position_" + traderNum + "_history"
+	if err := b.data.db.Table(tableName).Where("closed=?", 0).Find(&lhTraderPosition).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_LH_TRADER_POSITION_ERROR", err.Error())
+	}
+
+	for _, v := range lhTraderPosition {
+		res = append(res, &biz.TraderPositionNew{
+			ID:     v.ID,
+			Symbol: v.Symbol,
+			Qty:    v.Qty,
+			Side:   v.Side,
+			Closed: v.Closed,
+			Opened: v.Opened,
 		})
 	}
 
