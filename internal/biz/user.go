@@ -2178,8 +2178,8 @@ func (b *BinanceUserUsecase) userOrderGoroutine(ctx context.Context, wg *sync.Wa
 					return
 				}
 
-				if 0 < tmpPositionTotal {
-					quantityFloat = historyQuantityFloat * traderAmount / tmpPositionTotal // 本次平仓数量
+				if 0 < tmpPositionTotal && 0 < qty {
+					quantityFloat = historyQuantityFloat * qty / tmpPositionTotal // 本次平仓数量
 				}
 			}
 
@@ -2571,8 +2571,8 @@ func (b *BinanceUserUsecase) userOrderGoroutineTwo(ctx context.Context, wg *sync
 					return
 				}
 
-				if 0 < tmpPositionTotal {
-					quantityFloat = historyQuantityFloat * traderAmount / tmpPositionTotal // 本次平仓数量
+				if 0 < tmpPositionTotal && 0 < qty {
+					quantityFloat = historyQuantityFloat * qty / tmpPositionTotal // 本次平仓数量
 				}
 			}
 
