@@ -3996,7 +3996,7 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwo(ctx context.Context, req *v1.
 
 			priceFloat, err = strconv.ParseFloat(price.Price, 64)
 			if nil != err {
-				fmt.Println("初始化仓位，价格查询，转化", traderId, price, err)
+				fmt.Println("初始化仓位，价格查询，转化", traderId, vTraderPositions, price, err)
 				continue
 			}
 
@@ -4282,6 +4282,11 @@ func (b *BinanceUserUsecase) OverOrderTwo(ctx context.Context, req *v1.OverOrder
 
 					// todo 暂时使用检测没用api信息
 					if 0 >= users[vVUserBindTraders.UserId].ApiStatus {
+						continue
+					}
+
+					// 新系统用户不使用
+					if 1 == users[vVUserBindTraders.UserId].UseNewSystem {
 						continue
 					}
 
