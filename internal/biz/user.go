@@ -4046,6 +4046,7 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwo(ctx context.Context, req *v1.
 						side = "BUY"
 					}
 
+					fmt.Println("新系统初始化：", vTraderPositions, users[vVUserBindTraders.UserId].Address)
 					// 发送订单
 					wg.Add(1) // 启动一个goroutine就登记+1
 					go b.userOrderGoroutineTwo(ctx, &wg, &OrderData{
