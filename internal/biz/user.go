@@ -2379,6 +2379,11 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 		}
 
 		if 0 < vOrders.TraderNum {
+			fmt.Println("新系统", vOrders)
+			for _, v := range vOrders.Data {
+				fmt.Println(v)
+			}
+
 			traderNums = append(traderNums, vOrders.TraderNum)
 		}
 
