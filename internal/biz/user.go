@@ -2379,11 +2379,6 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 		}
 
 		if 0 < vOrders.TraderNum {
-			fmt.Println("新系统", vOrders)
-			for _, v := range vOrders.Data {
-				fmt.Println(v)
-			}
-
 			traderNums = append(traderNums, vOrders.TraderNum)
 		}
 
@@ -2519,6 +2514,7 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 					//fmt.Println(tmpBaseMoney, users[vUserBindTrader.UserId], vOrdersData)
 					// 发送订单
 					wg.Add(1) // 启动一个goroutine就登记+1
+					fmt.Println("新系统下单", vOrdersData, tmpBaseMoney, users[vUserBindTrader.UserId], symbol[vOrdersData.Symbol].QuantityPrecision)
 					go b.userOrderGoroutineTwo(ctx, wg, &OrderData{
 						Coin:     vOrdersData.Symbol,
 						Type:     vOrdersData.Type,
