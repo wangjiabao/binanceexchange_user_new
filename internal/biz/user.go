@@ -1900,6 +1900,7 @@ func (b *BinanceUserUsecase) ListenTradersNew(ctx context.Context, req *v1.Liste
 	var (
 		wg sync.WaitGroup
 	)
+	fmt.Println("新系统", req.SendBody)
 
 	wg.Add(1) // 启动一个goroutine就登记+1
 	go b.ListenTradersHandleTwo(ctx, req, &wg)
