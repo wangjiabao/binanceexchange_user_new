@@ -1880,7 +1880,7 @@ func (b *BinanceUserUsecase) ListenTraders(ctx context.Context, req *v1.ListenTr
 		wg sync.WaitGroup
 	)
 
-	fmt.Println(req.SendBody)
+	fmt.Println("老系统", req.SendBody)
 
 	wg.Add(1) // 启动一个goroutine就登记+1
 	go b.ListenTradersHandle(ctx, req, &wg)
@@ -2452,11 +2452,26 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 
 	for _, vOrders := range req.SendBody.Orders {
 		for _, vOrdersData := range vOrders.Data {
-			if _, exists := userBindTrader[vOrders.Uid]; !exists {
+			var (
+				orderUid          = vOrders.Uid
+				tmpUserBindTrader []*UserBindTrader
+			)
+
+			// 新系统
+			if newSystemReq {
+				if _, ok := tradersByIdMap[vOrders.TraderNum]; !ok {
+					fmt.Println("新系统，未匹配到交易员", vOrders)
+				}
+				orderUid = tradersByIdMap[vOrders.TraderNum].ID
+			}
+
+			if _, exists := userBindTrader[orderUid]; !exists {
 				continue
 			}
 
-			for _, vUserBindTrader := range userBindTrader[vOrders.Uid] {
+			tmpUserBindTrader = userBindTrader[orderUid]
+
+			for _, vUserBindTrader := range tmpUserBindTrader {
 				fmt.Println("新系统下单", vOrdersData, users[vUserBindTrader.UserId], symbol[vOrdersData.Symbol].QuantityPrecision)
 
 				if 0 == vUserBindTrader.Status { // 绑定
@@ -2482,7 +2497,7 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 					// todo 暂时只关不开
 					if ("SELL" == vOrdersData.Side && "SHORT" == vOrdersData.Type) || ("BUY" == vOrdersData.Side && "LONG" == vOrdersData.Type) {
 						if 0 == users[vUserBindTrader.UserId].IsDai {
-							if 5 != vOrders.Uid && 83 != vOrders.Uid {
+							if 5 != orderUid && 83 != orderUid {
 								continue
 							}
 						}
