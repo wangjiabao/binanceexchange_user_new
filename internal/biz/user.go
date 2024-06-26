@@ -2459,10 +2459,11 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 
 			// 新系统
 			if newSystemReq {
-				if _, ok := tradersByIdMap[vOrders.TraderNum]; !ok {
+				tmpStr := strconv.FormatUint(vOrders.TraderNum, 10)
+				if _, ok := traders[tmpStr]; !ok {
 					fmt.Println("新系统，未匹配到交易员", vOrders)
 				}
-				orderUid = tradersByIdMap[vOrders.TraderNum].ID
+				orderUid = traders[tmpStr].ID
 			}
 
 			if _, exists := userBindTrader[orderUid]; !exists {
