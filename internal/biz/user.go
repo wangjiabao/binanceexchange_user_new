@@ -2457,6 +2457,8 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 			}
 
 			for _, vUserBindTrader := range userBindTrader[vOrders.Uid] {
+				fmt.Println("新系统下单", vOrdersData, users[vUserBindTrader.UserId], symbol[vOrdersData.Symbol].QuantityPrecision)
+
 				if 0 == vUserBindTrader.Status { // 绑定
 					// 初始化仓位
 					if 1 != vUserBindTrader.InitOrder {
@@ -2514,7 +2516,7 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 					//fmt.Println(tmpBaseMoney, users[vUserBindTrader.UserId], vOrdersData)
 					// 发送订单
 					wg.Add(1) // 启动一个goroutine就登记+1
-					fmt.Println("新系统下单", vOrdersData, tmpBaseMoney, users[vUserBindTrader.UserId], symbol[vOrdersData.Symbol].QuantityPrecision)
+					fmt.Println("新系统下单", tmpBaseMoney)
 					go b.userOrderGoroutineTwo(ctx, wg, &OrderData{
 						Coin:     vOrdersData.Symbol,
 						Type:     vOrdersData.Type,
