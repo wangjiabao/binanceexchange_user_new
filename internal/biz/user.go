@@ -4490,6 +4490,39 @@ func (b *BinanceUserUsecase) AdminOverOrderTwo(ctx context.Context, req *v1.Over
 	return nil, b.handleAdminOverOrderTwo(ctx)
 }
 
+func (b *BinanceUserUsecase) AdminOverOrderTwoByInfo(ctx context.Context, req *v1.AdminOverOrderTwoByInfoRequest) (*v1.AdminOverOrderTwoByInfoReply, error) {
+	var (
+		err      error
+		side     string
+		quantity string
+	)
+	var orderInfo *OrderInfo
+	if "SHORT" == req.PositionSide {
+		side = "BUY"
+	} else if "LONG" == req.PositionSide {
+		side = "SELL"
+	} else {
+		fmt.Println("错误的自定义关仓方向", req)
+		return nil, nil
+	}
+	if 0 > req.Num {
+		fmt.Println("错误的自定义关仓数量", req)
+		return nil, nil
+	}
+
+	quantity = strconv.FormatFloat(req.Num, 'f', -1, 64)
+
+	// 请求下单
+	_, orderInfo, err = requestBinanceOrder(req.Symbol, side, "MARKET", req.PositionSide, quantity, req.ApiKey, req.ApiSecret)
+	if nil != err {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	fmt.Println(orderInfo)
+	return nil, nil
+}
+
 func (b *BinanceUserUsecase) handleAdminOverOrderTwo(ctx context.Context) error {
 	var (
 		wg              sync.WaitGroup

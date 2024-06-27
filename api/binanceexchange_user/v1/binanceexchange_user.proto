@@ -117,6 +117,12 @@ service BinanceUser {
     };
   };
 
+  rpc AdminOverOrderTwoByInfo (AdminOverOrderTwoByInfoRequest) returns (AdminOverOrderTwoByInfoReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/admin_over_order_two_by_info"
+    };
+  };
+
   rpc PullTradingBoxOpen (PullTradingBoxOpenRequest) returns (PullTradingBoxOpenReply) {
     option (google.api.http) = {
       get: "/api/binanceexchange_user/pull_trading_box_open"
@@ -238,6 +244,16 @@ message InitOrderAfterBindReply {}
 message OverOrderAfterBindRequest {}
 
 message OverOrderAfterBindReply {}
+
+message AdminOverOrderTwoByInfoRequest {
+  string apiKey = 1;
+  string apiSecret = 2;
+  string symbol = 3;
+  double num = 4;
+  string positionSide = 5;
+}
+
+message AdminOverOrderTwoByInfoReply {}
 
 message OrderHandleRequest {}
 
