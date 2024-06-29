@@ -178,6 +178,33 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/exchange_user_lever_age:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_ExchangeUserLeverAge
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: symbol
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExchangeUserLeverAgeReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/binanceexchange_user/get_binance_trader_position_history:
         get:
             tags:
@@ -868,6 +895,9 @@ components:
             properties:
                 id:
                     type: string
+        ExchangeUserLeverAgeReply:
+            type: object
+            properties: {}
         GetBinanceTraderPositionHistoryReply:
             type: object
             properties:

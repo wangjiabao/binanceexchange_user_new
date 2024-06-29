@@ -4083,6 +4083,53 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwo(ctx context.Context, req *v1.
 	return nil, nil
 }
 
+func (b *BinanceUserUsecase) ExchangeUserLeverAge(ctx context.Context, req *v1.ExchangeUserLeverAgeRequest) (*v1.ExchangeUserLeverAgeReply, error) {
+	var (
+		symbol map[string]*Symbol
+		user   *User
+		err    error
+	)
+	symbol, err = b.binanceUserRepo.GetSymbol()
+	if nil != err {
+		return nil, err
+	}
+
+	user, err = b.binanceUserRepo.GetUserById(ctx, req.UserId)
+	if nil != err {
+		return nil, err
+	}
+
+	if nil == user {
+		return nil, nil
+	}
+
+	if "all" == req.Symbol {
+		for k, _ := range symbol {
+			fmt.Println("仓位杠杆修改：", k, int64(5), user.ApiKey, user.ApiSecret)
+			_, err = requestBinanceLeverAge(k, int64(5), user.ApiKey, user.ApiSecret)
+			if nil != err {
+				fmt.Println(err)
+				return nil, err
+			}
+		}
+	} else {
+		for k, _ := range symbol {
+			if k != req.Symbol {
+				continue
+			}
+
+			fmt.Println("仓位杠杆修改：", k, int64(5), user.ApiKey, user.ApiSecret)
+			_, err = requestBinanceLeverAge(k, int64(5), user.ApiKey, user.ApiSecret)
+			if nil != err {
+				fmt.Println(err)
+				return nil, err
+			}
+		}
+	}
+
+	return nil, nil
+}
+
 // OrderAdminTwo 管理员下单手动
 func (b *BinanceUserUsecase) OrderAdminTwo(ctx context.Context, req *v1.OrderAdminTwoRequest) (*v1.OrderAdminTwoReply, error) {
 	var (

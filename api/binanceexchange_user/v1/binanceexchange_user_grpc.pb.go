@@ -39,6 +39,7 @@ const (
 	BinanceUser_AdminOverOrderAfterBindTwo_FullMethodName  = "/BinanceUser/AdminOverOrderAfterBindTwo"
 	BinanceUser_AdminOverOrderTwoByInfo_FullMethodName     = "/BinanceUser/AdminOverOrderTwoByInfo"
 	BinanceUser_OrderAdminTwo_FullMethodName               = "/BinanceUser/OrderAdminTwo"
+	BinanceUser_ExchangeUserLeverAge_FullMethodName        = "/BinanceUser/ExchangeUserLeverAge"
 	BinanceUser_PullTradingBoxOpen_FullMethodName          = "/BinanceUser/PullTradingBoxOpen"
 	BinanceUser_SettleTradingBoxOpen_FullMethodName        = "/BinanceUser/SettleTradingBoxOpen"
 	BinanceUser_PullBinanceTradeHistory_FullMethodName     = "/BinanceUser/PullBinanceTradeHistory"
@@ -78,6 +79,7 @@ type BinanceUserClient interface {
 	AdminOverOrderAfterBindTwo(ctx context.Context, in *OverOrderAfterBindRequest, opts ...grpc.CallOption) (*OverOrderAfterBindReply, error)
 	AdminOverOrderTwoByInfo(ctx context.Context, in *AdminOverOrderTwoByInfoRequest, opts ...grpc.CallOption) (*AdminOverOrderTwoByInfoReply, error)
 	OrderAdminTwo(ctx context.Context, in *OrderAdminTwoRequest, opts ...grpc.CallOption) (*OrderAdminTwoReply, error)
+	ExchangeUserLeverAge(ctx context.Context, in *ExchangeUserLeverAgeRequest, opts ...grpc.CallOption) (*ExchangeUserLeverAgeReply, error)
 	PullTradingBoxOpen(ctx context.Context, in *PullTradingBoxOpenRequest, opts ...grpc.CallOption) (*PullTradingBoxOpenReply, error)
 	SettleTradingBoxOpen(ctx context.Context, in *SettleTradingBoxOpenRequest, opts ...grpc.CallOption) (*SettleTradingBoxOpenReply, error)
 	PullBinanceTradeHistory(ctx context.Context, in *PullBinanceTradeHistoryRequest, opts ...grpc.CallOption) (*PullBinanceTradeHistoryReply, error)
@@ -281,6 +283,15 @@ func (c *binanceUserClient) OrderAdminTwo(ctx context.Context, in *OrderAdminTwo
 	return out, nil
 }
 
+func (c *binanceUserClient) ExchangeUserLeverAge(ctx context.Context, in *ExchangeUserLeverAgeRequest, opts ...grpc.CallOption) (*ExchangeUserLeverAgeReply, error) {
+	out := new(ExchangeUserLeverAgeReply)
+	err := c.cc.Invoke(ctx, BinanceUser_ExchangeUserLeverAge_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *binanceUserClient) PullTradingBoxOpen(ctx context.Context, in *PullTradingBoxOpenRequest, opts ...grpc.CallOption) (*PullTradingBoxOpenReply, error) {
 	out := new(PullTradingBoxOpenReply)
 	err := c.cc.Invoke(ctx, BinanceUser_PullTradingBoxOpen_FullMethodName, in, out, opts...)
@@ -422,6 +433,7 @@ type BinanceUserServer interface {
 	AdminOverOrderAfterBindTwo(context.Context, *OverOrderAfterBindRequest) (*OverOrderAfterBindReply, error)
 	AdminOverOrderTwoByInfo(context.Context, *AdminOverOrderTwoByInfoRequest) (*AdminOverOrderTwoByInfoReply, error)
 	OrderAdminTwo(context.Context, *OrderAdminTwoRequest) (*OrderAdminTwoReply, error)
+	ExchangeUserLeverAge(context.Context, *ExchangeUserLeverAgeRequest) (*ExchangeUserLeverAgeReply, error)
 	PullTradingBoxOpen(context.Context, *PullTradingBoxOpenRequest) (*PullTradingBoxOpenReply, error)
 	SettleTradingBoxOpen(context.Context, *SettleTradingBoxOpenRequest) (*SettleTradingBoxOpenReply, error)
 	PullBinanceTradeHistory(context.Context, *PullBinanceTradeHistoryRequest) (*PullBinanceTradeHistoryReply, error)
@@ -501,6 +513,9 @@ func (UnimplementedBinanceUserServer) AdminOverOrderTwoByInfo(context.Context, *
 }
 func (UnimplementedBinanceUserServer) OrderAdminTwo(context.Context, *OrderAdminTwoRequest) (*OrderAdminTwoReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method OrderAdminTwo not implemented")
+}
+func (UnimplementedBinanceUserServer) ExchangeUserLeverAge(context.Context, *ExchangeUserLeverAgeRequest) (*ExchangeUserLeverAgeReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExchangeUserLeverAge not implemented")
 }
 func (UnimplementedBinanceUserServer) PullTradingBoxOpen(context.Context, *PullTradingBoxOpenRequest) (*PullTradingBoxOpenReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PullTradingBoxOpen not implemented")
@@ -914,6 +929,24 @@ func _BinanceUser_OrderAdminTwo_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BinanceUser_ExchangeUserLeverAge_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExchangeUserLeverAgeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).ExchangeUserLeverAge(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_ExchangeUserLeverAge_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).ExchangeUserLeverAge(ctx, req.(*ExchangeUserLeverAgeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BinanceUser_PullTradingBoxOpen_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PullTradingBoxOpenRequest)
 	if err := dec(in); err != nil {
@@ -1234,6 +1267,10 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "OrderAdminTwo",
 			Handler:    _BinanceUser_OrderAdminTwo_Handler,
+		},
+		{
+			MethodName: "ExchangeUserLeverAge",
+			Handler:    _BinanceUser_ExchangeUserLeverAge_Handler,
 		},
 		{
 			MethodName: "PullTradingBoxOpen",

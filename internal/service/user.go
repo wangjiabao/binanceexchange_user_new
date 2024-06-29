@@ -436,6 +436,10 @@ func (b *BinanceUserService) OrderAdminTwo(ctx context.Context, req *v1.OrderAdm
 	return b.buc.OrderAdminTwo(ctx, req)
 }
 
+func (b *BinanceUserService) ExchangeUserLeverAge(ctx context.Context, req *v1.ExchangeUserLeverAgeRequest) (*v1.ExchangeUserLeverAgeReply, error) {
+	return b.buc.ExchangeUserLeverAge(ctx, req)
+}
+
 func (b *BinanceUserService) UserOrderDo(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
 	return b.buc.UserOrderDo(ctx, req)
 }
