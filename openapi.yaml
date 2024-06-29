@@ -396,6 +396,37 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/order_admin_two:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_OrderAdminTwo
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: traderId
+                  in: query
+                  schema:
+                    type: string
+                - name: symbol
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OrderAdminTwoReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/binanceexchange_user/order_handle:
         get:
             tags:
@@ -993,6 +1024,9 @@ components:
                         $ref: '#/components/schemas/SendBody_Order'
                 initOrder:
                     type: string
+        OrderAdminTwoReply:
+            type: object
+            properties: {}
         OrderHandleReply:
             type: object
             properties: {}

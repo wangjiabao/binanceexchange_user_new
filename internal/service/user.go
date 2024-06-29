@@ -432,6 +432,10 @@ func (b *BinanceUserService) AdminOverOrderTwoByInfo(ctx context.Context, req *v
 	return b.buc.AdminOverOrderTwoByInfo(ctx, req)
 }
 
+func (b *BinanceUserService) OrderAdminTwo(ctx context.Context, req *v1.OrderAdminTwoRequest) (*v1.OrderAdminTwoReply, error) {
+	return b.buc.OrderAdminTwo(ctx, req)
+}
+
 func (b *BinanceUserService) UserOrderDo(ctx context.Context, req *v1.UserOrderDoRequest) (*v1.UserOrderDoReply, error) {
 	return b.buc.UserOrderDo(ctx, req)
 }
