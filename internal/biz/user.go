@@ -4243,23 +4243,23 @@ func (b *BinanceUserUsecase) OrderAdminTwo(ctx context.Context, req *v1.OrderAdm
 							continue
 						}
 						fmt.Println("新系统仓位自定义补充，仓位杠杆修改：", k, int64(5), users[vVUserBindTraders.UserId].ApiKey, users[vVUserBindTraders.UserId].ApiSecret)
-						//_, err = requestBinanceLeverAge(k, int64(5), users[vVUserBindTraders.UserId].ApiKey, users[vVUserBindTraders.UserId].ApiSecret)
-						//if nil != err {
-						//	fmt.Println(err)
-						//	return nil, err
-						//}
+						_, err = requestBinanceLeverAge(k, int64(5), users[vVUserBindTraders.UserId].ApiKey, users[vVUserBindTraders.UserId].ApiSecret)
+						if nil != err {
+							fmt.Println(err)
+							return nil, err
+						}
 					}
 
 					fmt.Println("新系统仓位自定义补充：", vTraderPositions, users[vVUserBindTraders.UserId].Address, side)
 					// 发送订单
-					//wg.Add(1) // 启动一个goroutine就登记+1
-					//go b.userOrderGoroutineTwo(ctx, &wg, &OrderData{
-					//	Coin:  vTraderPositions.Symbol,
-					//	Type:  vTraderPositions.Side,
-					//	Price: price.Price,
-					//	Side:  side,
-					//	Qty:   "0",
-					//}, "0", users[vVUserBindTraders.UserId], vVUserBindTraders, symbol[vTraderPositions.Symbol].QuantityPrecision, 1, proportion, 0)
+					wg.Add(1) // 启动一个goroutine就登记+1
+					go b.userOrderGoroutineTwo(ctx, &wg, &OrderData{
+						Coin:  vTraderPositions.Symbol,
+						Type:  vTraderPositions.Side,
+						Price: price.Price,
+						Side:  side,
+						Qty:   "0",
+					}, "0", users[vVUserBindTraders.UserId], vVUserBindTraders, symbol[vTraderPositions.Symbol].QuantityPrecision, 1, proportion, 0)
 				}
 			}
 		}
