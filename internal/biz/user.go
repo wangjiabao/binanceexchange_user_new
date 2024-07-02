@@ -7272,7 +7272,7 @@ func (b *BinanceUserUsecase) GetBinanceTradersTrade(ctx context.Context, req *v1
 		NewBinanceTradeHistory []*BinanceTradeHistory
 		err                    error
 	)
-	NewBinanceTradeHistory, err = b.binanceUserRepo.GetBinanceTradeHistoryByTraderNumNewest(req.TraderNum, 3000)
+	NewBinanceTradeHistory, err = b.binanceUserRepo.GetBinanceTradeHistoryByTraderNumNewest(req.TraderNum, 6000)
 	if nil != err {
 		return nil, err
 	}
