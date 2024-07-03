@@ -2,6 +2,7 @@ package biz
 
 import (
 	v1 "binanceexchange_user/api/binanceexchange_user/v1"
+	"bytes"
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
@@ -7556,4 +7557,171 @@ func (b *BinanceUserUsecase) DeleteUserBindData(ctx context.Context, req *v1.Del
 		Msg: "ok",
 		Res: true,
 	}, nil
+}
+
+type DataReq struct {
+	Symbol     string `json:"symbol"`
+	Type       string `json:"type"`
+	Price      string `json:"price"`
+	Side       string `json:"side"`
+	Qty        string `json:"qty"`
+	Proportion string `json:"proportion"`
+	Position   string `json:"position"`
+}
+
+type Order struct {
+	Uid       uint64     `json:"uid"`
+	BaseMoney string     `json:"base_money"`
+	Data      []*DataReq `json:"data"`
+	InitOrder uint64     `json:"init_order"`
+	Rate      string     `json:"rate"`
+	TraderNum uint64     `json:"trader_num"`
+}
+
+type SendBody struct {
+	Orders    []*Order `json:"orders"`
+	InitOrder uint64   `json:"init_order"`
+}
+
+type ListenTraderAndUserOrderRequest struct {
+	SendBody SendBody `json:"send_body"`
+}
+
+type binanceTrade struct {
+	TraderNum uint64
+	Time      uint64
+	Symbol    string
+	Type      string
+	Position  string
+	Side      string
+	Price     string
+	Qty       string
+	QtyFloat  float64
+}
+
+func (b *BinanceUserUsecase) HandelP() {
+	var (
+		err error
+	)
+	// 初始化一个
+	order := make([]*Order, 0)
+	order = append(order, &Order{
+		Uid:       0,
+		BaseMoney: "",
+		Data:      make([]*DataReq, 0),
+		InitOrder: 0,
+		Rate:      "",
+		TraderNum: 0,
+	})
+	order[0].TraderNum = 3887627985594221568
+	order[0].Data = append(order[0].Data, &DataReq{
+		Symbol:     "AVAXUSDT",
+		Type:       "SHORT",
+		Price:      "",
+		Side:       "BUY",
+		Qty:        strconv.FormatFloat(319, 'f', -1, 64),
+		Proportion: "",
+		Position:   "319",
+	})
+
+	order = append(order, &Order{
+		Uid:       0,
+		BaseMoney: "",
+		Data:      make([]*DataReq, 0),
+		InitOrder: 0,
+		Rate:      "",
+		TraderNum: 0,
+	})
+	order[1].TraderNum = 3887627985594221568
+	order[1].Data = append(order[0].Data, &DataReq{
+		Symbol:     "WIFUSDT",
+		Type:       "SHORT",
+		Price:      "",
+		Side:       "BUY",
+		Qty:        strconv.FormatFloat(14778, 'f', -1, 64),
+		Proportion: "",
+		Position:   "14778",
+	})
+
+	if 0 >= len(order[0].Data) {
+		return
+	}
+
+	// 请求下单
+	var res string
+	res, err = requestSystemOrder(order)
+	if "ok" != res {
+		fmt.Println("请求下单错,结果信息：", res, err)
+		for _, vData := range order[0].Data {
+			fmt.Println("请求下单错误，订单信息：", vData)
+		}
+	}
+}
+
+type RequestResp struct {
+	Status string
+}
+
+// 请求下单接口
+func requestSystemOrder(Orders []*Order) (string, error) {
+	var (
+		resp   *http.Response
+		b      []byte
+		err    error
+		apiUrl = "http://127.0.0.1:8125/api/binanceexchange_user/listen_trader_and_user_order_new"
+	)
+
+	// 构造请求数据
+	requestBody := ListenTraderAndUserOrderRequest{
+		SendBody: SendBody{
+			Orders: Orders,
+		},
+	}
+
+	// 序列化为JSON
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return "", err
+	}
+
+	// 创建http.Client并设置超时时间
+	client := &http.Client{
+		Timeout: 20 * time.Second,
+	}
+
+	// 构造http请求
+	req, err := http.NewRequest("POST", apiUrl, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// 发送请求
+	resp, err = client.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	// 结果
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	b, err = io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	var r *RequestResp
+	err = json.Unmarshal(b, &r)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	return r.Status, nil
 }

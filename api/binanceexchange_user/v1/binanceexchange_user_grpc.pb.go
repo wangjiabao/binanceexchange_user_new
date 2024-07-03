@@ -53,6 +53,7 @@ const (
 	BinanceUser_GetBinanceTradersTrade_FullMethodName      = "/BinanceUser/GetBinanceTradersTrade"
 	BinanceUser_InsertUserBindData_FullMethodName          = "/BinanceUser/InsertUserBindData"
 	BinanceUser_DeleteUserBindData_FullMethodName          = "/BinanceUser/DeleteUserBindData"
+	BinanceUser_HandleP_FullMethodName                     = "/BinanceUser/HandleP"
 )
 
 // BinanceUserClient is the client API for BinanceUser service.
@@ -93,6 +94,7 @@ type BinanceUserClient interface {
 	GetBinanceTradersTrade(ctx context.Context, in *GetBinanceTradersTradeRequest, opts ...grpc.CallOption) (*GetBinanceTradersTradeReply, error)
 	InsertUserBindData(ctx context.Context, in *InsertUserBindDataRequest, opts ...grpc.CallOption) (*InsertUserBindDataReply, error)
 	DeleteUserBindData(ctx context.Context, in *DeleteUserBindDataRequest, opts ...grpc.CallOption) (*DeleteUserBindDataReply, error)
+	HandleP(ctx context.Context, in *HandlePRequest, opts ...grpc.CallOption) (*HandlePReply, error)
 }
 
 type binanceUserClient struct {
@@ -409,6 +411,15 @@ func (c *binanceUserClient) DeleteUserBindData(ctx context.Context, in *DeleteUs
 	return out, nil
 }
 
+func (c *binanceUserClient) HandleP(ctx context.Context, in *HandlePRequest, opts ...grpc.CallOption) (*HandlePReply, error) {
+	out := new(HandlePReply)
+	err := c.cc.Invoke(ctx, BinanceUser_HandleP_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BinanceUserServer is the server API for BinanceUser service.
 // All implementations must embed UnimplementedBinanceUserServer
 // for forward compatibility
@@ -447,6 +458,7 @@ type BinanceUserServer interface {
 	GetBinanceTradersTrade(context.Context, *GetBinanceTradersTradeRequest) (*GetBinanceTradersTradeReply, error)
 	InsertUserBindData(context.Context, *InsertUserBindDataRequest) (*InsertUserBindDataReply, error)
 	DeleteUserBindData(context.Context, *DeleteUserBindDataRequest) (*DeleteUserBindDataReply, error)
+	HandleP(context.Context, *HandlePRequest) (*HandlePReply, error)
 	mustEmbedUnimplementedBinanceUserServer()
 }
 
@@ -555,6 +567,9 @@ func (UnimplementedBinanceUserServer) InsertUserBindData(context.Context, *Inser
 }
 func (UnimplementedBinanceUserServer) DeleteUserBindData(context.Context, *DeleteUserBindDataRequest) (*DeleteUserBindDataReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUserBindData not implemented")
+}
+func (UnimplementedBinanceUserServer) HandleP(context.Context, *HandlePRequest) (*HandlePReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandleP not implemented")
 }
 func (UnimplementedBinanceUserServer) mustEmbedUnimplementedBinanceUserServer() {}
 
@@ -1181,6 +1196,24 @@ func _BinanceUser_DeleteUserBindData_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BinanceUser_HandleP_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HandlePRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).HandleP(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_HandleP_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).HandleP(ctx, req.(*HandlePRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BinanceUser_ServiceDesc is the grpc.ServiceDesc for BinanceUser service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1323,6 +1356,10 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteUserBindData",
 			Handler:    _BinanceUser_DeleteUserBindData_Handler,
+		},
+		{
+			MethodName: "HandleP",
+			Handler:    _BinanceUser_HandleP_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

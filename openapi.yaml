@@ -315,6 +315,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/handle_p:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_HandleP
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HandlePReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/binanceexchange_user/init_order_after_bind:
         get:
             tags:
@@ -1014,6 +1032,9 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        HandlePReply:
+            type: object
+            properties: {}
         InitOrderAfterBindReply:
             type: object
             properties: {}

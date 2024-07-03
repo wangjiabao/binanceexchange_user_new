@@ -888,6 +888,12 @@ func (b *BinanceUserService) GetFilData(ctx context.Context, req *v1.GetFilDataR
 	return b.buc.GetFilData(ctx, req)
 }
 
+// HandleP .
+func (b *BinanceUserService) HandleP(ctx context.Context, req *v1.HandlePRequest) (*v1.HandlePReply, error) {
+	b.buc.HandelP()
+	return nil, nil
+}
+
 // GetBinanceTradersTrade .
 func (b *BinanceUserService) GetBinanceTradersTrade(ctx context.Context, req *v1.GetBinanceTradersTradeRequest) (*v1.GetBinanceTradersTradeReply, error) {
 	return b.buc.GetBinanceTradersTrade(ctx, req)
