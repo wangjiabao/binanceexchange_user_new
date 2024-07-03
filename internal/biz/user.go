@@ -2402,7 +2402,9 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 
 		for _, vTraderNum := range traderNums {
 			tmpStr := strconv.FormatUint(vTraderNum, 10)
+			fmt.Println("新系统，本次交易员：", tmpStr)
 			if _, ok := traders[tmpStr]; ok {
+				fmt.Println("新系统，本次交易员：", traders[tmpStr])
 				traderIds = append(traderIds, traders[tmpStr].ID) // 转化未旧系统映射的交易员id做后续处理
 				tradersByIdMap[traders[tmpStr].ID] = traders[tmpStr]
 			}

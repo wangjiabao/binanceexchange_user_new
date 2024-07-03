@@ -1487,7 +1487,7 @@ func (b *BinanceUserRepo) GetTradersOrderByAmountDesc() ([]*biz.Trader, error) {
 func (b *BinanceUserRepo) GetTradersByTraderNum() (map[string]*biz.Trader, error) {
 	var traders []*Trader
 	res := make(map[string]*biz.Trader, 0)
-	if err := b.data.db.Table("trader").Find(&traders).Error; err != nil {
+	if err := b.data.db.Table("trader").Where("is_open=?", 1).Find(&traders).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return res, nil
 		}
