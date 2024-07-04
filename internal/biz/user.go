@@ -3888,6 +3888,11 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwo(ctx context.Context, req *v1.
 	}
 
 	for traderId, vUserBindTraders := range userBindTraders {
+		// todo
+		if 139 != traderId {
+			continue
+		}
+
 		var (
 			//traderPositions           []*TraderPosition
 			traderOpeningPositionsNew []*ZyTraderPosition
@@ -3923,7 +3928,7 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwo(ctx context.Context, req *v1.
 		}
 
 		// 新系统的
-		traderOpeningPositionsNew, err = b.binanceUserRepo.GetOpeningTraderPosition(traders[traderId].PortfolioId)
+		traderOpeningPositionsNew, err = b.binanceUserRepo.GetOpeningTraderPosition("102")
 		if nil != err {
 			fmt.Println("初始化仓位，空仓位", traderId, err)
 			continue
