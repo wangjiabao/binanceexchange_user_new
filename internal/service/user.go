@@ -386,7 +386,7 @@ func (b *BinanceUserService) ListenTraderAndUserOrderNew(ctx context.Context, re
 }
 
 func (b *BinanceUserService) ListenOrderNew(ctx context.Context, req *v1.ListenTraderAndUserOrderRequest) (*v1.ListenTraderAndUserOrderReply, error) {
-	fmt.Println("最新系统")
+	fmt.Println("最新系统", req)
 	return b.buc.ListenTradersNew(ctx, req)
 }
 
