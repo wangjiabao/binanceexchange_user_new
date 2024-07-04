@@ -3889,7 +3889,7 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwo(ctx context.Context, req *v1.
 
 	for traderId, vUserBindTraders := range userBindTraders {
 		// todo
-		if 139 != traderId {
+		if 89 != traderId {
 			continue
 		}
 
