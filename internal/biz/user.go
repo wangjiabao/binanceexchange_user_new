@@ -2385,7 +2385,9 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 	traderNums = make([]uint64, 0)
 	for _, vOrders := range req.SendBody.Orders {
 		if "ok" == req.SendBody.Last {
-			traderIds = append(traderIds, vOrders.Uid)
+			if 0 < vOrders.Uid {
+				traderIds = append(traderIds, vOrders.Uid)
+			}
 			// 新系统下单请求
 			newSystemReqLast = true
 		} else {
