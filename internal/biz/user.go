@@ -2369,28 +2369,34 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 	defer wg.Done()
 
 	var (
-		newSystemReq   bool
-		traderIds      []uint64
-		traderNums     []uint64
-		userBindTrader map[uint64][]*UserBindTrader
-		userIds        []uint64
-		userIdsMap     map[uint64]uint64
-		users          map[uint64]*User
-		symbol         map[string]*Symbol
-		err            error
+		newSystemReq     bool
+		newSystemReqLast bool
+		traderIds        []uint64
+		traderNums       []uint64
+		userBindTrader   map[uint64][]*UserBindTrader
+		userIds          []uint64
+		userIdsMap       map[uint64]uint64
+		users            map[uint64]*User
+		symbol           map[string]*Symbol
+		err              error
 	)
 
 	traderIds = make([]uint64, 0)
 	traderNums = make([]uint64, 0)
 	for _, vOrders := range req.SendBody.Orders {
-		if 0 < vOrders.Uid {
+		if "ok" == req.SendBody.Last {
 			traderIds = append(traderIds, vOrders.Uid)
-		}
+			// 新系统下单请求
+			newSystemReqLast = true
+		} else {
+			if 0 < vOrders.Uid {
+				traderIds = append(traderIds, vOrders.Uid)
+			}
 
-		if 0 < vOrders.TraderNum {
-			traderNums = append(traderNums, vOrders.TraderNum)
+			if 0 < vOrders.TraderNum {
+				traderNums = append(traderNums, vOrders.TraderNum)
+			}
 		}
-
 	}
 
 	// 新系统需要的交易员信息
@@ -2531,10 +2537,12 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 					} else {
 						// 老系统请求
 						if 1 == users[vUserBindTrader.UserId].UseNewSystem { // 新系统用户
-							continue
-						} else {
-							tmpBaseMoney = vOrders.BaseMoney
+							if !newSystemReqLast {
+								continue
+							}
 						}
+
+						tmpBaseMoney = vOrders.BaseMoney
 					}
 
 					//

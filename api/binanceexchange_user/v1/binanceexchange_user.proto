@@ -303,6 +303,7 @@ message OrderHandleReply {}
 message ListenTraderAndUserOrderRequest {
   message SendBody {
     repeated Order orders = 1;
+    string last = 2;
     uint64 init_order = 4;
     message Order {
       uint64 uid = 1;
