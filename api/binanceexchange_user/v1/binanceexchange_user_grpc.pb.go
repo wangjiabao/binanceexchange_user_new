@@ -26,6 +26,7 @@ const (
 	BinanceUser_BindTrader_FullMethodName                  = "/BinanceUser/BindTrader"
 	BinanceUser_ListenTraderAndUserOrder_FullMethodName    = "/BinanceUser/ListenTraderAndUserOrder"
 	BinanceUser_ListenTraderAndUserOrderNew_FullMethodName = "/BinanceUser/ListenTraderAndUserOrderNew"
+	BinanceUser_ListenOrderNew_FullMethodName              = "/BinanceUser/ListenOrderNew"
 	BinanceUser_OrderHandle_FullMethodName                 = "/BinanceUser/OrderHandle"
 	BinanceUser_OrderHandleTwo_FullMethodName              = "/BinanceUser/OrderHandleTwo"
 	BinanceUser_Analyze_FullMethodName                     = "/BinanceUser/Analyze"
@@ -67,6 +68,7 @@ type BinanceUserClient interface {
 	BindTrader(ctx context.Context, in *BindTraderRequest, opts ...grpc.CallOption) (*BindTraderReply, error)
 	ListenTraderAndUserOrder(ctx context.Context, in *ListenTraderAndUserOrderRequest, opts ...grpc.CallOption) (*ListenTraderAndUserOrderReply, error)
 	ListenTraderAndUserOrderNew(ctx context.Context, in *ListenTraderAndUserOrderRequest, opts ...grpc.CallOption) (*ListenTraderAndUserOrderReply, error)
+	ListenOrderNew(ctx context.Context, in *ListenTraderAndUserOrderRequest, opts ...grpc.CallOption) (*ListenTraderAndUserOrderReply, error)
 	OrderHandle(ctx context.Context, in *OrderHandleRequest, opts ...grpc.CallOption) (*OrderHandleReply, error)
 	OrderHandleTwo(ctx context.Context, in *OrderHandleRequest, opts ...grpc.CallOption) (*OrderHandleReply, error)
 	Analyze(ctx context.Context, in *AnalyzeRequest, opts ...grpc.CallOption) (*AnalyzeReply, error)
@@ -162,6 +164,15 @@ func (c *binanceUserClient) ListenTraderAndUserOrder(ctx context.Context, in *Li
 func (c *binanceUserClient) ListenTraderAndUserOrderNew(ctx context.Context, in *ListenTraderAndUserOrderRequest, opts ...grpc.CallOption) (*ListenTraderAndUserOrderReply, error) {
 	out := new(ListenTraderAndUserOrderReply)
 	err := c.cc.Invoke(ctx, BinanceUser_ListenTraderAndUserOrderNew_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *binanceUserClient) ListenOrderNew(ctx context.Context, in *ListenTraderAndUserOrderRequest, opts ...grpc.CallOption) (*ListenTraderAndUserOrderReply, error) {
+	out := new(ListenTraderAndUserOrderReply)
+	err := c.cc.Invoke(ctx, BinanceUser_ListenOrderNew_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -431,6 +442,7 @@ type BinanceUserServer interface {
 	BindTrader(context.Context, *BindTraderRequest) (*BindTraderReply, error)
 	ListenTraderAndUserOrder(context.Context, *ListenTraderAndUserOrderRequest) (*ListenTraderAndUserOrderReply, error)
 	ListenTraderAndUserOrderNew(context.Context, *ListenTraderAndUserOrderRequest) (*ListenTraderAndUserOrderReply, error)
+	ListenOrderNew(context.Context, *ListenTraderAndUserOrderRequest) (*ListenTraderAndUserOrderReply, error)
 	OrderHandle(context.Context, *OrderHandleRequest) (*OrderHandleReply, error)
 	OrderHandleTwo(context.Context, *OrderHandleRequest) (*OrderHandleReply, error)
 	Analyze(context.Context, *AnalyzeRequest) (*AnalyzeReply, error)
@@ -486,6 +498,9 @@ func (UnimplementedBinanceUserServer) ListenTraderAndUserOrder(context.Context, 
 }
 func (UnimplementedBinanceUserServer) ListenTraderAndUserOrderNew(context.Context, *ListenTraderAndUserOrderRequest) (*ListenTraderAndUserOrderReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListenTraderAndUserOrderNew not implemented")
+}
+func (UnimplementedBinanceUserServer) ListenOrderNew(context.Context, *ListenTraderAndUserOrderRequest) (*ListenTraderAndUserOrderReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListenOrderNew not implemented")
 }
 func (UnimplementedBinanceUserServer) OrderHandle(context.Context, *OrderHandleRequest) (*OrderHandleReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method OrderHandle not implemented")
@@ -706,6 +721,24 @@ func _BinanceUser_ListenTraderAndUserOrderNew_Handler(srv interface{}, ctx conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BinanceUserServer).ListenTraderAndUserOrderNew(ctx, req.(*ListenTraderAndUserOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BinanceUser_ListenOrderNew_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListenTraderAndUserOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).ListenOrderNew(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_ListenOrderNew_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).ListenOrderNew(ctx, req.(*ListenTraderAndUserOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1248,6 +1281,10 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListenTraderAndUserOrderNew",
 			Handler:    _BinanceUser_ListenTraderAndUserOrderNew_Handler,
+		},
+		{
+			MethodName: "ListenOrderNew",
+			Handler:    _BinanceUser_ListenOrderNew_Handler,
 		},
 		{
 			MethodName: "OrderHandle",

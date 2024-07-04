@@ -88,6 +88,13 @@ type LhTraderPosition struct {
 	Qty      float64 `gorm:"type:decimal(65,20);not null"`
 }
 
+type ZyTraderPosition struct {
+	ID             uint64  `gorm:"primarykey;type:int"`
+	PositionSide   string  `gorm:"column:positionSide;type:varchar(100);not null"`
+	Symbol         string  `gorm:"type:varchar(100);not null"`
+	PositionAmount float64 `gorm:"column:positionAmount;type:decimal(60,8);not null"`
+}
+
 type TraderPositionNew struct {
 	ID     uint64  `gorm:"primarykey;type:int"`
 	Closed uint64  `gorm:"type:bigint(20);not null"`
@@ -2530,6 +2537,32 @@ func (b *BinanceUserRepo) GetTraderPosition(traderId uint64) ([]*biz.TraderPosit
 			Qty:          v.Qty,
 			Side:         v.Side,
 			PositionSide: v.Type,
+		})
+	}
+
+	return res, nil
+}
+
+// GetOpeningTraderPosition .
+func (b *BinanceUserRepo) GetOpeningTraderPosition(traderNum string) ([]*biz.ZyTraderPosition, error) {
+	var lhTraderPosition []*ZyTraderPosition
+
+	res := make([]*biz.ZyTraderPosition, 0)
+	tableName := "zy_trader_position" + traderNum
+	if err := b.data.db.Table(tableName).Where("positionAmount>?", 0).Find(&lhTraderPosition).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_LH_TRADER_POSITION_ERROR", err.Error())
+	}
+
+	for _, v := range lhTraderPosition {
+		res = append(res, &biz.ZyTraderPosition{
+			ID:             v.ID,
+			Symbol:         v.Symbol,
+			PositionAmount: v.PositionAmount,
+			PositionSide:   v.PositionSide,
 		})
 	}
 

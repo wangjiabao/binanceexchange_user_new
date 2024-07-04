@@ -381,6 +381,12 @@ func (b *BinanceUserService) ListenTraderAndUserOrder(ctx context.Context, req *
 }
 
 func (b *BinanceUserService) ListenTraderAndUserOrderNew(ctx context.Context, req *v1.ListenTraderAndUserOrderRequest) (*v1.ListenTraderAndUserOrderReply, error) {
+	fmt.Println("新系统", req.SendBody)
+	return b.buc.ListenTradersNew(ctx, req)
+}
+
+func (b *BinanceUserService) ListenOrderNew(ctx context.Context, req *v1.ListenTraderAndUserOrderRequest) (*v1.ListenTraderAndUserOrderReply, error) {
+	fmt.Println("最新系统")
 	return b.buc.ListenTradersNew(ctx, req)
 }
 
