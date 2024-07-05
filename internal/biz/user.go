@@ -3901,11 +3901,6 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwo(ctx context.Context, req *v1.
 	}
 
 	for traderId, vUserBindTraders := range userBindTraders {
-		// todo
-		if 89 != traderId {
-			continue
-		}
-
 		var (
 			//traderPositions           []*TraderPosition
 			traderOpeningPositionsNew []*ZyTraderPosition
@@ -3993,7 +3988,7 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwo(ctx context.Context, req *v1.
 					}
 
 					// 使用的新系统
-					if 1 != users[vVUserBindTraders.UserId].UseNewSystem {
+					if 2 != users[vVUserBindTraders.UserId].UseNewSystem {
 						continue
 					}
 
