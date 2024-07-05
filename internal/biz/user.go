@@ -2521,6 +2521,11 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 						}
 					}
 
+					// 最新系统的用户不处理老系统的订单
+					if newSystemReqLast && 2 != users[vUserBindTrader.UserId].UseNewSystem {
+						continue
+					}
+
 					var (
 						tmpBaseMoney string
 					)
@@ -2539,9 +2544,7 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 					} else {
 						// 老系统请求
 						if 1 == users[vUserBindTrader.UserId].UseNewSystem { // 新系统用户
-							if !newSystemReqLast {
-								continue
-							}
+							continue
 						}
 
 						tmpBaseMoney = vOrders.BaseMoney
@@ -3938,7 +3941,7 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwo(ctx context.Context, req *v1.
 		}
 
 		// 新系统的
-		traderOpeningPositionsNew, err = b.binanceUserRepo.GetOpeningTraderPosition("102")
+		traderOpeningPositionsNew, err = b.binanceUserRepo.GetOpeningTraderPosition(strconv.FormatUint(traderId, 10))
 		if nil != err {
 			fmt.Println("初始化仓位，空仓位", traderId, err)
 			continue
