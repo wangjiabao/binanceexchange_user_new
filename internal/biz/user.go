@@ -2547,6 +2547,11 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 							continue
 						}
 
+						// 老系统
+						if !newSystemReqLast && 0 != users[vUserBindTrader.UserId].UseNewSystem {
+							continue
+						}
+
 						tmpBaseMoney = vOrders.BaseMoney
 					}
 
