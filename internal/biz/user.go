@@ -4222,8 +4222,8 @@ func (b *BinanceUserUsecase) ExchangeUserLeverAge(ctx context.Context, req *v1.E
 
 	if "all" == req.Symbol {
 		for k, _ := range symbol {
-			fmt.Println("仓位杠杆修改：", k, int64(5), user.ApiKey, user.ApiSecret)
-			_, err = requestBinanceLeverAge(k, int64(5), user.ApiKey, user.ApiSecret)
+			fmt.Println("仓位杠杆修改：", k, int64(req.Num), user.ApiKey, user.ApiSecret)
+			_, err = requestBinanceLeverAge(k, int64(req.Num), user.ApiKey, user.ApiSecret)
 			if nil != err {
 				fmt.Println(err)
 				return nil, err

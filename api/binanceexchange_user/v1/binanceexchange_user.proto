@@ -288,10 +288,10 @@ message OrderAdminTwoRequest {
 
 message OrderAdminTwoReply {}
 
-
 message ExchangeUserLeverAgeRequest {
   uint64 user_id = 1;
   string symbol = 3;
+  uint64 num = 2;
 }
 
 message ExchangeUserLeverAgeReply {}
