@@ -95,6 +95,13 @@ type ZyTraderPosition struct {
 	PositionAmount float64 `gorm:"column:positionAmount;type:decimal(60,8);not null"`
 }
 
+type TraderPosition struct {
+	ID             uint64  `gorm:"primarykey;type:int"`
+	PositionSide   string  `gorm:"type:varchar(100);not null"`
+	Symbol         string  `gorm:"type:varchar(100);not null"`
+	PositionAmount float64 `gorm:"type:decimal(60,8);not null"`
+}
+
 type TraderPositionNew struct {
 	ID     uint64  `gorm:"primarykey;type:int"`
 	Closed uint64  `gorm:"type:bigint(20);not null"`
@@ -2634,7 +2641,7 @@ func (b *BinanceUserRepo) GetTraderPosition(traderId uint64) ([]*biz.TraderPosit
 
 // GetOpeningTraderPositionNewNew .
 func (b *BinanceUserRepo) GetOpeningTraderPositionNewNew(traderNum string) ([]*biz.ZyTraderPosition, error) {
-	var lhTraderPosition []*ZyTraderPosition
+	var lhTraderPosition []*TraderPosition
 
 	res := make([]*biz.ZyTraderPosition, 0)
 	tableName := "trader_position_" + traderNum
