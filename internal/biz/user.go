@@ -4235,7 +4235,7 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwoNew(ctx context.Context, req *
 		}
 
 		// 新系统的
-		traderOpeningPositionsNew, err = b.binanceUserRepo.GetOpeningTraderPositionNewNew(strconv.FormatUint(traderId, 10))
+		traderOpeningPositionsNew, err = b.binanceUserRepo.GetOpeningTraderPositionNewNew(traders[traderId].PortfolioId)
 		if nil != err {
 			fmt.Println("初始化仓位，空仓位", traderId, err)
 			continue
