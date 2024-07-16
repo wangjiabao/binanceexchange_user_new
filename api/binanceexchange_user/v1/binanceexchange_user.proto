@@ -100,6 +100,12 @@ service BinanceUser {
     };
   };
 
+  rpc InitOrderAfterBindTwoNew (InitOrderAfterBindRequest) returns (InitOrderAfterBindReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/init_order_after_bind_tfi_new"
+    };
+  };
+
   rpc OverOrderAfterBind (OverOrderAfterBindRequest) returns (OverOrderAfterBindReply) {
     option (google.api.http) = {
       get: "/api/binanceexchange_user/over_order_after_bind"

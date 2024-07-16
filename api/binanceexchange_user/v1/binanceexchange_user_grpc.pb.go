@@ -34,6 +34,7 @@ const (
 	BinanceUser_CloseOrderAfterBindTwo_FullMethodName      = "/BinanceUser/CloseOrderAfterBindTwo"
 	BinanceUser_InitOrderAfterBind_FullMethodName          = "/BinanceUser/InitOrderAfterBind"
 	BinanceUser_InitOrderAfterBindTwo_FullMethodName       = "/BinanceUser/InitOrderAfterBindTwo"
+	BinanceUser_InitOrderAfterBindTwoNew_FullMethodName    = "/BinanceUser/InitOrderAfterBindTwoNew"
 	BinanceUser_OverOrderAfterBind_FullMethodName          = "/BinanceUser/OverOrderAfterBind"
 	BinanceUser_OverOrderAfterBindTwo_FullMethodName       = "/BinanceUser/OverOrderAfterBindTwo"
 	BinanceUser_AdminOverOrderAfterBind_FullMethodName     = "/BinanceUser/AdminOverOrderAfterBind"
@@ -76,6 +77,7 @@ type BinanceUserClient interface {
 	CloseOrderAfterBindTwo(ctx context.Context, in *CloseOrderAfterBindRequest, opts ...grpc.CallOption) (*CloseOrderAfterBindReply, error)
 	InitOrderAfterBind(ctx context.Context, in *InitOrderAfterBindRequest, opts ...grpc.CallOption) (*InitOrderAfterBindReply, error)
 	InitOrderAfterBindTwo(ctx context.Context, in *InitOrderAfterBindRequest, opts ...grpc.CallOption) (*InitOrderAfterBindReply, error)
+	InitOrderAfterBindTwoNew(ctx context.Context, in *InitOrderAfterBindRequest, opts ...grpc.CallOption) (*InitOrderAfterBindReply, error)
 	OverOrderAfterBind(ctx context.Context, in *OverOrderAfterBindRequest, opts ...grpc.CallOption) (*OverOrderAfterBindReply, error)
 	OverOrderAfterBindTwo(ctx context.Context, in *OverOrderAfterBindRequest, opts ...grpc.CallOption) (*OverOrderAfterBindReply, error)
 	AdminOverOrderAfterBind(ctx context.Context, in *OverOrderAfterBindRequest, opts ...grpc.CallOption) (*OverOrderAfterBindReply, error)
@@ -236,6 +238,15 @@ func (c *binanceUserClient) InitOrderAfterBind(ctx context.Context, in *InitOrde
 func (c *binanceUserClient) InitOrderAfterBindTwo(ctx context.Context, in *InitOrderAfterBindRequest, opts ...grpc.CallOption) (*InitOrderAfterBindReply, error) {
 	out := new(InitOrderAfterBindReply)
 	err := c.cc.Invoke(ctx, BinanceUser_InitOrderAfterBindTwo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *binanceUserClient) InitOrderAfterBindTwoNew(ctx context.Context, in *InitOrderAfterBindRequest, opts ...grpc.CallOption) (*InitOrderAfterBindReply, error) {
+	out := new(InitOrderAfterBindReply)
+	err := c.cc.Invoke(ctx, BinanceUser_InitOrderAfterBindTwoNew_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -450,6 +461,7 @@ type BinanceUserServer interface {
 	CloseOrderAfterBindTwo(context.Context, *CloseOrderAfterBindRequest) (*CloseOrderAfterBindReply, error)
 	InitOrderAfterBind(context.Context, *InitOrderAfterBindRequest) (*InitOrderAfterBindReply, error)
 	InitOrderAfterBindTwo(context.Context, *InitOrderAfterBindRequest) (*InitOrderAfterBindReply, error)
+	InitOrderAfterBindTwoNew(context.Context, *InitOrderAfterBindRequest) (*InitOrderAfterBindReply, error)
 	OverOrderAfterBind(context.Context, *OverOrderAfterBindRequest) (*OverOrderAfterBindReply, error)
 	OverOrderAfterBindTwo(context.Context, *OverOrderAfterBindRequest) (*OverOrderAfterBindReply, error)
 	AdminOverOrderAfterBind(context.Context, *OverOrderAfterBindRequest) (*OverOrderAfterBindReply, error)
@@ -522,6 +534,9 @@ func (UnimplementedBinanceUserServer) InitOrderAfterBind(context.Context, *InitO
 }
 func (UnimplementedBinanceUserServer) InitOrderAfterBindTwo(context.Context, *InitOrderAfterBindRequest) (*InitOrderAfterBindReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitOrderAfterBindTwo not implemented")
+}
+func (UnimplementedBinanceUserServer) InitOrderAfterBindTwoNew(context.Context, *InitOrderAfterBindRequest) (*InitOrderAfterBindReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InitOrderAfterBindTwoNew not implemented")
 }
 func (UnimplementedBinanceUserServer) OverOrderAfterBind(context.Context, *OverOrderAfterBindRequest) (*OverOrderAfterBindReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method OverOrderAfterBind not implemented")
@@ -865,6 +880,24 @@ func _BinanceUser_InitOrderAfterBindTwo_Handler(srv interface{}, ctx context.Con
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BinanceUserServer).InitOrderAfterBindTwo(ctx, req.(*InitOrderAfterBindRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BinanceUser_InitOrderAfterBindTwoNew_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InitOrderAfterBindRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).InitOrderAfterBindTwoNew(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_InitOrderAfterBindTwoNew_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).InitOrderAfterBindTwoNew(ctx, req.(*InitOrderAfterBindRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1313,6 +1346,10 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "InitOrderAfterBindTwo",
 			Handler:    _BinanceUser_InitOrderAfterBindTwo_Handler,
+		},
+		{
+			MethodName: "InitOrderAfterBindTwoNew",
+			Handler:    _BinanceUser_InitOrderAfterBindTwoNew_Handler,
 		},
 		{
 			MethodName: "OverOrderAfterBind",

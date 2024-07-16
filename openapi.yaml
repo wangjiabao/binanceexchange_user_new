@@ -373,6 +373,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/init_order_after_bind_tfi_new:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_InitOrderAfterBindTwoNew
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InitOrderAfterBindReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/binanceexchange_user/insert_user_bind_data:
         post:
             tags:

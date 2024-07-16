@@ -893,6 +893,55 @@ func (b *BinanceUserRepo) InsertUserOrderErr(ctx context.Context, order *biz.Use
 	}, nil
 }
 
+// InsertUserOrderTwoNew .
+func (b *BinanceUserRepo) InsertUserOrderTwoNew(ctx context.Context, order *biz.UserOrder) (*biz.UserOrder, error) {
+	insertUserOrder := &UserOrder{
+		ID:            order.ID,
+		UserId:        order.UserId,
+		TraderId:      order.TraderId,
+		ClientOrderId: order.ClientOrderId,
+		OrderId:       order.OrderId,
+		Symbol:        order.Symbol,
+		Side:          order.Side,
+		PositionSide:  order.PositionSide,
+		Quantity:      order.Quantity,
+		Price:         order.Price,
+		TraderQty:     order.TraderQty,
+		OrderType:     order.OrderType,
+		ClosePosition: order.ClosePosition,
+		CumQuote:      order.CumQuote,
+		ExecutedQty:   order.ExecutedQty,
+		AvgPrice:      order.AvgPrice,
+		HandleStatus:  0,
+	}
+
+	res := b.data.DB(ctx).Table("new_user_order_two_" + strconv.FormatInt(int64(order.UserId), 10)).Create(&insertUserOrder)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_USER_ORDER_TWO_ERROR", "创建数据失败")
+	}
+
+	return &biz.UserOrder{
+		ID:            insertUserOrder.ID,
+		UserId:        insertUserOrder.UserId,
+		TraderId:      insertUserOrder.TraderId,
+		ClientOrderId: insertUserOrder.ClientOrderId,
+		OrderId:       insertUserOrder.OrderId,
+		Symbol:        insertUserOrder.Symbol,
+		Side:          insertUserOrder.Side,
+		PositionSide:  insertUserOrder.PositionSide,
+		Quantity:      insertUserOrder.Quantity,
+		Price:         insertUserOrder.Price,
+		TraderQty:     insertUserOrder.TraderQty,
+		OrderType:     insertUserOrder.OrderType,
+		ClosePosition: insertUserOrder.ClosePosition,
+		CumQuote:      insertUserOrder.CumQuote,
+		ExecutedQty:   insertUserOrder.ExecutedQty,
+		AvgPrice:      insertUserOrder.AvgPrice,
+		CreatedAt:     insertUserOrder.CreatedAt,
+		UpdatedAt:     insertUserOrder.UpdatedAt,
+	}, nil
+}
+
 // InsertUserOrderTwo .
 func (b *BinanceUserRepo) InsertUserOrderTwo(ctx context.Context, order *biz.UserOrder) (*biz.UserOrder, error) {
 	insertUserOrder := &UserOrder{
@@ -2166,6 +2215,46 @@ func (b *BinanceUserRepo) GetUserOrderTwoByUserTraderIdAndSymbol(userId uint64, 
 	return res, nil
 }
 
+// GetUserOrderTwoByUserTraderIdAndSymbolNew .
+func (b *BinanceUserRepo) GetUserOrderTwoByUserTraderIdAndSymbolNew(userId uint64, traderId uint64, symbol string) ([]*biz.UserOrder, error) {
+	var userOrder []*UserOrder
+	if err := b.data.db.Table("new_user_order_two_"+strconv.FormatInt(int64(userId), 10)).
+		Where("user_id=? and trader_id=? and symbol=?", userId, traderId, symbol).
+		Find(&userOrder).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
+		return nil, errors.New(500, "FIND_USER_ORDER_TWO_ERROR", err.Error())
+	}
+
+	res := make([]*biz.UserOrder, 0)
+	for _, v := range userOrder {
+		res = append(res, &biz.UserOrder{
+			ID:            v.ID,
+			UserId:        v.UserId,
+			TraderId:      v.TraderId,
+			ClientOrderId: v.ClientOrderId,
+			OrderId:       v.OrderId,
+			Symbol:        v.Symbol,
+			Side:          v.Side,
+			PositionSide:  v.PositionSide,
+			Quantity:      v.Quantity,
+			Price:         v.Price,
+			TraderQty:     v.TraderQty,
+			OrderType:     v.OrderType,
+			ClosePosition: v.ClosePosition,
+			CumQuote:      v.CumQuote,
+			ExecutedQty:   v.ExecutedQty,
+			AvgPrice:      v.AvgPrice,
+			CreatedAt:     v.CreatedAt,
+			UpdatedAt:     v.UpdatedAt,
+		})
+	}
+
+	return res, nil
+}
+
 // GetUserOrderByUserTraderId .
 func (b *BinanceUserRepo) GetUserOrderByUserTraderId(userId uint64, traderId uint64) (map[string][]*biz.UserOrder, error) {
 	var userOrder []*UserOrder
@@ -2537,6 +2626,32 @@ func (b *BinanceUserRepo) GetTraderPosition(traderId uint64) ([]*biz.TraderPosit
 			Qty:          v.Qty,
 			Side:         v.Side,
 			PositionSide: v.Type,
+		})
+	}
+
+	return res, nil
+}
+
+// GetOpeningTraderPositionNewNew .
+func (b *BinanceUserRepo) GetOpeningTraderPositionNewNew(traderNum string) ([]*biz.ZyTraderPosition, error) {
+	var lhTraderPosition []*ZyTraderPosition
+
+	res := make([]*biz.ZyTraderPosition, 0)
+	tableName := "trader_position_" + traderNum
+	if err := b.data.db.Table(tableName).Where("positionAmount>?", 0).Find(&lhTraderPosition).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_LH_TRADER_POSITION_ERROR", err.Error())
+	}
+
+	for _, v := range lhTraderPosition {
+		res = append(res, &biz.ZyTraderPosition{
+			ID:             v.ID,
+			Symbol:         v.Symbol,
+			PositionAmount: v.PositionAmount,
+			PositionSide:   v.PositionSide,
 		})
 	}
 

@@ -457,6 +457,7 @@ type BinanceUserRepo interface {
 	DeleteUserBindTrader(ctx context.Context, userId uint64) (bool, error)
 	InsertUserOrder(ctx context.Context, order *UserOrder) (*UserOrder, error)
 	InsertUserOrderErr(ctx context.Context, order *UserOrderErr) (*UserOrderErr, error)
+	InsertUserOrderTwoNew(ctx context.Context, order *UserOrder) (*UserOrder, error)
 	InsertUserOrderErrTwo(ctx context.Context, order *UserOrderErr) (*UserOrderErr, error)
 	InsertUserOrderTwo(ctx context.Context, order *UserOrder) (*UserOrder, error)
 	UpdatesUserOrderHandleStatus(ctx context.Context, id uint64) (bool, error)
@@ -503,6 +504,7 @@ type BinanceUserRepo interface {
 	GetSymbol() (map[string]*Symbol, error)
 	GetUserOrderByUserTraderIdAndSymbol(userId uint64, traderId uint64, symbol string) ([]*UserOrder, error)
 	GetUserOrderTwoByUserTraderIdAndSymbol(userId uint64, traderId uint64, symbol string) ([]*UserOrder, error)
+	GetUserOrderTwoByUserTraderIdAndSymbolNew(userId uint64, traderId uint64, symbol string) ([]*UserOrder, error)
 	GetUserOrderByUserTraderId(userId uint64, traderId uint64) (map[string][]*UserOrder, error)
 	GetUserOrderByUserIdMapId(userId uint64) (map[string]*UserOrder, error)
 	GetUserOrderByUserIdAndSymbolAndPositionSide(userId uint64, symbol string, positionSide string) ([]*UserOrder, error)
@@ -514,6 +516,7 @@ type BinanceUserRepo interface {
 	GetTraderPosition(traderId uint64) ([]*TraderPosition, error)
 	GetOpeningTraderPositionNew(traderNum string) ([]*TraderPositionNew, error)
 	GetOpeningTraderPosition(traderNum string) ([]*ZyTraderPosition, error)
+	GetOpeningTraderPositionNewNew(traderNum string) ([]*ZyTraderPosition, error)
 	InsertTradingBoxOpen(ctx context.Context, box *TradingBoxOpen) (*TradingBoxOpen, error)
 	UpdateTradingBoxOpenStatus(ctx context.Context, tokenId uint64) (bool, error)
 	GetTradingBoxOpen() ([]*TradingBoxOpen, error)
@@ -2573,6 +2576,289 @@ func (b *BinanceUserUsecase) ListenTradersHandleTwo(ctx context.Context, req *v1
 	}
 }
 
+func (b *BinanceUserUsecase) userOrderGoroutineTwoNew(ctx context.Context, wg *sync.WaitGroup, order *OrderData, amount string, user *User, userBindTrader *UserBindTrader, quantityPrecision int64, initOrderReq uint64, proportion float64, overOrderReq uint64) {
+	defer wg.Done() // goroutine结束就登记-1
+
+	var (
+		binanceOrder  *BinanceOrder
+		orderType     = "MARKET"
+		positionSide  string
+		quantity      string
+		qty           float64
+		price         float64
+		traderAmount  float64
+		currentOrders []*UserOrder
+		currentOrder  *UserOrder
+		insertOrder   *UserOrder
+		err           error
+	)
+
+	// 新订单数据
+	currentOrder = &UserOrder{
+		UserId:        userBindTrader.UserId,
+		TraderId:      userBindTrader.TraderId,
+		Symbol:        order.Coin,
+		Side:          "",
+		PositionSide:  "",
+		Quantity:      0,
+		Price:         0,
+		TraderQty:     0,
+		OrderType:     orderType,
+		ClosePosition: "",
+		CumQuote:      0,
+		ExecutedQty:   0,
+		AvgPrice:      0,
+	}
+
+	if 0 == overOrderReq { // 非全平仓下单
+		qty, err = strconv.ParseFloat(order.Qty, 64)
+		if nil != err {
+			fmt.Println(err, order, userBindTrader)
+			return
+		}
+		currentOrder.TraderQty = qty
+
+		traderAmount, err = strconv.ParseFloat(amount, 64)
+		if nil != err {
+			fmt.Println(err, order, userBindTrader)
+			return
+		}
+	}
+
+	if "LONG" == order.Type {
+		positionSide = "LONG"
+	} else if "SHORT" == order.Type {
+		positionSide = "SHORT" // 空
+	} else {
+		fmt.Println("err position side")
+		return
+	}
+	currentOrder.PositionSide = positionSide
+
+	var (
+		quantityFloat float64
+	)
+	if 1 == initOrderReq { // 初始化下单
+		price, err = strconv.ParseFloat(order.Price, 64)
+		if nil != err {
+			fmt.Println(err, order, userBindTrader)
+			return
+		}
+		currentOrder.Price = price
+
+		if 0 > currentOrder.Price {
+			fmt.Println("err price", currentOrder.Price, order, userBindTrader)
+			return
+		}
+
+		quantityFloat = float64(userBindTrader.Amount) * proportion / currentOrder.Price
+	} else if 1 == overOrderReq { // 全平仓
+
+	} else {
+		quantityFloat = float64(userBindTrader.Amount) * qty / traderAmount // 本次开单数量
+	}
+
+	var historyQuantityFloat float64
+	// 本次平仓
+	if ("SELL" == order.Side && "LONG" == order.Type) || ("BUY" == order.Side && "SHORT" == order.Type) {
+		// 订单统计
+		currentOrders, err = b.binanceUserRepo.GetUserOrderTwoByUserTraderIdAndSymbolNew(userBindTrader.UserId, userBindTrader.TraderId, order.Coin)
+		if nil != err {
+			fmt.Println(err, order)
+			return
+		}
+		// 查出用户的BUY单的币的数量，在对应的trader下，超过了BUY不能SELL todo 使用数据库量太大以后
+		if 0 >= len(currentOrders) {
+			return
+		}
+
+		// 多的部分不管，按剩余的数量关 todo 交易员全部平仓，少的部分另一个程序解决
+		for _, vCurrentOrders := range currentOrders {
+			// 本次平多
+			if "SELL" == order.Side && "LONG" == order.Type {
+				// 历史开多和平多
+				if "BUY" == vCurrentOrders.Side && "LONG" == vCurrentOrders.PositionSide {
+					historyQuantityFloat += vCurrentOrders.ExecutedQty
+				} else if "SELL" == vCurrentOrders.Side && "LONG" == vCurrentOrders.PositionSide {
+					historyQuantityFloat -= vCurrentOrders.ExecutedQty
+				}
+			} else if "BUY" == order.Side && "SHORT" == order.Type {
+				// 历史开空和平空
+				if "SELL" == vCurrentOrders.Side && "SHORT" == vCurrentOrders.PositionSide {
+					historyQuantityFloat += vCurrentOrders.ExecutedQty
+				} else if "BUY" == vCurrentOrders.Side && "SHORT" == vCurrentOrders.PositionSide {
+					historyQuantityFloat -= vCurrentOrders.ExecutedQty
+				}
+			}
+		}
+
+		// 开单历史数量不足了
+		if isZero(historyQuantityFloat) || 0 > historyQuantityFloat {
+			fmt.Println("trader的开单数量小于关单数量了，可能是精度问题", order.Coin, userBindTrader.UserId, userBindTrader.TraderId, historyQuantityFloat)
+			if 1 == overOrderReq {
+				fmt.Println("全平功能")
+			}
+			return
+		}
+
+		if 1 == overOrderReq { // 全平仓
+			quantityFloat = historyQuantityFloat
+		} else {
+			// 按仓位百分比平仓
+			if 0 < len(order.Position) {
+				var (
+					tmpPositionTotal float64
+				)
+
+				tmpPositionTotal, err = strconv.ParseFloat(order.Position, 64)
+				if nil != err {
+					fmt.Println(err, order, userBindTrader)
+					return
+				}
+
+				if 0 < tmpPositionTotal && 0 < qty {
+					quantityFloat = historyQuantityFloat * qty / tmpPositionTotal // 本次平仓数量
+				}
+			}
+
+			// 超过了净开单数量
+			// todo 并发操作时数据不一致的可能性，会导致数量对不上，例如下单程序和更换绑定程序同时执行时，是否程序中统计的总数字会漏计算这里的新增的订单的数字
+			if quantityFloat > historyQuantityFloat {
+				quantityFloat = historyQuantityFloat
+			}
+		}
+
+	} else if ("SELL" == order.Side && "SHORT" == order.Type) || ("BUY" == order.Side && "LONG" == order.Type) {
+		// 开仓
+
+	} else {
+		fmt.Println("err order side")
+		return
+	}
+
+	currentOrder.Side = order.Side
+
+	// 精度调整
+	if 0 >= quantityPrecision {
+		quantity = fmt.Sprintf("%d", int64(quantityFloat))
+	} else {
+		quantity = strconv.FormatFloat(quantityFloat, 'f', int(quantityPrecision), 64)
+	}
+
+	currentOrder.Quantity, err = strconv.ParseFloat(quantity, 64)
+	if nil != err {
+		fmt.Println(err)
+		return
+	}
+
+	if 0 >= currentOrder.Quantity {
+		fmt.Println("下单数值太小", quantity, currentOrder, quantityPrecision)
+		return
+	}
+
+	var orderInfo *OrderInfo
+	// 请求下单
+	binanceOrder, orderInfo, err = requestBinanceOrder(order.Coin, order.Side, orderType, positionSide, quantity, user.ApiKey, user.ApiSecret)
+	if nil != err {
+		fmt.Println(err)
+		return
+	}
+
+	// 下单异常
+	if 0 >= binanceOrder.OrderId {
+		// 写入
+		orderErr := &UserOrderErr{
+			UserId:        currentOrder.UserId,
+			TraderId:      currentOrder.TraderId,
+			ClientOrderId: currentOrder.ClientOrderId,
+			OrderId:       currentOrder.OrderId,
+			Symbol:        currentOrder.Symbol,
+			Side:          currentOrder.Side,
+			PositionSide:  currentOrder.PositionSide,
+			Quantity:      quantityFloat,
+			Price:         currentOrder.Price,
+			TraderQty:     currentOrder.TraderQty,
+			OrderType:     currentOrder.OrderType,
+			ClosePosition: currentOrder.ClosePosition,
+			CumQuote:      currentOrder.CumQuote,
+			ExecutedQty:   currentOrder.ExecutedQty,
+			AvgPrice:      currentOrder.AvgPrice,
+			HandleStatus:  currentOrder.HandleStatus,
+			InitOrder:     int64(initOrderReq),
+			Code:          orderInfo.Code,
+			Msg:           orderInfo.Msg,
+			Proportion:    proportion,
+		}
+
+		if 1 == overOrderReq {
+			orderErr.InitOrder = 2
+		}
+
+		if err = b.tx.ExecTx(ctx, func(ctx context.Context) error {
+			_, err = b.binanceUserRepo.InsertUserOrderErrTwo(ctx, orderErr)
+			if nil != err {
+				return err
+			}
+
+			return nil
+		}); err != nil {
+			fmt.Println(err, orderErr)
+			return
+		}
+
+		return // 返回
+	}
+
+	currentOrder.OrderId = strconv.FormatInt(binanceOrder.OrderId, 10)
+
+	currentOrder.CumQuote, err = strconv.ParseFloat(binanceOrder.CumQuote, 64)
+	if nil != err {
+		fmt.Println(err, binanceOrder)
+		return
+	}
+
+	currentOrder.ExecutedQty, err = strconv.ParseFloat(binanceOrder.ExecutedQty, 64)
+	if nil != err {
+		fmt.Println(err, binanceOrder)
+		return
+	}
+
+	currentOrder.AvgPrice, err = strconv.ParseFloat(binanceOrder.AvgPrice, 64)
+	if nil != err {
+		fmt.Println(err, binanceOrder)
+		return
+	}
+
+	// 写入
+	if err = b.tx.ExecTx(ctx, func(ctx context.Context) error {
+		insertOrder, err = b.binanceUserRepo.InsertUserOrderTwoNew(ctx, currentOrder)
+		if nil != err {
+			return err
+		}
+
+		return nil
+	}); err != nil {
+		fmt.Println(err, insertOrder)
+		return
+	}
+
+	// 计算收益 卖单去binance查询本单收益
+	if ("SELL" == order.Side && "LONG" == order.Type) || ("BUY" == order.Side && "SHORT" == order.Type) {
+		if 0 >= insertOrder.ID {
+			fmt.Println("错误的数据写入", insertOrder)
+			return
+		}
+
+		err = b.binanceUserRepo.SAddOrderSetSellLongOrBuyShortTwo(ctx, int64(insertOrder.ID))
+		if nil != err {
+			fmt.Println("错误的数据写入, redis", insertOrder, err)
+			return
+		}
+	}
+
+	return
+}
+
 func (b *BinanceUserUsecase) userOrderGoroutineTwo(ctx context.Context, wg *sync.WaitGroup, order *OrderData, amount string, user *User, userBindTrader *UserBindTrader, quantityPrecision int64, initOrderReq uint64, proportion float64, overOrderReq uint64) {
 	defer wg.Done() // goroutine结束就登记-1
 
@@ -3847,6 +4133,195 @@ func (b *BinanceUserUsecase) InitOrderAfterBind(ctx context.Context, req *v1.Ini
 			}
 		}
 
+	}
+
+	wg.Wait()
+
+	return nil, nil
+}
+
+// InitOrderAfterBindTwoNew 初始化仓位tfi
+func (b *BinanceUserUsecase) InitOrderAfterBindTwoNew(ctx context.Context, req *v1.InitOrderAfterBindRequest) (*v1.InitOrderAfterBindReply, error) {
+	var (
+		wg              sync.WaitGroup
+		userBindTraders map[uint64][]*UserBindTrader
+		traders         map[uint64]*Trader
+		userIds         []uint64
+		userIdsMap      map[uint64]uint64
+		users           map[uint64]*User
+		symbol          map[string]*Symbol
+		err             error
+	)
+
+	userBindTraders, err = b.binanceUserRepo.GetUserBindTraderTwoByInitOrder()
+	if nil != err {
+		return nil, err
+	}
+
+	userIds = make([]uint64, 0)
+	userIdsMap = make(map[uint64]uint64, 0)
+	for _, vUserBindTrader := range userBindTraders {
+		for _, vVUserBindTrader := range vUserBindTrader {
+			if _, ok := userIdsMap[vVUserBindTrader.UserId]; ok {
+				continue
+			}
+
+			// todo 测试
+			if 47 == vVUserBindTrader.UserId || 48 == vVUserBindTrader.UserId {
+				userIdsMap[vVUserBindTrader.UserId] = vVUserBindTrader.UserId
+				userIds = append(userIds, vVUserBindTrader.UserId)
+			}
+		}
+	}
+
+	if 0 >= len(userIds) {
+		return nil, nil
+	}
+
+	traders, err = b.binanceUserRepo.GetTraders()
+	if nil != err {
+		return nil, nil
+	}
+
+	// 获取用户信息，余额信息，收益信息
+	users, err = b.binanceUserRepo.GetUsersByUserIds(userIds)
+	if nil != err {
+		return nil, nil
+	}
+
+	symbol, err = b.binanceUserRepo.GetSymbol()
+	if nil != err {
+		return nil, nil
+	}
+
+	for traderId, vUserBindTraders := range userBindTraders {
+		// todo
+		if 154 != traderId && 155 != traderId {
+			continue
+		}
+
+		var (
+			//traderPositions           []*TraderPosition
+			traderOpeningPositionsNew []*ZyTraderPosition
+		)
+
+		// 先更新状态
+		for _, vVUserBindTraders := range vUserBindTraders {
+			if _, ok := users[vVUserBindTraders.UserId]; !ok {
+				continue
+			}
+
+			// todo 暂时使用检测没用api信息
+			if 0 >= users[vVUserBindTraders.UserId].ApiStatus {
+				continue
+			}
+
+			if err = b.tx.ExecTx(ctx, func(ctx context.Context) error {
+				_, err = b.binanceUserRepo.UpdatesUserBindTraderTwoInitOrderById(ctx, vVUserBindTraders.ID)
+				if nil != err {
+					return err
+				}
+
+				return nil
+			}); err != nil {
+				fmt.Println(err, "修改初始化失败", traderId, vVUserBindTraders)
+				continue
+			}
+		}
+
+		if _, ok := traders[traderId]; !ok {
+			fmt.Println("初始化仓位，不存在交易员", traderId)
+			continue
+		}
+
+		// 新系统的
+		traderOpeningPositionsNew, err = b.binanceUserRepo.GetOpeningTraderPositionNewNew(strconv.FormatUint(traderId, 10))
+		if nil != err {
+			fmt.Println("初始化仓位，空仓位", traderId, err)
+			continue
+		}
+		// 按仓位
+		for _, vTraderPositions := range traderOpeningPositionsNew {
+			if 0 >= vTraderPositions.PositionAmount {
+				continue
+			}
+
+			var (
+				price      *BinanceSymbolPrice
+				priceFloat float64
+			)
+			// 查询币价
+			price, err = requestBinanceSymbolPrice(vTraderPositions.Symbol)
+			if nil != err {
+				fmt.Println("初始化仓位，价格查询", traderId, price, err)
+				continue
+			}
+
+			priceFloat, err = strconv.ParseFloat(price.Price, 64)
+			if nil != err {
+				fmt.Println("初始化仓位，价格查询，转化", traderId, vTraderPositions, price, err)
+				continue
+			}
+
+			// 交易员仓位u占保证金比例
+			var proportion float64
+			if 0 >= vTraderPositions.PositionAmount || 0 >= traders[traderId].BaseMoney {
+				continue
+			}
+
+			proportion = vTraderPositions.PositionAmount * priceFloat / traders[traderId].BaseMoney
+			if 0 >= proportion || 0 >= priceFloat {
+				fmt.Println("初始化仓位，比例计算", vTraderPositions, proportion, vTraderPositions.PositionAmount, priceFloat, traders[traderId].BaseMoney)
+				continue
+			}
+
+			for _, vVUserBindTraders := range vUserBindTraders {
+				if 0 == vVUserBindTraders.Status { // 绑定
+					if _, ok := users[vVUserBindTraders.UserId]; !ok {
+						continue
+					}
+
+					// todo 暂时使用检测没用api信息
+					if 0 >= users[vVUserBindTraders.UserId].ApiStatus {
+						continue
+					}
+
+					// 使用的新系统
+					if 2 != users[vVUserBindTraders.UserId].UseNewSystem {
+						continue
+					}
+
+					// 精度
+					if _, ok := symbol[vTraderPositions.Symbol]; !ok {
+						continue
+					}
+
+					side := "SELL"
+					if "SHORT" == vTraderPositions.PositionSide || "LONG" == vTraderPositions.PositionSide {
+						if 0 == users[vVUserBindTraders.UserId].IsDai {
+							continue
+						}
+					} else {
+						continue
+					}
+
+					if "LONG" == vTraderPositions.PositionSide {
+						side = "BUY"
+					}
+
+					fmt.Println("最最新系统初始化：", vTraderPositions, users[vVUserBindTraders.UserId].Address)
+					// 发送订单
+					wg.Add(1) // 启动一个goroutine就登记+1
+					go b.userOrderGoroutineTwoNew(ctx, &wg, &OrderData{
+						Coin:  vTraderPositions.Symbol,
+						Type:  vTraderPositions.PositionSide,
+						Price: price.Price,
+						Side:  side,
+						Qty:   "0",
+					}, "0", users[vVUserBindTraders.UserId], vVUserBindTraders, symbol[vTraderPositions.Symbol].QuantityPrecision, 1, proportion, 0)
+				}
+			}
+		}
 	}
 
 	wg.Wait()
