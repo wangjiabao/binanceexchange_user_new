@@ -2638,7 +2638,7 @@ func (b *BinanceUserRepo) GetOpeningTraderPositionNewNew(traderNum string) ([]*b
 
 	res := make([]*biz.ZyTraderPosition, 0)
 	tableName := "trader_position_" + traderNum
-	if err := b.data.db.Table(tableName).Where("positionAmount>?", 0).Find(&lhTraderPosition).Error; err != nil {
+	if err := b.data.db.Table(tableName).Where("position_amount>?", 0).Find(&lhTraderPosition).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return res, nil
 		}
