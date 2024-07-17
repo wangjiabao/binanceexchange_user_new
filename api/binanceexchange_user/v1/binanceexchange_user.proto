@@ -106,6 +106,12 @@ service BinanceUser {
     };
   };
 
+  rpc HandleChange (OverOrderAfterBindRequest) returns (OverOrderAfterBindReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/handle_change"
+    };
+  };
+
   rpc OverOrderAfterBind (OverOrderAfterBindRequest) returns (OverOrderAfterBindReply) {
     option (google.api.http) = {
       get: "/api/binanceexchange_user/over_order_after_bind"

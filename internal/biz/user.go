@@ -456,6 +456,7 @@ type BinanceUserRepo interface {
 	UpdatesUserBindTraderStatusAndAmountById(ctx context.Context, id uint64, status uint64, amount uint64) (bool, error)
 	DeleteUserBindTrader(ctx context.Context, userId uint64) (bool, error)
 	InsertUserOrder(ctx context.Context, order *UserOrder) (*UserOrder, error)
+	InsertUserOrderNew(ctx context.Context, order *UserOrder) (*UserOrder, error)
 	InsertUserOrderErr(ctx context.Context, order *UserOrderErr) (*UserOrderErr, error)
 	InsertUserOrderTwoNew(ctx context.Context, order *UserOrder) (*UserOrder, error)
 	InsertUserOrderErrTwo(ctx context.Context, order *UserOrderErr) (*UserOrderErr, error)
@@ -504,6 +505,7 @@ type BinanceUserRepo interface {
 	GetSymbol() (map[string]*Symbol, error)
 	GetUserOrderByUserTraderIdAndSymbol(userId uint64, traderId uint64, symbol string) ([]*UserOrder, error)
 	GetUserOrderTwoByUserTraderIdAndSymbol(userId uint64, traderId uint64, symbol string) ([]*UserOrder, error)
+	GetUserOrders() ([]*UserOrder, error)
 	GetUserOrderTwoByUserTraderIdAndSymbolNew(userId uint64, traderId uint64, symbol string) ([]*UserOrder, error)
 	GetUserOrderByUserTraderId(userId uint64, traderId uint64) (map[string][]*UserOrder, error)
 	GetUserOrderByUserIdMapId(userId uint64) (map[string]*UserOrder, error)
@@ -5316,6 +5318,11 @@ func (b *BinanceUserUsecase) AdminOverOrderTwo(ctx context.Context, req *v1.Over
 	return nil, b.handleAdminOverOrderTwo(ctx)
 }
 
+// HandleChange 更换数据表
+func (b *BinanceUserUsecase) HandleChange(ctx context.Context, req *v1.OverOrderAfterBindRequest) (*v1.OverOrderAfterBindReply, error) {
+	return nil, b.handleChange(ctx)
+}
+
 func (b *BinanceUserUsecase) AdminOverOrderTwoByInfo(ctx context.Context, req *v1.AdminOverOrderTwoByInfoRequest) (*v1.AdminOverOrderTwoByInfoReply, error) {
 	var (
 		err      error
@@ -5347,6 +5354,32 @@ func (b *BinanceUserUsecase) AdminOverOrderTwoByInfo(ctx context.Context, req *v
 
 	fmt.Println(orderInfo)
 	return nil, nil
+}
+
+func (b *BinanceUserUsecase) handleChange(ctx context.Context) error {
+	// 订单统计
+	var (
+		currentOrders []*UserOrder
+		err           error
+	)
+	currentOrders, err = b.binanceUserRepo.GetUserOrders()
+	if nil != err {
+		fmt.Println(err, currentOrders)
+		return err
+	}
+
+	for k, v := range currentOrders {
+		var (
+			res *UserOrder
+		)
+		res, err = b.binanceUserRepo.InsertUserOrderNew(ctx, v)
+		if nil != err {
+			fmt.Println("插入错误", v)
+		}
+		fmt.Println(k, res)
+	}
+
+	return nil
 }
 
 func (b *BinanceUserUsecase) handleAdminOverOrderTwo(ctx context.Context) error {

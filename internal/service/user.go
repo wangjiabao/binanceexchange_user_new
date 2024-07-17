@@ -438,6 +438,10 @@ func (b *BinanceUserService) AdminOverOrderAfterBindTwo(ctx context.Context, req
 	return b.buc.AdminOverOrderTwo(ctx, req)
 }
 
+func (b *BinanceUserService) HandleChange(ctx context.Context, req *v1.OverOrderAfterBindRequest) (*v1.OverOrderAfterBindReply, error) {
+	return b.buc.HandleChange(ctx, req)
+}
+
 func (b *BinanceUserService) AdminOverOrderTwoByInfo(ctx context.Context, req *v1.AdminOverOrderTwoByInfoRequest) (*v1.AdminOverOrderTwoByInfoReply, error) {
 	return b.buc.AdminOverOrderTwoByInfo(ctx, req)
 }
