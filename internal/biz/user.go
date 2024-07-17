@@ -4169,10 +4169,8 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwoNew(ctx context.Context, req *
 			}
 
 			// todo 测试
-			if 47 == vVUserBindTrader.UserId || 48 == vVUserBindTrader.UserId {
-				userIdsMap[vVUserBindTrader.UserId] = vVUserBindTrader.UserId
-				userIds = append(userIds, vVUserBindTrader.UserId)
-			}
+			userIdsMap[vVUserBindTrader.UserId] = vVUserBindTrader.UserId
+			userIds = append(userIds, vVUserBindTrader.UserId)
 		}
 	}
 
@@ -4197,11 +4195,6 @@ func (b *BinanceUserUsecase) InitOrderAfterBindTwoNew(ctx context.Context, req *
 	}
 
 	for traderId, vUserBindTraders := range userBindTraders {
-		// todo
-		if 154 != traderId && 155 != traderId {
-			continue
-		}
-
 		var (
 			//traderPositions           []*TraderPosition
 			traderOpeningPositionsNew []*ZyTraderPosition
