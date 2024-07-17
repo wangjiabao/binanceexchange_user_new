@@ -815,7 +815,7 @@ func (b *BinanceUserRepo) InsertUserOrderNew(ctx context.Context, order *biz.Use
 		HandleStatus:  0,
 	}
 
-	res := b.data.DB(ctx).Table("new_user_order_" + strconv.FormatInt(int64(order.UserId), 10)).Create(&insertUserOrder)
+	res := b.data.DB(ctx).Table("new_user_order_two_" + strconv.FormatInt(int64(order.UserId), 10)).Create(&insertUserOrder)
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_USER_ORDER_ERROR", "创建数据失败")
 	}
