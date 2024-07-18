@@ -3493,3 +3493,108 @@ func (b *BinanceUserRepo) SRemOrderSetSellLongOrBuyShortTwo(ctx context.Context,
 	err = b.data.rdb.SRem(ctx, "new_user_order_sell_long_buy_short_two", OrderId).Err()
 	return err
 }
+
+// GetUsersNew .
+func (b *BinanceUserRepo) GetUsersNew() ([]*biz.User, error) {
+	var users []*User
+	res := make([]*biz.User, 0)
+
+	if err := b.data.db.Table("new_user").
+		Where("use_new_system=? and is_dai=? and bind_trader_status_tfi=?", 2, 1, 1).
+		Find(&users).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_USER_ERROR", err.Error())
+	}
+
+	for _, v := range users {
+		res = append(res, &biz.User{
+			ID:               v.ID,
+			Address:          v.Address,
+			ApiKey:           v.ApiKey,
+			ApiStatus:        v.ApiStatus,
+			BindTraderStatus: v.BindTraderStatus,
+			ApiSecret:        v.ApiSecret,
+			CreatedAt:        v.CreatedAt,
+			UpdatedAt:        v.UpdatedAt,
+		})
+	}
+
+	return res, nil
+}
+
+// GetNewUserBindTraderTwoByUserIdMap .
+func (b *BinanceUserRepo) GetNewUserBindTraderTwoByUserIdMap() (map[uint64][]*biz.UserBindTrader, error) {
+	var userBindTrader []*UserBindTrader
+	res := make(map[uint64][]*biz.UserBindTrader, 0)
+
+	if err := b.data.db.Table("new_user_bind_trader_two").Where("init_order=? and status=?", 1, 0).Find(&userBindTrader).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_USER_BIND_TRADER_TWO_ERROR", err.Error())
+	}
+
+	for _, v := range userBindTrader {
+		if _, ok := res[v.UserId]; !ok {
+			res[v.UserId] = make([]*biz.UserBindTrader, 0)
+		}
+
+		res[v.UserId] = append(res[v.UserId], &biz.UserBindTrader{
+			ID:        v.ID,
+			UserId:    v.UserId,
+			TraderId:  v.TraderId,
+			Amount:    v.Amount,
+			Status:    v.Status,
+			InitOrder: v.InitOrder,
+			CreatedAt: v.CreatedAt,
+			UpdatedAt: v.UpdatedAt,
+		})
+	}
+
+	return res, nil
+}
+
+// GetUserOrderTwoByUserTraderIdNew .
+func (b *BinanceUserRepo) GetUserOrderTwoByUserTraderIdNew(userId uint64, traderId uint64) ([]*biz.UserOrder, error) {
+	var userOrder []*UserOrder
+
+	res := make([]*biz.UserOrder, 0)
+	if err := b.data.db.Table("new_user_order_two_"+strconv.FormatInt(int64(userId), 10)).
+		Where("user_id=? and trader_id=?", userId, traderId).
+		Find(&userOrder).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_USER_ORDER_TWO_ERROR", err.Error())
+	}
+
+	for _, v := range userOrder {
+		res = append(res, &biz.UserOrder{
+			ID:            v.ID,
+			UserId:        v.UserId,
+			TraderId:      v.TraderId,
+			ClientOrderId: v.ClientOrderId,
+			OrderId:       v.OrderId,
+			Symbol:        v.Symbol,
+			Side:          v.Side,
+			PositionSide:  v.PositionSide,
+			Quantity:      v.Quantity,
+			Price:         v.Price,
+			TraderQty:     v.TraderQty,
+			OrderType:     v.OrderType,
+			ClosePosition: v.ClosePosition,
+			CumQuote:      v.CumQuote,
+			ExecutedQty:   v.ExecutedQty,
+			AvgPrice:      v.AvgPrice,
+			CreatedAt:     v.CreatedAt,
+			UpdatedAt:     v.UpdatedAt,
+		})
+	}
+
+	return res, nil
+}

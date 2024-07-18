@@ -239,6 +239,24 @@ service BinanceUser {
       get: "/api/binanceexchange_user/handle_p"
     };
   };
+
+  rpc GetUserAndTrader (GetUserAndTraderRequest) returns (GetUserAndTraderReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/get_user_and_trader"
+    };
+  };
+
+  rpc GetTraderPosition (GetTraderPositionRequest) returns (GetTraderPositionReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/get_trader_positions"
+    };
+  };
+
+  rpc GetUserPosition (GetUserPositionRequest) returns (GetUserPositionReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/get_trader_positions"
+    };
+  };
 }
 
 message GetUserRequest {
@@ -486,4 +504,57 @@ message HandlePRequest {
 }
 
 message HandlePReply {
+}
+
+message GetUserAndTraderRequest {
+}
+
+message GetUserAndTraderReply {
+  repeated DataList list = 1;
+
+  message DataList {
+    uint64 userId = 1;
+    string address = 2;
+    string apiKey = 3;
+    string apiSecret = 4;
+    uint64 apiStatus = 5;
+
+    repeated DataBindTraderList traderList = 6;
+  }
+
+  message DataBindTraderList {
+    uint64 id = 4;
+    uint64 traderId = 1;
+    uint64 traderNum = 2;
+    uint64 amount = 3;
+  }
+}
+
+message GetTraderPositionRequest {
+  uint64 traderId = 1;
+}
+
+message GetTraderPositionReply {
+  repeated DataList list = 1;
+
+  message DataList {
+    string symbol = 1;
+    double amount = 2;
+    string positionSide = 3;
+  }
+}
+
+message GetUserPositionRequest {
+  uint64 userId = 1;
+  uint64 traderId = 2;
+}
+
+message GetUserPositionReply {
+  repeated DataList list = 1;
+
+  message DataList {
+    string symbol = 1;
+    double amount = 2;
+    string positionSide = 3;
+  }
 }

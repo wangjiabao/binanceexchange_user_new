@@ -549,6 +549,10 @@ type BinanceUserRepo interface {
 	SAddOrderSetSellLongOrBuyShortTwo(ctx context.Context, OrderId int64) error
 	SMembersOrderSetSellLongOrBuyShortTwo(ctx context.Context) ([]string, error)
 	SRemOrderSetSellLongOrBuyShortTwo(ctx context.Context, OrderId int64) error
+
+	GetUsersNew() ([]*User, error)
+	GetNewUserBindTraderTwoByUserIdMap() (map[uint64][]*UserBindTrader, error)
+	GetUserOrderTwoByUserTraderIdNew(userId uint64, traderId uint64) ([]*UserOrder, error)
 }
 
 // BinanceUserUsecase is a BinanceData usecase.
@@ -8341,4 +8345,164 @@ func requestSystemOrder(Orders []*Order) (string, error) {
 	}
 
 	return r.Status, nil
+}
+
+// GetUserAndTrader .
+func (b *BinanceUserUsecase) GetUserAndTrader(ctx context.Context, req *v1.GetUserAndTraderRequest) (*v1.GetUserAndTraderReply, error) {
+	var (
+		users              []*User
+		userBindTradersMap map[uint64][]*UserBindTrader
+		traders            map[uint64]*Trader
+		err                error
+	)
+
+	// 可用的用户数据
+	users, err = b.binanceUserRepo.GetUsersNew()
+	if nil != err {
+		return nil, err
+	}
+
+	// 可用的绑定信息
+	userBindTradersMap, err = b.binanceUserRepo.GetNewUserBindTraderTwoByUserIdMap()
+	if nil != err {
+		return nil, err
+	}
+
+	// 所有的代单员
+	traders, err = b.binanceUserRepo.GetTraders()
+	if nil != err {
+		return nil, err
+	}
+
+	res := &v1.GetUserAndTraderReply{List: make([]*v1.GetUserAndTraderReply_DataList, 0)}
+	for _, user := range users {
+		// 绑定信息数组
+		tmpTraderList := make([]*v1.GetUserAndTraderReply_DataBindTraderList, 0)
+		if _, ok := userBindTradersMap[user.ID]; ok {
+			for _, vUserBindTradersMap := range userBindTradersMap[user.ID] {
+				var tmpTraderNum uint64
+				if _, ok = traders[vUserBindTradersMap.TraderId]; ok {
+					tmpTraderNum, err = strconv.ParseUint(traders[vUserBindTradersMap.TraderId].PortfolioId, 10, 64)
+					if nil != err {
+						fmt.Println("解析错误，信息：", err)
+					}
+				}
+
+				tmpTraderList = append(tmpTraderList, &v1.GetUserAndTraderReply_DataBindTraderList{
+					Id:        vUserBindTradersMap.ID,
+					TraderId:  vUserBindTradersMap.TraderId,
+					TraderNum: tmpTraderNum,
+					Amount:    vUserBindTradersMap.Amount,
+				})
+			}
+		}
+
+		res.List = append(res.List, &v1.GetUserAndTraderReply_DataList{
+			UserId:     user.ID,
+			Address:    user.Address,
+			ApiKey:     user.ApiKey,
+			ApiSecret:  user.ApiSecret,
+			ApiStatus:  user.ApiStatus,
+			TraderList: tmpTraderList,
+		})
+	}
+
+	return res, nil
+}
+
+// GetTraderPosition .
+func (b *BinanceUserUsecase) GetTraderPosition(ctx context.Context, req *v1.GetTraderPositionRequest) (*v1.GetTraderPositionReply, error) {
+	var (
+		traders   map[uint64]*Trader
+		positions []*ZyTraderPosition
+		err       error
+	)
+
+	traders, err = b.binanceUserRepo.GetTraders()
+	if nil != err {
+		return nil, err
+	}
+
+	if _, ok := traders[req.TraderId]; !ok {
+		return nil, errors.New(500, "Trader Err", "不存在交易员")
+	}
+
+	positions, err = b.binanceUserRepo.GetOpeningTraderPositionNewNew(traders[req.TraderId].PortfolioId)
+	if nil != err {
+		return nil, err
+	}
+
+	res := &v1.GetTraderPositionReply{
+		List: make([]*v1.GetTraderPositionReply_DataList, 0),
+	}
+
+	for _, vPosition := range positions {
+		res.List = append(res.List, &v1.GetTraderPositionReply_DataList{
+			Symbol:       vPosition.Symbol,
+			Amount:       vPosition.PositionAmount,
+			PositionSide: vPosition.PositionSide,
+		})
+	}
+
+	return res, nil
+}
+
+// GetUserPosition .
+func (b *BinanceUserUsecase) GetUserPosition(ctx context.Context, req *v1.GetUserPositionRequest) (*v1.GetUserPositionReply, error) {
+	var (
+		userOrders []*UserOrder
+		err        error
+	)
+
+	userOrders, err = b.binanceUserRepo.GetUserOrderTwoByUserTraderIdNew(req.UserId, req.TraderId)
+	if nil != err {
+		return nil, err
+	}
+
+	userOrderSymbolMap := make(map[string]map[string]float64, 0)
+	for _, vUserOrders := range userOrders {
+		// 初始化，代币，和一种方向
+		if _, ok := userOrderSymbolMap[vUserOrders.Symbol]; !ok {
+			userOrderSymbolMap[vUserOrders.Symbol] = make(map[string]float64, 0)
+			userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide] = vUserOrders.ExecutedQty
+			continue
+		} else {
+			// 初始化，代币，和另一种方向
+			if _, ok = userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide]; !ok {
+				userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide] = vUserOrders.ExecutedQty
+				continue
+			}
+
+			// 计算
+			if "LONG" == vUserOrders.PositionSide {
+				if "BUY" == vUserOrders.Side {
+					userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide] += vUserOrders.ExecutedQty
+				} else if "SELL" == vUserOrders.Side {
+					userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide] -= vUserOrders.ExecutedQty
+				}
+			} else if "SHORT" == vUserOrders.PositionSide {
+				if "SELL" == vUserOrders.Side {
+					userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide] += vUserOrders.ExecutedQty
+				} else if "BUY" == vUserOrders.Side {
+					userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide] -= vUserOrders.ExecutedQty
+				}
+			}
+		}
+	}
+
+	res := &v1.GetUserPositionReply{
+		List: make([]*v1.GetUserPositionReply_DataList, 0),
+	}
+
+	for symbol, vUserOrderSymbolMap := range userOrderSymbolMap {
+		for positionSide, vVUserOrderSymbolMap := range vUserOrderSymbolMap {
+			res.List = append(res.List, &v1.GetUserPositionReply_DataList{
+				Symbol:       symbol,
+				Amount:       vVUserOrderSymbolMap,
+				PositionSide: positionSide,
+			})
+		}
+	}
+
+	return res, nil
 }

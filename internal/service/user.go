@@ -927,3 +927,18 @@ func (b *BinanceUserService) InsertUserBindData(ctx context.Context, req *v1.Ins
 func (b *BinanceUserService) DeleteUserBindData(ctx context.Context, req *v1.DeleteUserBindDataRequest) (*v1.DeleteUserBindDataReply, error) {
 	return b.buc.DeleteUserBindData(ctx, req)
 }
+
+// GetUserAndTrader .
+func (b *BinanceUserService) GetUserAndTrader(ctx context.Context, req *v1.GetUserAndTraderRequest) (*v1.GetUserAndTraderReply, error) {
+	return b.buc.GetUserAndTrader(ctx, req)
+}
+
+// GetTraderPosition .
+func (b *BinanceUserService) GetTraderPosition(ctx context.Context, req *v1.GetTraderPositionRequest) (*v1.GetTraderPositionReply, error) {
+	return b.buc.GetTraderPosition(ctx, req)
+}
+
+// GetUserPosition .
+func (b *BinanceUserService) GetUserPosition(ctx context.Context, req *v1.GetUserPositionRequest) (*v1.GetUserPositionReply, error) {
+	return b.buc.GetUserPosition(ctx, req)
+}
