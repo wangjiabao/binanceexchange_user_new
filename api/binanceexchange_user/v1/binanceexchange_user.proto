@@ -254,7 +254,7 @@ service BinanceUser {
 
   rpc GetUserPosition (GetUserPositionRequest) returns (GetUserPositionReply) {
     option (google.api.http) = {
-      get: "/api/binanceexchange_user/get_trader_positions"
+      get: "/api/binanceexchange_user/get_user_positions"
     };
   };
 }

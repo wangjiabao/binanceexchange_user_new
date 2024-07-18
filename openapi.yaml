@@ -282,12 +282,8 @@ paths:
         get:
             tags:
                 - BinanceUser
-            operationId: BinanceUser_GetUserPosition
+            operationId: BinanceUser_GetTraderPosition
             parameters:
-                - name: userId
-                  in: query
-                  schema:
-                    type: string
                 - name: traderId
                   in: query
                   schema:
@@ -298,7 +294,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetUserPositionReply'
+                                $ref: '#/components/schemas/GetTraderPositionReply'
                 default:
                     description: Default error response
                     content:
@@ -358,6 +354,33 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/GetUserBindDataReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/get_user_positions:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_GetUserPosition
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: traderId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserPositionReply'
                 default:
                     description: Default error response
                     content:

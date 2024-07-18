@@ -147,7 +147,7 @@ func RegisterBinanceUserHTTPServer(s *http.Server, srv BinanceUserHTTPServer) {
 	r.GET("/api/binanceexchange_user/handle_p", _BinanceUser_HandleP0_HTTP_Handler(srv))
 	r.GET("/api/binanceexchange_user/get_user_and_trader", _BinanceUser_GetUserAndTrader0_HTTP_Handler(srv))
 	r.GET("/api/binanceexchange_user/get_trader_positions", _BinanceUser_GetTraderPosition0_HTTP_Handler(srv))
-	r.GET("/api/binanceexchange_user/get_trader_positions", _BinanceUser_GetUserPosition0_HTTP_Handler(srv))
+	r.GET("/api/binanceexchange_user/get_user_positions", _BinanceUser_GetUserPosition0_HTTP_Handler(srv))
 }
 
 func _BinanceUser_GetUser0_HTTP_Handler(srv BinanceUserHTTPServer) func(ctx http.Context) error {
@@ -1206,7 +1206,7 @@ func (c *BinanceUserHTTPClientImpl) GetUserBindData(ctx context.Context, in *Get
 
 func (c *BinanceUserHTTPClientImpl) GetUserPosition(ctx context.Context, in *GetUserPositionRequest, opts ...http.CallOption) (*GetUserPositionReply, error) {
 	var out GetUserPositionReply
-	pattern := "/api/binanceexchange_user/get_trader_positions"
+	pattern := "/api/binanceexchange_user/get_user_positions"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationBinanceUserGetUserPosition))
 	opts = append(opts, http.PathTemplate(pattern))
