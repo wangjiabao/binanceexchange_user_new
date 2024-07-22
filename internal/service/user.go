@@ -942,3 +942,18 @@ func (b *BinanceUserService) GetTraderPosition(ctx context.Context, req *v1.GetT
 func (b *BinanceUserService) GetUserPosition(ctx context.Context, req *v1.GetUserPositionRequest) (*v1.GetUserPositionReply, error) {
 	return b.buc.GetUserPosition(ctx, req)
 }
+
+// OpenPosition .
+func (b *BinanceUserService) OpenPosition(ctx context.Context, req *v1.OpenPositionRequest) (*v1.OpenPositionReply, error) {
+	return b.buc.OpenPosition(ctx, req)
+}
+
+// InitPosition .
+func (b *BinanceUserService) InitPosition(ctx context.Context, req *v1.InitPositionRequest) (*v1.InitPositionReply, error) {
+	return b.buc.InitPosition(ctx, req)
+}
+
+// UnbindAndClosePosition .
+func (b *BinanceUserService) UnbindAndClosePosition(ctx context.Context, req *v1.UnbindAndClosePositionRequest) (*v1.UnbindAndClosePositionReply, error) {
+	return b.buc.UnbindAndClosePosition(ctx, req)
+}

@@ -257,6 +257,27 @@ service BinanceUser {
       get: "/api/binanceexchange_user/get_user_positions"
     };
   };
+
+  rpc OpenPosition (OpenPositionRequest) returns (OpenPositionReply) {
+    option (google.api.http) = {
+      post: "/api/binanceexchange_user/open_positions"
+      body: "send_body"
+    };
+  };
+
+  rpc InitPosition (InitPositionRequest) returns (InitPositionReply) {
+    option (google.api.http) = {
+      post: "/api/binanceexchange_user/init_positions"
+      body: "send_body"
+    };
+  };
+
+  rpc UnbindAndClosePosition (UnbindAndClosePositionRequest) returns (UnbindAndClosePositionReply) {
+    option (google.api.http) = {
+      post: "/api/binanceexchange_user/unbind_and_close_positions"
+      body: "send_body"
+    };
+  };
 }
 
 message GetUserRequest {
@@ -526,6 +547,7 @@ message GetUserAndTraderReply {
     uint64 id = 4;
     uint64 traderId = 1;
     uint64 traderNum = 2;
+    string traderName= 5;
     uint64 amount = 3;
   }
 }
@@ -538,6 +560,7 @@ message GetTraderPositionReply {
   repeated DataList list = 1;
 
   message DataList {
+    uint64 id = 4;
     string symbol = 1;
     double amount = 2;
     string positionSide = 3;
@@ -557,4 +580,47 @@ message GetUserPositionReply {
     double amount = 2;
     string positionSide = 3;
   }
+}
+
+message OpenPositionRequest {
+  message SendBody {
+    uint64 bindId = 1;
+    uint64 positionId = 2; // 指定仓位
+    double amount = 3; // 金额
+    bool useSystemInit = 4; // 系统初始化
+  }
+
+  SendBody send_body = 1;
+}
+
+message OpenPositionReply {
+  string msg = 1;
+  bool res = 2;
+}
+
+message InitPositionRequest {
+  message SendBody {
+    uint64 userId = 1;
+  }
+
+  SendBody send_body = 1;
+}
+
+message InitPositionReply {
+  string msg = 1;
+  bool res = 2;
+}
+
+message UnbindAndClosePositionRequest {
+  message SendBody {
+    uint64 userId = 1;
+    uint64 traderId = 2;
+  }
+
+  SendBody send_body = 1;
+}
+
+message UnbindAndClosePositionReply {
+  string msg = 1;
+  bool res = 2;
 }

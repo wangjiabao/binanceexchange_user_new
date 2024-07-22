@@ -477,6 +477,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/init_positions:
+        post:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_InitPosition
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/InitPositionRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InitPositionReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/binanceexchange_user/insert_user_bind_data:
         post:
             tags:
@@ -567,6 +591,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ListenTraderAndUserOrderReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/open_positions:
+        post:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_OpenPosition
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/OpenPositionRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OpenPositionReply'
                 default:
                     description: Default error response
                     content:
@@ -801,6 +849,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/SettleTradingBoxOpenReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/unbind_and_close_positions:
+        post:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_UnbindAndClosePosition
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UnbindAndClosePositionRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UnbindAndClosePositionReply'
                 default:
                     description: Default error response
                     content:
@@ -1129,6 +1201,8 @@ components:
         GetTraderPositionReply_DataList:
             type: object
             properties:
+                id:
+                    type: string
                 symbol:
                     type: string
                 amount:
@@ -1151,6 +1225,8 @@ components:
                 traderId:
                     type: string
                 traderNum:
+                    type: string
+                traderName:
                     type: string
                 amount:
                     type: string
@@ -1239,6 +1315,18 @@ components:
         InitOrderAfterBindReply:
             type: object
             properties: {}
+        InitPositionReply:
+            type: object
+            properties:
+                msg:
+                    type: string
+                res:
+                    type: boolean
+        InitPositionRequest_SendBody:
+            type: object
+            properties:
+                userId:
+                    type: string
         InsertUserBindDataReply:
             type: object
             properties:
@@ -1278,6 +1366,25 @@ components:
                     type: string
                 initOrder:
                     type: string
+        OpenPositionReply:
+            type: object
+            properties:
+                msg:
+                    type: string
+                res:
+                    type: boolean
+        OpenPositionRequest_SendBody:
+            type: object
+            properties:
+                bindId:
+                    type: string
+                positionId:
+                    type: string
+                amount:
+                    type: number
+                    format: double
+                useSystemInit:
+                    type: boolean
         OrderAdminTwoReply:
             type: object
             properties: {}
@@ -1356,6 +1463,20 @@ components:
                         $ref: '#/components/schemas/GoogleProtobufAny'
                     description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
             description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        UnbindAndClosePositionReply:
+            type: object
+            properties:
+                msg:
+                    type: string
+                res:
+                    type: boolean
+        UnbindAndClosePositionRequest_SendBody:
+            type: object
+            properties:
+                userId:
+                    type: string
+                traderId:
+                    type: string
         UserOrderDoHandlePriceReply:
             type: object
             properties: {}

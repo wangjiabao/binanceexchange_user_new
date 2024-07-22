@@ -60,6 +60,9 @@ const (
 	BinanceUser_GetUserAndTrader_FullMethodName            = "/BinanceUser/GetUserAndTrader"
 	BinanceUser_GetTraderPosition_FullMethodName           = "/BinanceUser/GetTraderPosition"
 	BinanceUser_GetUserPosition_FullMethodName             = "/BinanceUser/GetUserPosition"
+	BinanceUser_OpenPosition_FullMethodName                = "/BinanceUser/OpenPosition"
+	BinanceUser_InitPosition_FullMethodName                = "/BinanceUser/InitPosition"
+	BinanceUser_UnbindAndClosePosition_FullMethodName      = "/BinanceUser/UnbindAndClosePosition"
 )
 
 // BinanceUserClient is the client API for BinanceUser service.
@@ -107,6 +110,9 @@ type BinanceUserClient interface {
 	GetUserAndTrader(ctx context.Context, in *GetUserAndTraderRequest, opts ...grpc.CallOption) (*GetUserAndTraderReply, error)
 	GetTraderPosition(ctx context.Context, in *GetTraderPositionRequest, opts ...grpc.CallOption) (*GetTraderPositionReply, error)
 	GetUserPosition(ctx context.Context, in *GetUserPositionRequest, opts ...grpc.CallOption) (*GetUserPositionReply, error)
+	OpenPosition(ctx context.Context, in *OpenPositionRequest, opts ...grpc.CallOption) (*OpenPositionReply, error)
+	InitPosition(ctx context.Context, in *InitPositionRequest, opts ...grpc.CallOption) (*InitPositionReply, error)
+	UnbindAndClosePosition(ctx context.Context, in *UnbindAndClosePositionRequest, opts ...grpc.CallOption) (*UnbindAndClosePositionReply, error)
 }
 
 type binanceUserClient struct {
@@ -486,6 +492,33 @@ func (c *binanceUserClient) GetUserPosition(ctx context.Context, in *GetUserPosi
 	return out, nil
 }
 
+func (c *binanceUserClient) OpenPosition(ctx context.Context, in *OpenPositionRequest, opts ...grpc.CallOption) (*OpenPositionReply, error) {
+	out := new(OpenPositionReply)
+	err := c.cc.Invoke(ctx, BinanceUser_OpenPosition_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *binanceUserClient) InitPosition(ctx context.Context, in *InitPositionRequest, opts ...grpc.CallOption) (*InitPositionReply, error) {
+	out := new(InitPositionReply)
+	err := c.cc.Invoke(ctx, BinanceUser_InitPosition_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *binanceUserClient) UnbindAndClosePosition(ctx context.Context, in *UnbindAndClosePositionRequest, opts ...grpc.CallOption) (*UnbindAndClosePositionReply, error) {
+	out := new(UnbindAndClosePositionReply)
+	err := c.cc.Invoke(ctx, BinanceUser_UnbindAndClosePosition_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BinanceUserServer is the server API for BinanceUser service.
 // All implementations must embed UnimplementedBinanceUserServer
 // for forward compatibility
@@ -531,6 +564,9 @@ type BinanceUserServer interface {
 	GetUserAndTrader(context.Context, *GetUserAndTraderRequest) (*GetUserAndTraderReply, error)
 	GetTraderPosition(context.Context, *GetTraderPositionRequest) (*GetTraderPositionReply, error)
 	GetUserPosition(context.Context, *GetUserPositionRequest) (*GetUserPositionReply, error)
+	OpenPosition(context.Context, *OpenPositionRequest) (*OpenPositionReply, error)
+	InitPosition(context.Context, *InitPositionRequest) (*InitPositionReply, error)
+	UnbindAndClosePosition(context.Context, *UnbindAndClosePositionRequest) (*UnbindAndClosePositionReply, error)
 	mustEmbedUnimplementedBinanceUserServer()
 }
 
@@ -660,6 +696,15 @@ func (UnimplementedBinanceUserServer) GetTraderPosition(context.Context, *GetTra
 }
 func (UnimplementedBinanceUserServer) GetUserPosition(context.Context, *GetUserPositionRequest) (*GetUserPositionReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserPosition not implemented")
+}
+func (UnimplementedBinanceUserServer) OpenPosition(context.Context, *OpenPositionRequest) (*OpenPositionReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OpenPosition not implemented")
+}
+func (UnimplementedBinanceUserServer) InitPosition(context.Context, *InitPositionRequest) (*InitPositionReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InitPosition not implemented")
+}
+func (UnimplementedBinanceUserServer) UnbindAndClosePosition(context.Context, *UnbindAndClosePositionRequest) (*UnbindAndClosePositionReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnbindAndClosePosition not implemented")
 }
 func (UnimplementedBinanceUserServer) mustEmbedUnimplementedBinanceUserServer() {}
 
@@ -1412,6 +1457,60 @@ func _BinanceUser_GetUserPosition_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BinanceUser_OpenPosition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OpenPositionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).OpenPosition(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_OpenPosition_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).OpenPosition(ctx, req.(*OpenPositionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BinanceUser_InitPosition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InitPositionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).InitPosition(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_InitPosition_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).InitPosition(ctx, req.(*InitPositionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BinanceUser_UnbindAndClosePosition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnbindAndClosePositionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).UnbindAndClosePosition(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_UnbindAndClosePosition_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).UnbindAndClosePosition(ctx, req.(*UnbindAndClosePositionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BinanceUser_ServiceDesc is the grpc.ServiceDesc for BinanceUser service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1582,6 +1681,18 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserPosition",
 			Handler:    _BinanceUser_GetUserPosition_Handler,
+		},
+		{
+			MethodName: "OpenPosition",
+			Handler:    _BinanceUser_OpenPosition_Handler,
+		},
+		{
+			MethodName: "InitPosition",
+			Handler:    _BinanceUser_InitPosition_Handler,
+		},
+		{
+			MethodName: "UnbindAndClosePosition",
+			Handler:    _BinanceUser_UnbindAndClosePosition_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
