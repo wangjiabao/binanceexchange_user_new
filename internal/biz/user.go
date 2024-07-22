@@ -8987,6 +8987,206 @@ func (b *BinanceUserUsecase) OpenPosition(ctx context.Context, req *v1.OpenPosit
 
 // InitPosition .
 func (b *BinanceUserUsecase) InitPosition(ctx context.Context, req *v1.InitPositionRequest) (*v1.InitPositionReply, error) {
+	var (
+		userBindTraders map[uint64][]*UserBindTrader
+		traders         map[uint64]*Trader
+		userIds         []uint64
+		userIdsMap      map[uint64]uint64
+		users           map[uint64]*User
+		symbol          map[string]*Symbol
+		err             error
+	)
+
+	userBindTraders, err = b.binanceUserRepo.GetUserBindTraderTwoByInitOrder()
+	if nil != err {
+		return &v1.InitPositionReply{
+			Msg: "错误，未查询到绑定信息",
+			Res: false,
+		}, err
+	}
+
+	userIds = make([]uint64, 0)
+	userIdsMap = make(map[uint64]uint64, 0)
+	for _, vUserBindTrader := range userBindTraders {
+		for _, vVUserBindTrader := range vUserBindTrader {
+			if _, ok := userIdsMap[vVUserBindTrader.UserId]; ok {
+				continue
+			}
+
+			if vVUserBindTrader.UserId != req.SendBody.UserId { // 过滤非参数用户
+				continue
+			}
+
+			// todo 测试
+			userIdsMap[vVUserBindTrader.UserId] = vVUserBindTrader.UserId
+			userIds = append(userIds, vVUserBindTrader.UserId)
+		}
+	}
+
+	if 0 >= len(userIds) {
+		return &v1.InitPositionReply{
+			Msg: "错误，无效用户",
+			Res: false,
+		}, err
+	}
+
+	traders, err = b.binanceUserRepo.GetTraders()
+	if nil != err {
+		return &v1.InitPositionReply{
+			Msg: "错误，无效交易员",
+			Res: false,
+		}, err
+	}
+
+	// 获取用户信息，余额信息，收益信息
+	users, err = b.binanceUserRepo.GetUsersByUserIds(userIds)
+	if nil != err {
+		return &v1.InitPositionReply{
+			Msg: "错误，无效用户",
+			Res: false,
+		}, err
+	}
+
+	symbol, err = b.binanceUserRepo.GetSymbol()
+	if nil != err {
+		return &v1.InitPositionReply{
+			Msg: "错误，无效币种",
+			Res: false,
+		}, err
+	}
+
+	for traderId, vUserBindTraders := range userBindTraders {
+		var (
+			//traderPositions           []*TraderPosition
+			traderOpeningPositionsNew []*ZyTraderPosition
+		)
+
+		// 先更新状态
+		for _, vVUserBindTraders := range vUserBindTraders {
+			if req.SendBody.UserId != vVUserBindTraders.UserId { // 参数用户
+				continue
+			}
+
+			if _, ok := users[vVUserBindTraders.UserId]; !ok {
+				continue
+			}
+
+			// todo 暂时使用检测没用api信息
+			if 0 >= users[vVUserBindTraders.UserId].ApiStatus {
+				continue
+			}
+
+			if 1 != vVUserBindTraders.InitOrder {
+				if err = b.tx.ExecTx(ctx, func(ctx context.Context) error {
+					_, err = b.binanceUserRepo.UpdatesUserBindTraderTwoInitOrderById(ctx, vVUserBindTraders.ID)
+					if nil != err {
+						return err
+					}
+
+					return nil
+				}); err != nil {
+					fmt.Println(err, "修改初始化失败", traderId, vVUserBindTraders)
+					continue
+				}
+			}
+		}
+
+		if _, ok := traders[traderId]; !ok {
+			fmt.Println("初始化仓位，不存在交易员", traderId)
+			continue
+		}
+
+		// 新系统的
+		traderOpeningPositionsNew, err = b.binanceUserRepo.GetOpeningTraderPositionNewNew(traders[traderId].PortfolioId)
+		if nil != err {
+			fmt.Println("初始化仓位，空仓位", traderId, err)
+			continue
+		}
+		// 按仓位
+		for _, vTraderPositions := range traderOpeningPositionsNew {
+			if 0 >= vTraderPositions.PositionAmount {
+				continue
+			}
+
+			var (
+				price      *BinanceSymbolPrice
+				priceFloat float64
+			)
+			// 查询币价
+			price, err = requestBinanceSymbolPrice(vTraderPositions.Symbol)
+			if nil != err {
+				fmt.Println("初始化仓位，价格查询", traderId, price, err)
+				continue
+			}
+
+			priceFloat, err = strconv.ParseFloat(price.Price, 64)
+			if nil != err {
+				fmt.Println("初始化仓位，价格查询，转化", traderId, vTraderPositions, price, err)
+				continue
+			}
+
+			// 交易员仓位u占保证金比例
+			var proportion float64
+			if 0 >= vTraderPositions.PositionAmount || 0 >= traders[traderId].BaseMoney {
+				continue
+			}
+
+			proportion = vTraderPositions.PositionAmount * priceFloat / traders[traderId].BaseMoney
+			if 0 >= proportion || 0 >= priceFloat {
+				fmt.Println("初始化仓位，比例计算", vTraderPositions, proportion, vTraderPositions.PositionAmount, priceFloat, traders[traderId].BaseMoney)
+				continue
+			}
+
+			for _, vVUserBindTraders := range vUserBindTraders {
+				if req.SendBody.UserId != vVUserBindTraders.UserId { // 参数用户
+					continue
+				}
+
+				if 0 == vVUserBindTraders.Status { // 绑定
+					if _, ok := users[vVUserBindTraders.UserId]; !ok {
+						continue
+					}
+
+					// todo 暂时使用检测没用api信息
+					if 0 >= users[vVUserBindTraders.UserId].ApiStatus {
+						continue
+					}
+
+					// 使用的新系统
+					if 2 != users[vVUserBindTraders.UserId].UseNewSystem {
+						continue
+					}
+
+					// 精度
+					if _, ok := symbol[vTraderPositions.Symbol]; !ok {
+						continue
+					}
+
+					side := "SELL"
+					if "SHORT" == vTraderPositions.PositionSide {
+
+					} else if "LONG" == vTraderPositions.PositionSide {
+						side = "BUY"
+					} else {
+						continue
+					}
+
+					fmt.Println("最最最新系统初始化：", vTraderPositions, users[vVUserBindTraders.UserId].Address)
+					// 发送订单
+					b.userOrderGoroutineTwoNewNew(ctx, &OrderData{
+						Coin:  vTraderPositions.Symbol,
+						Type:  vTraderPositions.PositionSide,
+						Price: price.Price,
+						Side:  side,
+						Qty:   "0",
+					}, "0", users[vVUserBindTraders.UserId], vVUserBindTraders, symbol[vTraderPositions.Symbol].QuantityPrecision, 1, proportion, 0)
+
+					time.Sleep(100 * time.Millisecond)
+				}
+			}
+		}
+	}
+
 	return &v1.InitPositionReply{
 		Msg: "成功",
 		Res: true,
