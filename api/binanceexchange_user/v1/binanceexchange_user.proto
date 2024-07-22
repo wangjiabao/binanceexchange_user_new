@@ -603,6 +603,7 @@ message OpenPositionReply {
 message InitPositionRequest {
   message SendBody {
     uint64 userId = 1;
+    uint64 traderId = 2;
   }
 
   SendBody send_body = 1;

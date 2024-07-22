@@ -8809,17 +8809,11 @@ func (b *BinanceUserUsecase) OpenPosition(ctx context.Context, req *v1.OpenPosit
 	)
 
 	userBindTrader, err = b.binanceUserRepo.GetUserBindTraderTwoById(req.SendBody.BindId)
-	if nil != err || nil == userBindTrader || 0 != userBindTrader.Status {
+	if nil != err || nil == userBindTrader || 0 != userBindTrader.Status || 1 != userBindTrader.InitOrder {
 		return &v1.OpenPositionReply{
 			Msg: "错误，不存在绑定关系",
 			Res: false,
 		}, nil
-	}
-	if 0 != userBindTrader.Status {
-		return &v1.OpenPositionReply{
-			Msg: "错误，已经初始化过仓位了",
-			Res: false,
-		}, err
 	}
 
 	var (
@@ -8943,22 +8937,6 @@ func (b *BinanceUserUsecase) OpenPosition(ctx context.Context, req *v1.OpenPosit
 			Msg: "错误，未查询到币价",
 			Res: false,
 		}, nil
-	}
-
-	if 1 != userBindTrader.InitOrder {
-		if err = b.tx.ExecTx(ctx, func(ctx context.Context) error {
-			_, err = b.binanceUserRepo.UpdatesUserBindTraderTwoInitOrderById(ctx, userBindTrader.ID)
-			if nil != err {
-				return err
-			}
-
-			return nil
-		}); err != nil {
-			return &v1.OpenPositionReply{
-				Msg: "错误，保存数据失败",
-				Res: false,
-			}, err
-		}
 	}
 
 	// 使用系统的算法开仓

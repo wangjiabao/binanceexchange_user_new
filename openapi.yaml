@@ -1331,6 +1331,8 @@ components:
             properties:
                 userId:
                     type: string
+                traderId:
+                    type: string
         InsertUserBindDataReply:
             type: object
             properties:
