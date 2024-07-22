@@ -706,6 +706,21 @@ func (b *BinanceUserRepo) UpdatesUserBindTraderTwoInitOrderById(ctx context.Cont
 	return true, nil
 }
 
+// UpdatesUserBindTraderTwoUnbindById .
+func (b *BinanceUserRepo) UpdatesUserBindTraderTwoUnbindById(ctx context.Context, id uint64) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if err = b.data.DB(ctx).Table("new_user_bind_trader_two").Where("id=?", id).
+		Updates(map[string]interface{}{"status": 1, "updated_at": now}).Error; nil != err {
+		return false, errors.NotFound("UPDATE_USER_BIND_TRADER_TWO_ERROR", "UPDATE_USER_BIND_TRADER_ERROR")
+	}
+
+	return true, nil
+}
+
 // UpdatesUserBindTraderTwoById .
 func (b *BinanceUserRepo) UpdatesUserBindTraderTwoById(ctx context.Context, id uint64, amount uint64) (bool, error) {
 	var (

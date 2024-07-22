@@ -450,6 +450,7 @@ type BinanceUserRepo interface {
 	UpdatesUserBindTraderStatusAndInitOrderById(ctx context.Context, id uint64, status uint64, initOrder uint64, amount uint64) (bool, error)
 	UpdatesUserBindTraderInitOrderById(ctx context.Context, id uint64) (bool, error)
 	UpdatesUserBindTraderTwoInitOrderById(ctx context.Context, id uint64) (bool, error)
+	UpdatesUserBindTraderTwoUnbindById(ctx context.Context, id uint64) (bool, error)
 	UpdatesUserBindTraderTwoById(ctx context.Context, id uint64, amount uint64) (bool, error)
 	UpdatesUserBindTraderTwoAdminOverOrderById(ctx context.Context, id uint64) (bool, error)
 	UpdatesUserBindTraderTwoAfterAdminOverOrderById(ctx context.Context, id uint64) (bool, error)
@@ -9176,6 +9177,184 @@ func (b *BinanceUserUsecase) InitPosition(ctx context.Context, req *v1.InitPosit
 
 // UnbindAndClosePosition .
 func (b *BinanceUserUsecase) UnbindAndClosePosition(ctx context.Context, req *v1.UnbindAndClosePositionRequest) (*v1.UnbindAndClosePositionReply, error) {
+	var (
+		userBindTraders map[uint64][]*UserBindTrader
+		userIds         []uint64
+		userIdsMap      map[uint64]uint64
+		users           map[uint64]*User
+		symbol          map[string]*Symbol
+		err             error
+	)
+
+	userBindTraders, err = b.binanceUserRepo.GetUserBindTraderTwoByAlreadyInitOrder()
+	if nil != err {
+		return &v1.UnbindAndClosePositionReply{
+			Msg: "错误，未查询到绑定信息",
+			Res: false,
+		}, err
+	}
+
+	userIds = make([]uint64, 0)
+	userIdsMap = make(map[uint64]uint64, 0)
+	for traderId, vUserBindTrader := range userBindTraders {
+		if req.SendBody.TraderId != traderId { // 参数用户
+			continue
+		}
+
+		for _, vVUserBindTrader := range vUserBindTrader {
+			if vVUserBindTrader.UserId != req.SendBody.UserId { // 过滤非参数用户
+				continue
+			}
+
+			if _, ok := userIdsMap[vVUserBindTrader.UserId]; ok {
+				continue
+			}
+
+			// todo 测试
+			userIdsMap[vVUserBindTrader.UserId] = vVUserBindTrader.UserId
+			userIds = append(userIds, vVUserBindTrader.UserId)
+		}
+	}
+
+	if 0 >= len(userIds) {
+		return &v1.UnbindAndClosePositionReply{
+			Msg: "错误，无效用户",
+			Res: false,
+		}, err
+	}
+
+	// 获取用户信息，余额信息，收益信息
+	users, err = b.binanceUserRepo.GetUsersByUserIds(userIds)
+	if nil != err {
+		return &v1.UnbindAndClosePositionReply{
+			Msg: "错误，无效用户",
+			Res: false,
+		}, err
+	}
+
+	symbol, err = b.binanceUserRepo.GetSymbol()
+	if nil != err {
+		return &v1.UnbindAndClosePositionReply{
+			Msg: "错误，无效币种",
+			Res: false,
+		}, err
+	}
+
+	for traderId, vUserBindTraders := range userBindTraders {
+		if req.SendBody.TraderId != traderId { // 参数用户
+			continue
+		}
+
+		for _, vVUserBindTraders := range vUserBindTraders {
+			if req.SendBody.UserId != vVUserBindTraders.UserId { // 参数用户
+				continue
+			}
+
+			if 1 == vVUserBindTraders.InitOrder && 0 == vVUserBindTraders.Status {
+				if err = b.tx.ExecTx(ctx, func(ctx context.Context) error {
+					_, err = b.binanceUserRepo.UpdatesUserBindTraderTwoUnbindById(ctx, vVUserBindTraders.ID)
+					if nil != err {
+						return err
+					}
+
+					return nil
+				}); err != nil {
+					fmt.Println(err, "修改初始化失败", traderId, vVUserBindTraders)
+					continue
+				}
+			} else {
+				continue // 已初始化跳过
+			}
+
+			if 0 == vVUserBindTraders.Status { // 绑定
+				if _, ok := users[vVUserBindTraders.UserId]; !ok {
+					continue
+				}
+
+				// todo 暂时使用检测没用api信息
+				if 0 >= users[vVUserBindTraders.UserId].ApiStatus {
+					continue
+				}
+
+				// 使用的新系统
+				if 2 != users[vVUserBindTraders.UserId].UseNewSystem {
+					continue
+				}
+
+				var (
+					userOrders []*UserOrder
+				)
+
+				userOrders, err = b.binanceUserRepo.GetUserOrderTwoByUserTraderIdNew(req.SendBody.UserId, req.SendBody.TraderId)
+				if nil != err {
+					return nil, err
+				}
+
+				userOrderSymbolMap := make(map[string]map[string]float64, 0)
+				for _, vUserOrders := range userOrders {
+					// 初始化，代币，和一种方向
+					if _, ok := userOrderSymbolMap[vUserOrders.Symbol]; !ok {
+						userOrderSymbolMap[vUserOrders.Symbol] = make(map[string]float64, 0)
+						userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide] = vUserOrders.ExecutedQty
+						continue
+					} else {
+						// 初始化，代币，和另一种方向
+						if _, ok = userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide]; !ok {
+							userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide] = vUserOrders.ExecutedQty
+							continue
+						}
+
+						// 计算
+						if "LONG" == vUserOrders.PositionSide {
+							if "BUY" == vUserOrders.Side {
+								userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide] += vUserOrders.ExecutedQty
+							} else if "SELL" == vUserOrders.Side {
+								userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide] -= vUserOrders.ExecutedQty
+							}
+						} else if "SHORT" == vUserOrders.PositionSide {
+							if "SELL" == vUserOrders.Side {
+								userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide] += vUserOrders.ExecutedQty
+							} else if "BUY" == vUserOrders.Side {
+								userOrderSymbolMap[vUserOrders.Symbol][vUserOrders.PositionSide] -= vUserOrders.ExecutedQty
+							}
+						}
+					}
+				}
+
+				for kSymbol, vUserOrderSymbolMap := range userOrderSymbolMap {
+					for positionSide, vVUserOrderSymbolMap := range vUserOrderSymbolMap {
+						// 精度
+						if _, ok := symbol[kSymbol]; !ok {
+							continue
+						}
+
+						side := "SELL"
+						if "LONG" == positionSide {
+
+						} else if "SHORT" == positionSide {
+							side = "BUY"
+						} else {
+							continue
+						}
+
+						fmt.Println("最最最新平仓:", positionSide, kSymbol, vVUserOrderSymbolMap)
+						b.userOrderGoroutineTwoNewNew(ctx, &OrderData{
+							Coin:  kSymbol,
+							Type:  positionSide,
+							Price: "0",
+							Side:  side,
+							Qty:   "0",
+						}, "0", users[vVUserBindTraders.UserId], vVUserBindTraders, symbol[kSymbol].QuantityPrecision, 0, 0, 1)
+
+						time.Sleep(100 * time.Millisecond)
+					}
+				}
+			}
+
+		}
+
+	}
+
 	return &v1.UnbindAndClosePositionReply{
 		Msg: "成功",
 		Res: true,
