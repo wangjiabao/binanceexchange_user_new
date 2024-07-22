@@ -9141,6 +9141,8 @@ func (b *BinanceUserUsecase) InitPosition(ctx context.Context, req *v1.InitPosit
 						fmt.Println(err, "修改初始化失败", traderId, vVUserBindTraders)
 						continue
 					}
+				} else {
+					continue // 已初始化跳过
 				}
 
 				if 0 == vVUserBindTraders.Status { // 绑定
