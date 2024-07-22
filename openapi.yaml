@@ -1228,7 +1228,11 @@ components:
                     type: string
                 traderName:
                     type: string
+                initOrder:
+                    type: string
                 amount:
+                    type: string
+                status:
                     type: string
         GetUserAndTraderReply_DataList:
             type: object

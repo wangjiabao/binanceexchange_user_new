@@ -8679,6 +8679,8 @@ func (b *BinanceUserUsecase) GetUserAndTrader(ctx context.Context, req *v1.GetUs
 					TraderNum:  tmpTraderNum,
 					TraderName: tmpTraderName,
 					Amount:     vUserBindTradersMap.Amount,
+					Status:     vUserBindTradersMap.Status,
+					InitOrder:  vUserBindTradersMap.InitOrder,
 				})
 			}
 		}
@@ -8813,6 +8815,12 @@ func (b *BinanceUserUsecase) OpenPosition(ctx context.Context, req *v1.OpenPosit
 			Res: false,
 		}, nil
 	}
+	if 0 != userBindTrader.Status {
+		return &v1.OpenPositionReply{
+			Msg: "错误，已经初始化过仓位了",
+			Res: false,
+		}, err
+	}
 
 	var (
 		traders        map[uint64]*Trader
@@ -8937,6 +8945,22 @@ func (b *BinanceUserUsecase) OpenPosition(ctx context.Context, req *v1.OpenPosit
 		}, nil
 	}
 
+	if 1 != userBindTrader.InitOrder {
+		if err = b.tx.ExecTx(ctx, func(ctx context.Context) error {
+			_, err = b.binanceUserRepo.UpdatesUserBindTraderTwoInitOrderById(ctx, userBindTrader.ID)
+			if nil != err {
+				return err
+			}
+
+			return nil
+		}); err != nil {
+			return &v1.OpenPositionReply{
+				Msg: "错误，保存数据失败",
+				Res: false,
+			}, err
+		}
+	}
+
 	// 使用系统的算法开仓
 	if useSystemInit {
 		// 交易员仓位u占保证金比例
@@ -8961,22 +8985,6 @@ func (b *BinanceUserUsecase) OpenPosition(ctx context.Context, req *v1.OpenPosit
 			Msg: "无效参数",
 			Res: false,
 		}, nil
-	}
-
-	if 1 != userBindTrader.InitOrder {
-		if err = b.tx.ExecTx(ctx, func(ctx context.Context) error {
-			_, err = b.binanceUserRepo.UpdatesUserBindTraderTwoInitOrderById(ctx, userBindTrader.ID)
-			if nil != err {
-				return err
-			}
-
-			return nil
-		}); err != nil {
-			return &v1.OpenPositionReply{
-				Msg: "错误，保存数据失败",
-				Res: false,
-			}, err
-		}
 	}
 
 	return &v1.OpenPositionReply{
@@ -9061,36 +9069,6 @@ func (b *BinanceUserUsecase) InitPosition(ctx context.Context, req *v1.InitPosit
 			traderOpeningPositionsNew []*ZyTraderPosition
 		)
 
-		// 先更新状态
-		for _, vVUserBindTraders := range vUserBindTraders {
-			if req.SendBody.UserId != vVUserBindTraders.UserId { // 参数用户
-				continue
-			}
-
-			if _, ok := users[vVUserBindTraders.UserId]; !ok {
-				continue
-			}
-
-			// todo 暂时使用检测没用api信息
-			if 0 >= users[vVUserBindTraders.UserId].ApiStatus {
-				continue
-			}
-
-			if 1 != vVUserBindTraders.InitOrder {
-				if err = b.tx.ExecTx(ctx, func(ctx context.Context) error {
-					_, err = b.binanceUserRepo.UpdatesUserBindTraderTwoInitOrderById(ctx, vVUserBindTraders.ID)
-					if nil != err {
-						return err
-					}
-
-					return nil
-				}); err != nil {
-					fmt.Println(err, "修改初始化失败", traderId, vVUserBindTraders)
-					continue
-				}
-			}
-		}
-
 		if _, ok := traders[traderId]; !ok {
 			fmt.Println("初始化仓位，不存在交易员", traderId)
 			continue
@@ -9140,6 +9118,29 @@ func (b *BinanceUserUsecase) InitPosition(ctx context.Context, req *v1.InitPosit
 			for _, vVUserBindTraders := range vUserBindTraders {
 				if req.SendBody.UserId != vVUserBindTraders.UserId { // 参数用户
 					continue
+				}
+
+				if _, ok := users[vVUserBindTraders.UserId]; !ok {
+					continue
+				}
+
+				// todo 暂时使用检测没用api信息
+				if 0 >= users[vVUserBindTraders.UserId].ApiStatus {
+					continue
+				}
+
+				if 1 != vVUserBindTraders.InitOrder {
+					if err = b.tx.ExecTx(ctx, func(ctx context.Context) error {
+						_, err = b.binanceUserRepo.UpdatesUserBindTraderTwoInitOrderById(ctx, vVUserBindTraders.ID)
+						if nil != err {
+							return err
+						}
+
+						return nil
+					}); err != nil {
+						fmt.Println(err, "修改初始化失败", traderId, vVUserBindTraders)
+						continue
+					}
 				}
 
 				if 0 == vVUserBindTraders.Status { // 绑定

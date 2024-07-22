@@ -3530,7 +3530,7 @@ func (b *BinanceUserRepo) GetNewUserBindTraderTwoByUserIdMap() (map[uint64][]*bi
 	var userBindTrader []*UserBindTrader
 	res := make(map[uint64][]*biz.UserBindTrader, 0)
 
-	if err := b.data.db.Table("new_user_bind_trader_two").Where("init_order=? and status=?", 1, 0).Find(&userBindTrader).Error; err != nil {
+	if err := b.data.db.Table("new_user_bind_trader_two").Find(&userBindTrader).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return res, nil
 		}

@@ -548,7 +548,9 @@ message GetUserAndTraderReply {
     uint64 traderId = 1;
     uint64 traderNum = 2;
     string traderName= 5;
+    uint64 initOrder = 6;
     uint64 amount = 3;
+    uint64 status = 7;
   }
 }
 
