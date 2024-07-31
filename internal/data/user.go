@@ -102,6 +102,14 @@ type TraderPosition struct {
 	PositionAmount float64 `gorm:"type:decimal(60,8);not null"`
 }
 
+type TraderEmail struct {
+	ID        uint64    `gorm:"primarykey;type:int"`
+	TraderId  uint64    `gorm:"type:int;not null"`
+	Email     string    `gorm:"type:varchar(45);not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
 type TraderPositionNew struct {
 	ID     uint64  `gorm:"primarykey;type:int"`
 	Closed uint64  `gorm:"type:bigint(20);not null"`
@@ -2761,6 +2769,62 @@ func (b *BinanceUserRepo) GetOpeningTraderPositionNewNew(traderNum string) ([]*b
 			Symbol:         v.Symbol,
 			PositionAmount: v.PositionAmount,
 			PositionSide:   v.PositionSide,
+		})
+	}
+
+	return res, nil
+}
+
+// GetOpeningTraderPositionNewNewMap .
+func (b *BinanceUserRepo) GetOpeningTraderPositionNewNewMap(traderNum string) (map[uint64]*biz.ZyTraderPosition, error) {
+	var lhTraderPosition []*TraderPosition
+
+	res := make(map[uint64]*biz.ZyTraderPosition, 0)
+	tableName := "trader_position_" + traderNum
+	if err := b.data.db.Table(tableName).Where("position_amount>?", 0).Find(&lhTraderPosition).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_LH_TRADER_POSITION_ERROR", err.Error())
+	}
+
+	for _, v := range lhTraderPosition {
+		res[v.ID] = &biz.ZyTraderPosition{
+			ID:             v.ID,
+			Symbol:         v.Symbol,
+			PositionAmount: v.PositionAmount,
+			PositionSide:   v.PositionSide,
+		}
+	}
+
+	return res, nil
+}
+
+// GetTraderEmail .
+func (b *BinanceUserRepo) GetTraderEmail(traderId uint64) (map[uint64][]*biz.TraderEmail, error) {
+	var traderEmail []*TraderEmail
+
+	res := make(map[uint64][]*biz.TraderEmail, 0)
+	tableName := "trader_email"
+	if err := b.data.db.Table(tableName).Where("trader_id=?", traderId).Find(&traderEmail).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_LH_TRADER_POSITION_ERROR", err.Error())
+	}
+
+	for _, v := range traderEmail {
+		if _, ok := res[v.TraderId]; !ok {
+			res[v.TraderId] = make([]*biz.TraderEmail, 0)
+		}
+
+		res[v.TraderId] = append(res[v.TraderId], &biz.TraderEmail{
+			ID:        v.ID,
+			Email:     v.Email,
+			CreatedAt: v.CreatedAt,
+			TraderId:  v.TraderId,
 		})
 	}
 

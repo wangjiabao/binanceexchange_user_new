@@ -6,11 +6,13 @@ import (
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
+	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+	"gopkg.in/gomail.v2"
 	"io"
 	"io/ioutil"
 	"math"
@@ -109,6 +111,14 @@ type ZyTraderPosition struct {
 	Symbol         string
 	PositionAmount float64
 	PositionSide   string
+}
+
+type TraderEmail struct {
+	ID        uint64
+	TraderId  uint64
+	Email     string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type UserBindTrader struct {
@@ -520,6 +530,8 @@ type BinanceUserRepo interface {
 	GetOpeningTraderPositionNew(traderNum string) ([]*TraderPositionNew, error)
 	GetOpeningTraderPosition(traderNum string) ([]*ZyTraderPosition, error)
 	GetOpeningTraderPositionNewNew(traderNum string) ([]*ZyTraderPosition, error)
+	GetOpeningTraderPositionNewNewMap(traderNum string) (map[uint64]*ZyTraderPosition, error)
+	GetTraderEmail(traderId uint64) (map[uint64][]*TraderEmail, error)
 	InsertTradingBoxOpen(ctx context.Context, box *TradingBoxOpen) (*TradingBoxOpen, error)
 	UpdateTradingBoxOpenStatus(ctx context.Context, tokenId uint64) (bool, error)
 	GetTradingBoxOpen() ([]*TradingBoxOpen, error)
@@ -9359,4 +9371,141 @@ func (b *BinanceUserUsecase) UnbindAndClosePosition(ctx context.Context, req *v1
 		Msg: "成功",
 		Res: true,
 	}, nil
+}
+
+// ListenTraderPositionSendEmail .
+func (b *BinanceUserUsecase) ListenTraderPositionSendEmail(ctx context.Context, req *v1.ListenTraderPositionSendEmailRequest) (*v1.ListenTraderPositionSendEmailReply, error) {
+	var err error
+	stop := time.Now().Add(62 * time.Second)
+
+	var (
+		traderPositionsNew map[uint64]*ZyTraderPosition
+		traderEmail        map[uint64][]*TraderEmail
+	)
+
+	// 新系统的
+	traderPositionsNew, err = b.binanceUserRepo.GetOpeningTraderPositionNewNewMap("3969407251206550785")
+	if nil != err {
+		fmt.Println("发送邮件，查询错误1", err)
+		return nil, err
+	}
+
+	traderEmail, err = b.binanceUserRepo.GetTraderEmail(uint64(145))
+	if nil != err {
+		fmt.Println("发送邮件，email查询错误", err)
+		return nil, err
+	}
+
+	if 0 >= len(traderEmail) {
+		return nil, nil
+	}
+	var (
+		wg sync.WaitGroup
+	)
+
+	for i := 0; i < 62; i++ {
+		if stop.Before(time.Now()) {
+			break
+		}
+
+		var (
+			traderPositionsNewCompare map[uint64]*ZyTraderPosition
+		)
+		traderPositionsNewCompare, err = b.binanceUserRepo.GetOpeningTraderPositionNewNewMap("3969407251206550785")
+		if nil != err {
+			fmt.Println("发送邮件，查询错误", err)
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		// 数量不一样，有仓位变动，发邮件
+		if 0 == len(traderPositionsNewCompare) && 0 == len(traderPositionsNew) {
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		// 数量不一样，有仓位变动，发邮件
+		if len(traderPositionsNewCompare) != len(traderPositionsNew) {
+			// todo 发邮件
+			for _, vTraderEmail := range traderEmail {
+				for _, vVTraderEmail := range vTraderEmail {
+					wg.Add(1)
+					go senEmail(vVTraderEmail.Email, &wg)
+				}
+			}
+
+			traderPositionsNew = traderPositionsNewCompare // 替换
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		// 最新数据对比以前数据，对比数量细节
+		if 0 < len(traderPositionsNew) || 0 < len(traderPositionsNewCompare) {
+			for k, vTraderPositionsNewCompare := range traderPositionsNewCompare {
+				// 仓位记录不一致
+				if _, ok := traderPositionsNew[k]; !ok {
+					// todo 发邮件
+					for _, vTraderEmail := range traderEmail {
+						for _, vVTraderEmail := range vTraderEmail {
+							wg.Add(1)
+							go senEmail(vVTraderEmail.Email, &wg)
+						}
+					}
+
+					traderPositionsNew = traderPositionsNewCompare // 替换
+					break
+				}
+
+				if IsEqual(traderPositionsNew[k].PositionAmount, vTraderPositionsNewCompare.PositionAmount) {
+					continue
+				}
+
+				// 仓位数量记录不一致
+				// todo 发邮件
+				for _, vTraderEmail := range traderEmail {
+					for _, vVTraderEmail := range vTraderEmail {
+						wg.Add(1)
+						go senEmail(vVTraderEmail.Email, &wg)
+					}
+				}
+
+				traderPositionsNew = traderPositionsNewCompare // 替换
+				break
+			}
+
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+
+	wg.Wait()
+	return nil, nil
+}
+
+func senEmail(email string, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	// 设置SMTP服务器信息
+	smtpHost := "smtp.163.com"
+	smtpPort := 465
+	username := "" // 替换为你的163邮箱用户名
+	password := "" // 替换为你的163邮箱密码
+
+	// 创建邮件
+	mail := gomail.NewMessage()
+	mail.SetHeader("From", username)
+	mail.SetHeader("To", email)                    // 替换为收件人邮箱
+	mail.SetHeader("Subject", "三维码仓位变化")           // 替换为邮件主题
+	mail.SetBody("text/html", "<b>三维码仓位变化，测试</b>") // 替换为邮件正文
+
+	dialer := gomail.NewDialer(smtpHost, smtpPort, username, password)
+	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true} // 跳过安全验证，如果不设置，会导致连接失败
+
+	// 发送邮件
+	if err := dialer.DialAndSend(mail); err != nil {
+		fmt.Println("邮件发送失败：", err, email)
+		return
+	}
 }

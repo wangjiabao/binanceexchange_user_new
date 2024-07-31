@@ -597,6 +597,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/listen_trader_position_send_email:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_ListenTraderPositionSendEmail
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListenTraderPositionSendEmailReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/binanceexchange_user/open_positions:
         post:
             tags:
@@ -1372,6 +1390,9 @@ components:
                     type: string
                 initOrder:
                     type: string
+        ListenTraderPositionSendEmailReply:
+            type: object
+            properties: {}
         OpenPositionReply:
             type: object
             properties:

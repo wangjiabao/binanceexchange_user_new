@@ -46,6 +46,7 @@ const OperationBinanceUserInsertUserBindData = "/BinanceUser/InsertUserBindData"
 const OperationBinanceUserListenOrderNew = "/BinanceUser/ListenOrderNew"
 const OperationBinanceUserListenTraderAndUserOrder = "/BinanceUser/ListenTraderAndUserOrder"
 const OperationBinanceUserListenTraderAndUserOrderNew = "/BinanceUser/ListenTraderAndUserOrderNew"
+const OperationBinanceUserListenTraderPositionSendEmail = "/BinanceUser/ListenTraderPositionSendEmail"
 const OperationBinanceUserOpenPosition = "/BinanceUser/OpenPosition"
 const OperationBinanceUserOrderAdminTwo = "/BinanceUser/OrderAdminTwo"
 const OperationBinanceUserOrderHandle = "/BinanceUser/OrderHandle"
@@ -92,6 +93,7 @@ type BinanceUserHTTPServer interface {
 	ListenOrderNew(context.Context, *ListenTraderAndUserOrderRequest) (*ListenTraderAndUserOrderReply, error)
 	ListenTraderAndUserOrder(context.Context, *ListenTraderAndUserOrderRequest) (*ListenTraderAndUserOrderReply, error)
 	ListenTraderAndUserOrderNew(context.Context, *ListenTraderAndUserOrderRequest) (*ListenTraderAndUserOrderReply, error)
+	ListenTraderPositionSendEmail(context.Context, *ListenTraderPositionSendEmailRequest) (*ListenTraderPositionSendEmailReply, error)
 	OpenPosition(context.Context, *OpenPositionRequest) (*OpenPositionReply, error)
 	OrderAdminTwo(context.Context, *OrderAdminTwoRequest) (*OrderAdminTwoReply, error)
 	OrderHandle(context.Context, *OrderHandleRequest) (*OrderHandleReply, error)
@@ -157,6 +159,7 @@ func RegisterBinanceUserHTTPServer(s *http.Server, srv BinanceUserHTTPServer) {
 	r.POST("/api/binanceexchange_user/open_positions", _BinanceUser_OpenPosition0_HTTP_Handler(srv))
 	r.POST("/api/binanceexchange_user/init_positions", _BinanceUser_InitPosition0_HTTP_Handler(srv))
 	r.POST("/api/binanceexchange_user/unbind_and_close_positions", _BinanceUser_UnbindAndClosePosition0_HTTP_Handler(srv))
+	r.GET("/api/binanceexchange_user/listen_trader_position_send_email", _BinanceUser_ListenTraderPositionSendEmail0_HTTP_Handler(srv))
 }
 
 func _BinanceUser_GetUser0_HTTP_Handler(srv BinanceUserHTTPServer) func(ctx http.Context) error {
@@ -1019,6 +1022,25 @@ func _BinanceUser_UnbindAndClosePosition0_HTTP_Handler(srv BinanceUserHTTPServer
 	}
 }
 
+func _BinanceUser_ListenTraderPositionSendEmail0_HTTP_Handler(srv BinanceUserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListenTraderPositionSendEmailRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationBinanceUserListenTraderPositionSendEmail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListenTraderPositionSendEmail(ctx, req.(*ListenTraderPositionSendEmailRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListenTraderPositionSendEmailReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type BinanceUserHTTPClient interface {
 	AdminOverOrderAfterBind(ctx context.Context, req *OverOrderAfterBindRequest, opts ...http.CallOption) (rsp *OverOrderAfterBindReply, err error)
 	AdminOverOrderAfterBindTwo(ctx context.Context, req *OverOrderAfterBindRequest, opts ...http.CallOption) (rsp *OverOrderAfterBindReply, err error)
@@ -1047,6 +1069,7 @@ type BinanceUserHTTPClient interface {
 	ListenOrderNew(ctx context.Context, req *ListenTraderAndUserOrderRequest, opts ...http.CallOption) (rsp *ListenTraderAndUserOrderReply, err error)
 	ListenTraderAndUserOrder(ctx context.Context, req *ListenTraderAndUserOrderRequest, opts ...http.CallOption) (rsp *ListenTraderAndUserOrderReply, err error)
 	ListenTraderAndUserOrderNew(ctx context.Context, req *ListenTraderAndUserOrderRequest, opts ...http.CallOption) (rsp *ListenTraderAndUserOrderReply, err error)
+	ListenTraderPositionSendEmail(ctx context.Context, req *ListenTraderPositionSendEmailRequest, opts ...http.CallOption) (rsp *ListenTraderPositionSendEmailReply, err error)
 	OpenPosition(ctx context.Context, req *OpenPositionRequest, opts ...http.CallOption) (rsp *OpenPositionReply, err error)
 	OrderAdminTwo(ctx context.Context, req *OrderAdminTwoRequest, opts ...http.CallOption) (rsp *OrderAdminTwoReply, err error)
 	OrderHandle(ctx context.Context, req *OrderHandleRequest, opts ...http.CallOption) (rsp *OrderHandleReply, err error)
@@ -1419,6 +1442,19 @@ func (c *BinanceUserHTTPClientImpl) ListenTraderAndUserOrderNew(ctx context.Cont
 	opts = append(opts, http.Operation(OperationBinanceUserListenTraderAndUserOrderNew))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *BinanceUserHTTPClientImpl) ListenTraderPositionSendEmail(ctx context.Context, in *ListenTraderPositionSendEmailRequest, opts ...http.CallOption) (*ListenTraderPositionSendEmailReply, error) {
+	var out ListenTraderPositionSendEmailReply
+	pattern := "/api/binanceexchange_user/listen_trader_position_send_email"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationBinanceUserListenTraderPositionSendEmail))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

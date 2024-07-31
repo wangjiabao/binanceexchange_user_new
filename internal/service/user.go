@@ -957,3 +957,8 @@ func (b *BinanceUserService) InitPosition(ctx context.Context, req *v1.InitPosit
 func (b *BinanceUserService) UnbindAndClosePosition(ctx context.Context, req *v1.UnbindAndClosePositionRequest) (*v1.UnbindAndClosePositionReply, error) {
 	return b.buc.UnbindAndClosePosition(ctx, req)
 }
+
+// ListenTraderPositionSendEmail .
+func (b *BinanceUserService) ListenTraderPositionSendEmail(ctx context.Context, req *v1.ListenTraderPositionSendEmailRequest) (*v1.ListenTraderPositionSendEmailReply, error) {
+	return b.buc.ListenTraderPositionSendEmail(ctx, req)
+}

@@ -19,50 +19,51 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	BinanceUser_GetUser_FullMethodName                     = "/BinanceUser/GetUser"
-	BinanceUser_PullUserDeposit_FullMethodName             = "/BinanceUser/PullUserDeposit"
-	BinanceUser_PullUserDeposit2_FullMethodName            = "/BinanceUser/PullUserDeposit2"
-	BinanceUser_PullUserCredentialsBsc_FullMethodName      = "/BinanceUser/PullUserCredentialsBsc"
-	BinanceUser_BindTrader_FullMethodName                  = "/BinanceUser/BindTrader"
-	BinanceUser_ListenTraderAndUserOrder_FullMethodName    = "/BinanceUser/ListenTraderAndUserOrder"
-	BinanceUser_ListenTraderAndUserOrderNew_FullMethodName = "/BinanceUser/ListenTraderAndUserOrderNew"
-	BinanceUser_ListenOrderNew_FullMethodName              = "/BinanceUser/ListenOrderNew"
-	BinanceUser_OrderHandle_FullMethodName                 = "/BinanceUser/OrderHandle"
-	BinanceUser_OrderHandleTwo_FullMethodName              = "/BinanceUser/OrderHandleTwo"
-	BinanceUser_Analyze_FullMethodName                     = "/BinanceUser/Analyze"
-	BinanceUser_CloseOrderAfterBind_FullMethodName         = "/BinanceUser/CloseOrderAfterBind"
-	BinanceUser_CloseOrderAfterBindTwo_FullMethodName      = "/BinanceUser/CloseOrderAfterBindTwo"
-	BinanceUser_InitOrderAfterBind_FullMethodName          = "/BinanceUser/InitOrderAfterBind"
-	BinanceUser_InitOrderAfterBindTwo_FullMethodName       = "/BinanceUser/InitOrderAfterBindTwo"
-	BinanceUser_InitOrderAfterBindTwoNew_FullMethodName    = "/BinanceUser/InitOrderAfterBindTwoNew"
-	BinanceUser_HandleChange_FullMethodName                = "/BinanceUser/HandleChange"
-	BinanceUser_OverOrderAfterBind_FullMethodName          = "/BinanceUser/OverOrderAfterBind"
-	BinanceUser_OverOrderAfterBindTwo_FullMethodName       = "/BinanceUser/OverOrderAfterBindTwo"
-	BinanceUser_AdminOverOrderAfterBind_FullMethodName     = "/BinanceUser/AdminOverOrderAfterBind"
-	BinanceUser_AdminOverOrderAfterBindTwo_FullMethodName  = "/BinanceUser/AdminOverOrderAfterBindTwo"
-	BinanceUser_AdminOverOrderTwoByInfo_FullMethodName     = "/BinanceUser/AdminOverOrderTwoByInfo"
-	BinanceUser_OrderAdminTwo_FullMethodName               = "/BinanceUser/OrderAdminTwo"
-	BinanceUser_ExchangeUserLeverAge_FullMethodName        = "/BinanceUser/ExchangeUserLeverAge"
-	BinanceUser_PullTradingBoxOpen_FullMethodName          = "/BinanceUser/PullTradingBoxOpen"
-	BinanceUser_SettleTradingBoxOpen_FullMethodName        = "/BinanceUser/SettleTradingBoxOpen"
-	BinanceUser_PullBinanceTradeHistory_FullMethodName     = "/BinanceUser/PullBinanceTradeHistory"
-	BinanceUser_GetBinanceTraderPosition_FullMethodName    = "/BinanceUser/GetBinanceTraderPosition"
-	BinanceUser_UserOrderDo_FullMethodName                 = "/BinanceUser/UserOrderDo"
-	BinanceUser_UserOrderDoTwo_FullMethodName              = "/BinanceUser/UserOrderDoTwo"
-	BinanceUser_UserOrderDoHandlePrice_FullMethodName      = "/BinanceUser/UserOrderDoHandlePrice"
-	BinanceUser_PullFilData_FullMethodName                 = "/BinanceUser/PullFilData"
-	BinanceUser_GetFilData_FullMethodName                  = "/BinanceUser/GetFilData"
-	BinanceUser_GetUserBindData_FullMethodName             = "/BinanceUser/GetUserBindData"
-	BinanceUser_GetBinanceTradersTrade_FullMethodName      = "/BinanceUser/GetBinanceTradersTrade"
-	BinanceUser_InsertUserBindData_FullMethodName          = "/BinanceUser/InsertUserBindData"
-	BinanceUser_DeleteUserBindData_FullMethodName          = "/BinanceUser/DeleteUserBindData"
-	BinanceUser_HandleP_FullMethodName                     = "/BinanceUser/HandleP"
-	BinanceUser_GetUserAndTrader_FullMethodName            = "/BinanceUser/GetUserAndTrader"
-	BinanceUser_GetTraderPosition_FullMethodName           = "/BinanceUser/GetTraderPosition"
-	BinanceUser_GetUserPosition_FullMethodName             = "/BinanceUser/GetUserPosition"
-	BinanceUser_OpenPosition_FullMethodName                = "/BinanceUser/OpenPosition"
-	BinanceUser_InitPosition_FullMethodName                = "/BinanceUser/InitPosition"
-	BinanceUser_UnbindAndClosePosition_FullMethodName      = "/BinanceUser/UnbindAndClosePosition"
+	BinanceUser_GetUser_FullMethodName                       = "/BinanceUser/GetUser"
+	BinanceUser_PullUserDeposit_FullMethodName               = "/BinanceUser/PullUserDeposit"
+	BinanceUser_PullUserDeposit2_FullMethodName              = "/BinanceUser/PullUserDeposit2"
+	BinanceUser_PullUserCredentialsBsc_FullMethodName        = "/BinanceUser/PullUserCredentialsBsc"
+	BinanceUser_BindTrader_FullMethodName                    = "/BinanceUser/BindTrader"
+	BinanceUser_ListenTraderAndUserOrder_FullMethodName      = "/BinanceUser/ListenTraderAndUserOrder"
+	BinanceUser_ListenTraderAndUserOrderNew_FullMethodName   = "/BinanceUser/ListenTraderAndUserOrderNew"
+	BinanceUser_ListenOrderNew_FullMethodName                = "/BinanceUser/ListenOrderNew"
+	BinanceUser_OrderHandle_FullMethodName                   = "/BinanceUser/OrderHandle"
+	BinanceUser_OrderHandleTwo_FullMethodName                = "/BinanceUser/OrderHandleTwo"
+	BinanceUser_Analyze_FullMethodName                       = "/BinanceUser/Analyze"
+	BinanceUser_CloseOrderAfterBind_FullMethodName           = "/BinanceUser/CloseOrderAfterBind"
+	BinanceUser_CloseOrderAfterBindTwo_FullMethodName        = "/BinanceUser/CloseOrderAfterBindTwo"
+	BinanceUser_InitOrderAfterBind_FullMethodName            = "/BinanceUser/InitOrderAfterBind"
+	BinanceUser_InitOrderAfterBindTwo_FullMethodName         = "/BinanceUser/InitOrderAfterBindTwo"
+	BinanceUser_InitOrderAfterBindTwoNew_FullMethodName      = "/BinanceUser/InitOrderAfterBindTwoNew"
+	BinanceUser_HandleChange_FullMethodName                  = "/BinanceUser/HandleChange"
+	BinanceUser_OverOrderAfterBind_FullMethodName            = "/BinanceUser/OverOrderAfterBind"
+	BinanceUser_OverOrderAfterBindTwo_FullMethodName         = "/BinanceUser/OverOrderAfterBindTwo"
+	BinanceUser_AdminOverOrderAfterBind_FullMethodName       = "/BinanceUser/AdminOverOrderAfterBind"
+	BinanceUser_AdminOverOrderAfterBindTwo_FullMethodName    = "/BinanceUser/AdminOverOrderAfterBindTwo"
+	BinanceUser_AdminOverOrderTwoByInfo_FullMethodName       = "/BinanceUser/AdminOverOrderTwoByInfo"
+	BinanceUser_OrderAdminTwo_FullMethodName                 = "/BinanceUser/OrderAdminTwo"
+	BinanceUser_ExchangeUserLeverAge_FullMethodName          = "/BinanceUser/ExchangeUserLeverAge"
+	BinanceUser_PullTradingBoxOpen_FullMethodName            = "/BinanceUser/PullTradingBoxOpen"
+	BinanceUser_SettleTradingBoxOpen_FullMethodName          = "/BinanceUser/SettleTradingBoxOpen"
+	BinanceUser_PullBinanceTradeHistory_FullMethodName       = "/BinanceUser/PullBinanceTradeHistory"
+	BinanceUser_GetBinanceTraderPosition_FullMethodName      = "/BinanceUser/GetBinanceTraderPosition"
+	BinanceUser_UserOrderDo_FullMethodName                   = "/BinanceUser/UserOrderDo"
+	BinanceUser_UserOrderDoTwo_FullMethodName                = "/BinanceUser/UserOrderDoTwo"
+	BinanceUser_UserOrderDoHandlePrice_FullMethodName        = "/BinanceUser/UserOrderDoHandlePrice"
+	BinanceUser_PullFilData_FullMethodName                   = "/BinanceUser/PullFilData"
+	BinanceUser_GetFilData_FullMethodName                    = "/BinanceUser/GetFilData"
+	BinanceUser_GetUserBindData_FullMethodName               = "/BinanceUser/GetUserBindData"
+	BinanceUser_GetBinanceTradersTrade_FullMethodName        = "/BinanceUser/GetBinanceTradersTrade"
+	BinanceUser_InsertUserBindData_FullMethodName            = "/BinanceUser/InsertUserBindData"
+	BinanceUser_DeleteUserBindData_FullMethodName            = "/BinanceUser/DeleteUserBindData"
+	BinanceUser_HandleP_FullMethodName                       = "/BinanceUser/HandleP"
+	BinanceUser_GetUserAndTrader_FullMethodName              = "/BinanceUser/GetUserAndTrader"
+	BinanceUser_GetTraderPosition_FullMethodName             = "/BinanceUser/GetTraderPosition"
+	BinanceUser_GetUserPosition_FullMethodName               = "/BinanceUser/GetUserPosition"
+	BinanceUser_OpenPosition_FullMethodName                  = "/BinanceUser/OpenPosition"
+	BinanceUser_InitPosition_FullMethodName                  = "/BinanceUser/InitPosition"
+	BinanceUser_UnbindAndClosePosition_FullMethodName        = "/BinanceUser/UnbindAndClosePosition"
+	BinanceUser_ListenTraderPositionSendEmail_FullMethodName = "/BinanceUser/ListenTraderPositionSendEmail"
 )
 
 // BinanceUserClient is the client API for BinanceUser service.
@@ -113,6 +114,7 @@ type BinanceUserClient interface {
 	OpenPosition(ctx context.Context, in *OpenPositionRequest, opts ...grpc.CallOption) (*OpenPositionReply, error)
 	InitPosition(ctx context.Context, in *InitPositionRequest, opts ...grpc.CallOption) (*InitPositionReply, error)
 	UnbindAndClosePosition(ctx context.Context, in *UnbindAndClosePositionRequest, opts ...grpc.CallOption) (*UnbindAndClosePositionReply, error)
+	ListenTraderPositionSendEmail(ctx context.Context, in *ListenTraderPositionSendEmailRequest, opts ...grpc.CallOption) (*ListenTraderPositionSendEmailReply, error)
 }
 
 type binanceUserClient struct {
@@ -519,6 +521,15 @@ func (c *binanceUserClient) UnbindAndClosePosition(ctx context.Context, in *Unbi
 	return out, nil
 }
 
+func (c *binanceUserClient) ListenTraderPositionSendEmail(ctx context.Context, in *ListenTraderPositionSendEmailRequest, opts ...grpc.CallOption) (*ListenTraderPositionSendEmailReply, error) {
+	out := new(ListenTraderPositionSendEmailReply)
+	err := c.cc.Invoke(ctx, BinanceUser_ListenTraderPositionSendEmail_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BinanceUserServer is the server API for BinanceUser service.
 // All implementations must embed UnimplementedBinanceUserServer
 // for forward compatibility
@@ -567,6 +578,7 @@ type BinanceUserServer interface {
 	OpenPosition(context.Context, *OpenPositionRequest) (*OpenPositionReply, error)
 	InitPosition(context.Context, *InitPositionRequest) (*InitPositionReply, error)
 	UnbindAndClosePosition(context.Context, *UnbindAndClosePositionRequest) (*UnbindAndClosePositionReply, error)
+	ListenTraderPositionSendEmail(context.Context, *ListenTraderPositionSendEmailRequest) (*ListenTraderPositionSendEmailReply, error)
 	mustEmbedUnimplementedBinanceUserServer()
 }
 
@@ -705,6 +717,9 @@ func (UnimplementedBinanceUserServer) InitPosition(context.Context, *InitPositio
 }
 func (UnimplementedBinanceUserServer) UnbindAndClosePosition(context.Context, *UnbindAndClosePositionRequest) (*UnbindAndClosePositionReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnbindAndClosePosition not implemented")
+}
+func (UnimplementedBinanceUserServer) ListenTraderPositionSendEmail(context.Context, *ListenTraderPositionSendEmailRequest) (*ListenTraderPositionSendEmailReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListenTraderPositionSendEmail not implemented")
 }
 func (UnimplementedBinanceUserServer) mustEmbedUnimplementedBinanceUserServer() {}
 
@@ -1511,6 +1526,24 @@ func _BinanceUser_UnbindAndClosePosition_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BinanceUser_ListenTraderPositionSendEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListenTraderPositionSendEmailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).ListenTraderPositionSendEmail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_ListenTraderPositionSendEmail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).ListenTraderPositionSendEmail(ctx, req.(*ListenTraderPositionSendEmailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BinanceUser_ServiceDesc is the grpc.ServiceDesc for BinanceUser service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1693,6 +1726,10 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UnbindAndClosePosition",
 			Handler:    _BinanceUser_UnbindAndClosePosition_Handler,
+		},
+		{
+			MethodName: "ListenTraderPositionSendEmail",
+			Handler:    _BinanceUser_ListenTraderPositionSendEmail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
