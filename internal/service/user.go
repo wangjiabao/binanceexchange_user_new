@@ -962,3 +962,13 @@ func (b *BinanceUserService) UnbindAndClosePosition(ctx context.Context, req *v1
 func (b *BinanceUserService) ListenTraderPositionSendEmail(ctx context.Context, req *v1.ListenTraderPositionSendEmailRequest) (*v1.ListenTraderPositionSendEmailReply, error) {
 	return b.buc.ListenTraderPositionSendEmail(ctx, req)
 }
+
+// WithdrawToOkx .
+func (b *BinanceUserService) WithdrawToOkx(ctx context.Context, req *v1.WithdrawToOkxRequest) (*v1.WithdrawToOkxReply, error) {
+	return b.buc.WithdrawToOkx(ctx, req)
+}
+
+// PullTraderBaseMoney .
+func (b *BinanceUserService) PullTraderBaseMoney(ctx context.Context, req *v1.PullTraderBaseMoneyRequest) (*v1.PullTraderBaseMoneyReply, error) {
+	return b.buc.PullTraderBaseMoney(ctx, req)
+}

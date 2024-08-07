@@ -783,6 +783,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/pull_trader_base_money:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_PullTraderBaseMoney
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PullTraderBaseMoneyReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/binanceexchange_user/pull_trading_box_open:
         get:
             tags:
@@ -1103,6 +1121,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/UserOrderDoReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/binanceexchange_user/withdraw_to_okx:
+        get:
+            tags:
+                - BinanceUser
+            operationId: BinanceUser_WithdrawToOkx
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/WithdrawToOkxReply'
                 default:
                     description: Default error response
                     content:
@@ -1445,6 +1481,9 @@ components:
         PullFilDataReply:
             type: object
             properties: {}
+        PullTraderBaseMoneyReply:
+            type: object
+            properties: {}
         PullTradingBoxOpenReply:
             type: object
             properties: {}
@@ -1508,6 +1547,9 @@ components:
             type: object
             properties: {}
         UserOrderDoReply:
+            type: object
+            properties: {}
+        WithdrawToOkxReply:
             type: object
             properties: {}
 tags:

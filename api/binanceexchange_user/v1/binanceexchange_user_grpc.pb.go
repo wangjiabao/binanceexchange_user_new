@@ -64,6 +64,8 @@ const (
 	BinanceUser_InitPosition_FullMethodName                  = "/BinanceUser/InitPosition"
 	BinanceUser_UnbindAndClosePosition_FullMethodName        = "/BinanceUser/UnbindAndClosePosition"
 	BinanceUser_ListenTraderPositionSendEmail_FullMethodName = "/BinanceUser/ListenTraderPositionSendEmail"
+	BinanceUser_WithdrawToOkx_FullMethodName                 = "/BinanceUser/WithdrawToOkx"
+	BinanceUser_PullTraderBaseMoney_FullMethodName           = "/BinanceUser/PullTraderBaseMoney"
 )
 
 // BinanceUserClient is the client API for BinanceUser service.
@@ -115,6 +117,8 @@ type BinanceUserClient interface {
 	InitPosition(ctx context.Context, in *InitPositionRequest, opts ...grpc.CallOption) (*InitPositionReply, error)
 	UnbindAndClosePosition(ctx context.Context, in *UnbindAndClosePositionRequest, opts ...grpc.CallOption) (*UnbindAndClosePositionReply, error)
 	ListenTraderPositionSendEmail(ctx context.Context, in *ListenTraderPositionSendEmailRequest, opts ...grpc.CallOption) (*ListenTraderPositionSendEmailReply, error)
+	WithdrawToOkx(ctx context.Context, in *WithdrawToOkxRequest, opts ...grpc.CallOption) (*WithdrawToOkxReply, error)
+	PullTraderBaseMoney(ctx context.Context, in *PullTraderBaseMoneyRequest, opts ...grpc.CallOption) (*PullTraderBaseMoneyReply, error)
 }
 
 type binanceUserClient struct {
@@ -530,6 +534,24 @@ func (c *binanceUserClient) ListenTraderPositionSendEmail(ctx context.Context, i
 	return out, nil
 }
 
+func (c *binanceUserClient) WithdrawToOkx(ctx context.Context, in *WithdrawToOkxRequest, opts ...grpc.CallOption) (*WithdrawToOkxReply, error) {
+	out := new(WithdrawToOkxReply)
+	err := c.cc.Invoke(ctx, BinanceUser_WithdrawToOkx_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *binanceUserClient) PullTraderBaseMoney(ctx context.Context, in *PullTraderBaseMoneyRequest, opts ...grpc.CallOption) (*PullTraderBaseMoneyReply, error) {
+	out := new(PullTraderBaseMoneyReply)
+	err := c.cc.Invoke(ctx, BinanceUser_PullTraderBaseMoney_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BinanceUserServer is the server API for BinanceUser service.
 // All implementations must embed UnimplementedBinanceUserServer
 // for forward compatibility
@@ -579,6 +601,8 @@ type BinanceUserServer interface {
 	InitPosition(context.Context, *InitPositionRequest) (*InitPositionReply, error)
 	UnbindAndClosePosition(context.Context, *UnbindAndClosePositionRequest) (*UnbindAndClosePositionReply, error)
 	ListenTraderPositionSendEmail(context.Context, *ListenTraderPositionSendEmailRequest) (*ListenTraderPositionSendEmailReply, error)
+	WithdrawToOkx(context.Context, *WithdrawToOkxRequest) (*WithdrawToOkxReply, error)
+	PullTraderBaseMoney(context.Context, *PullTraderBaseMoneyRequest) (*PullTraderBaseMoneyReply, error)
 	mustEmbedUnimplementedBinanceUserServer()
 }
 
@@ -720,6 +744,12 @@ func (UnimplementedBinanceUserServer) UnbindAndClosePosition(context.Context, *U
 }
 func (UnimplementedBinanceUserServer) ListenTraderPositionSendEmail(context.Context, *ListenTraderPositionSendEmailRequest) (*ListenTraderPositionSendEmailReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListenTraderPositionSendEmail not implemented")
+}
+func (UnimplementedBinanceUserServer) WithdrawToOkx(context.Context, *WithdrawToOkxRequest) (*WithdrawToOkxReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method WithdrawToOkx not implemented")
+}
+func (UnimplementedBinanceUserServer) PullTraderBaseMoney(context.Context, *PullTraderBaseMoneyRequest) (*PullTraderBaseMoneyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PullTraderBaseMoney not implemented")
 }
 func (UnimplementedBinanceUserServer) mustEmbedUnimplementedBinanceUserServer() {}
 
@@ -1544,6 +1574,42 @@ func _BinanceUser_ListenTraderPositionSendEmail_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BinanceUser_WithdrawToOkx_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WithdrawToOkxRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).WithdrawToOkx(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_WithdrawToOkx_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).WithdrawToOkx(ctx, req.(*WithdrawToOkxRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BinanceUser_PullTraderBaseMoney_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PullTraderBaseMoneyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinanceUserServer).PullTraderBaseMoney(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinanceUser_PullTraderBaseMoney_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinanceUserServer).PullTraderBaseMoney(ctx, req.(*PullTraderBaseMoneyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BinanceUser_ServiceDesc is the grpc.ServiceDesc for BinanceUser service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1730,6 +1796,14 @@ var BinanceUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListenTraderPositionSendEmail",
 			Handler:    _BinanceUser_ListenTraderPositionSendEmail_Handler,
+		},
+		{
+			MethodName: "WithdrawToOkx",
+			Handler:    _BinanceUser_WithdrawToOkx_Handler,
+		},
+		{
+			MethodName: "PullTraderBaseMoney",
+			Handler:    _BinanceUser_PullTraderBaseMoney_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

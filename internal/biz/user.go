@@ -145,6 +145,24 @@ type UserBindAfterUnbind struct {
 	UpdatedAt    time.Time
 }
 
+type TraderInfo struct {
+	ID        uint64
+	TraderId  uint64
+	BId       uint64
+	BaseMoney float64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type UserInfo struct {
+	ID        uint64
+	UserId    uint64
+	BId       uint64
+	BaseMoney float64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type UserOrder struct {
 	ID            uint64
 	UserId        uint64
@@ -566,6 +584,10 @@ type BinanceUserRepo interface {
 	GetUsersNew() ([]*User, error)
 	GetNewUserBindTraderTwoByUserIdMap() (map[uint64][]*UserBindTrader, error)
 	GetUserOrderTwoByUserTraderIdNew(userId uint64, traderId uint64) ([]*UserOrder, error)
+	UpdateTraderInfo(ctx context.Context, traderId uint64, baseMoney float64) (bool, error)
+	UpdateUserInfo(ctx context.Context, userId uint64, baseMoney float64) (bool, error)
+	GetUserInfo() (map[uint64]*UserInfo, error)
+	GetTraderInfo() (map[uint64]*TraderInfo, error)
 }
 
 // BinanceUserUsecase is a BinanceData usecase.
@@ -9508,4 +9530,157 @@ func senEmail(email string, wg *sync.WaitGroup) {
 		fmt.Println("邮件发送失败：", err, email)
 		return
 	}
+}
+
+// WithdrawToOkx .
+func (b *BinanceUserUsecase) WithdrawToOkx(ctx context.Context, req *v1.WithdrawToOkxRequest) (*v1.WithdrawToOkxReply, error) {
+
+	return nil, nil
+}
+
+// PullTraderBaseMoney .
+func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.PullTraderBaseMoneyRequest) (*v1.PullTraderBaseMoneyReply, error) {
+	stop := time.Now().Add(55 * time.Second)
+
+	for i := 0; i < 20; i++ {
+		if stop.Before(time.Now()) {
+			break
+		}
+
+		var (
+			userInfo   map[uint64]*UserInfo
+			traderInfo map[uint64]*TraderInfo
+			err        error
+		)
+
+		traderInfo, err = b.binanceUserRepo.GetTraderInfo()
+		if nil != err {
+			fmt.Println(err)
+			continue
+		}
+
+		for _, vTraderInfo := range traderInfo {
+			var (
+				tmpBaseMoney      string
+				tmpBaseMoneyFloat float64
+			)
+
+			if 0 >= vTraderInfo.BId {
+				continue
+			}
+
+			tmpBaseMoney, _ = requestBinanceTraderDetail(vTraderInfo.BId)
+			if 0 >= len(tmpBaseMoney) {
+				continue
+			}
+			tmpBaseMoneyFloat, err = strconv.ParseFloat(tmpBaseMoney, 64)
+			if nil != err {
+				fmt.Println(err)
+				continue
+			}
+
+			if IsEqual(tmpBaseMoneyFloat, vTraderInfo.BaseMoney) {
+				continue
+			}
+
+			_, err = b.binanceUserRepo.UpdateTraderInfo(ctx, vTraderInfo.TraderId, tmpBaseMoneyFloat)
+			if nil != err {
+				fmt.Println(err)
+				continue
+			}
+		}
+
+		userInfo, err = b.binanceUserRepo.GetUserInfo()
+		if nil != err {
+			fmt.Println(err)
+			continue
+		}
+
+		for _, vUserInfo := range userInfo {
+			var (
+				tmpBaseMoney      string
+				tmpBaseMoneyFloat float64
+			)
+
+			if 0 >= vUserInfo.BId {
+				continue
+			}
+
+			tmpBaseMoney, _ = requestBinanceTraderDetail(vUserInfo.BId)
+			if 0 >= len(tmpBaseMoney) {
+				continue
+			}
+			tmpBaseMoneyFloat, err = strconv.ParseFloat(tmpBaseMoney, 64)
+			if nil != err {
+				fmt.Println(err)
+				continue
+			}
+
+			if IsEqual(tmpBaseMoneyFloat, vUserInfo.BaseMoney) {
+				continue
+			}
+
+			_, err = b.binanceUserRepo.UpdateUserInfo(ctx, vUserInfo.UserId, tmpBaseMoneyFloat)
+			if nil != err {
+				fmt.Println(err)
+				continue
+			}
+		}
+
+		time.Sleep(10 * time.Second)
+	}
+
+	return nil, nil
+}
+
+type BinanceTraderDetailResp struct {
+	Data *BinanceTraderDetailData
+}
+
+type BinanceTraderDetailData struct {
+	MarginBalance string
+}
+
+// 拉取交易员交易历史
+func requestBinanceTraderDetail(portfolioId uint64) (string, error) {
+	var (
+		resp   *http.Response
+		res    string
+		b      []byte
+		err    error
+		apiUrl = "https://www.binance.com/bapi/futures/v1/friendly/future/copy-trade/lead-portfolio/detail?portfolioId=" + strconv.FormatUint(portfolioId, 10)
+	)
+
+	// 构造请求
+	resp, err = http.Get(apiUrl)
+	if err != nil {
+		return res, err
+	}
+
+	// 结果
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	b, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return res, err
+	}
+
+	var l *BinanceTraderDetailResp
+	err = json.Unmarshal(b, &l)
+	if err != nil {
+		fmt.Println(err)
+		return res, err
+	}
+
+	if nil == l.Data {
+		return res, nil
+	}
+
+	return l.Data.MarginBalance, nil
 }

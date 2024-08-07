@@ -24,6 +24,24 @@ type User struct {
 	UpdatedAt           time.Time `gorm:"type:datetime;not null"`
 }
 
+type UserInfo struct {
+	ID        uint64    `gorm:"primarykey;type:int"`
+	UserId    uint64    `gorm:"type:int;not null"`
+	BId       uint64    `gorm:"type:bigint(20);not null"`
+	BaseMoney float64   `gorm:"type:decimal(65,20);not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
+type TraderInfo struct {
+	ID        uint64    `gorm:"primarykey;type:int"`
+	TraderId  uint64    `gorm:"type:int;not null"`
+	BId       uint64    `gorm:"type:bigint(20);not null"`
+	BaseMoney float64   `gorm:"type:decimal(65,20);not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
 type UserBalance struct {
 	ID        uint64    `gorm:"primarykey;type:int"`
 	UserId    uint64    `gorm:"type:int;not null"`
@@ -3673,6 +3691,92 @@ func (b *BinanceUserRepo) GetUserOrderTwoByUserTraderIdNew(userId uint64, trader
 			CreatedAt:     v.CreatedAt,
 			UpdatedAt:     v.UpdatedAt,
 		})
+	}
+
+	return res, nil
+}
+
+// UpdateTraderInfo .
+func (b *BinanceUserRepo) UpdateTraderInfo(ctx context.Context, traderId uint64, baseMoney float64) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if err = b.data.DB(ctx).Table("new_trader_info").Where("trader_id=?", traderId).
+		Updates(map[string]interface{}{"base_money": baseMoney, "updated_at": now}).Error; nil != err {
+		return false, errors.NotFound("UPDATE_TRADER_INFO_ERROR", "UPDATE_TRADER_INFO_ERROR")
+	}
+
+	return true, nil
+}
+
+// UpdateUserInfo .
+func (b *BinanceUserRepo) UpdateUserInfo(ctx context.Context, userId uint64, baseMoney float64) (bool, error) {
+	var (
+		err error
+		now = time.Now()
+	)
+
+	if err = b.data.DB(ctx).Table("new_user_info").Where("user_id=?", userId).
+		Updates(map[string]interface{}{"base_money": baseMoney, "updated_at": now}).Error; nil != err {
+		return false, errors.NotFound("UPDATE_USER_INFO_ERROR", "UPDATE_USER_INFO_ERROR")
+	}
+
+	return true, nil
+}
+
+// GetUserInfo .
+func (b *BinanceUserRepo) GetUserInfo() (map[uint64]*biz.UserInfo, error) {
+	var userOrder []*UserInfo
+
+	res := make(map[uint64]*biz.UserInfo, 0)
+	if err := b.data.db.Table("new_user_info").
+		Find(&userOrder).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_USER_INFO_ERROR", err.Error())
+	}
+
+	for _, v := range userOrder {
+		res[v.UserId] = &biz.UserInfo{
+			ID:        v.ID,
+			UserId:    v.UserId,
+			BId:       v.BId,
+			BaseMoney: v.BaseMoney,
+			CreatedAt: v.CreatedAt,
+			UpdatedAt: v.UpdatedAt,
+		}
+	}
+
+	return res, nil
+}
+
+// GetTraderInfo .
+func (b *BinanceUserRepo) GetTraderInfo() (map[uint64]*biz.TraderInfo, error) {
+	var userOrder []*TraderInfo
+
+	res := make(map[uint64]*biz.TraderInfo, 0)
+	if err := b.data.db.Table("new_trader_info").
+		Find(&userOrder).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_TRADER_INFO_ERROR", err.Error())
+	}
+
+	for _, v := range userOrder {
+		res[v.TraderId] = &biz.TraderInfo{
+			ID:        v.ID,
+			TraderId:  v.TraderId,
+			BId:       v.BId,
+			BaseMoney: v.BaseMoney,
+			CreatedAt: v.CreatedAt,
+			UpdatedAt: v.UpdatedAt,
+		}
 	}
 
 	return res, nil

@@ -284,6 +284,18 @@ service BinanceUser {
       get: "/api/binanceexchange_user/listen_trader_position_send_email"
     };
   };
+
+  rpc WithdrawToOkx (WithdrawToOkxRequest) returns (WithdrawToOkxReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/withdraw_to_okx"
+    };
+  };
+
+  rpc PullTraderBaseMoney (PullTraderBaseMoneyRequest) returns (PullTraderBaseMoneyReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/pull_trader_base_money"
+    };
+  };
 }
 
 message GetUserRequest {
@@ -638,4 +650,17 @@ message UnbindAndClosePositionRequest {
 message UnbindAndClosePositionReply {
   string msg = 1;
   bool res = 2;
+}
+
+message WithdrawToOkxRequest {
+}
+
+message WithdrawToOkxReply {
+}
+
+
+message PullTraderBaseMoneyRequest {
+}
+
+message PullTraderBaseMoneyReply {
 }
