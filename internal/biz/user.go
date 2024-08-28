@@ -9569,10 +9569,12 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 				continue
 			}
 
+			time.Sleep(200 * time.Millisecond)
 			tmpBaseMoney, _ = requestBinanceTraderDetail(vTraderInfo.BId)
 			if 0 >= len(tmpBaseMoney) {
 				continue
 			}
+
 			tmpBaseMoneyFloat, err = strconv.ParseFloat(tmpBaseMoney, 64)
 			if nil != err {
 				fmt.Println(err)
@@ -9588,8 +9590,6 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 				fmt.Println(err)
 				continue
 			}
-
-			time.Sleep(1 * time.Second)
 		}
 
 		userInfo, err = b.binanceUserRepo.GetUserInfo()
@@ -9608,6 +9608,7 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 				continue
 			}
 
+			time.Sleep(200 * time.Millisecond)
 			tmpBaseMoney, _ = requestBinanceTraderDetail(vUserInfo.BId)
 			if 0 >= len(tmpBaseMoney) {
 				continue
@@ -9627,8 +9628,6 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 				fmt.Println(err)
 				continue
 			}
-
-			time.Sleep(1 * time.Second)
 		}
 
 		time.Sleep(10 * time.Second)
