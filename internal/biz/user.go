@@ -9540,9 +9540,9 @@ func (b *BinanceUserUsecase) WithdrawToOkx(ctx context.Context, req *v1.Withdraw
 
 // PullTraderBaseMoney .
 func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.PullTraderBaseMoneyRequest) (*v1.PullTraderBaseMoneyReply, error) {
-	stop := time.Now().Add(55 * time.Second)
+	stop := time.Now().Add(150 * time.Second)
 
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 14; i++ {
 		if stop.Before(time.Now()) {
 			break
 		}
@@ -9588,6 +9588,8 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 				fmt.Println(err)
 				continue
 			}
+
+			time.Sleep(200 * time.Millisecond)
 		}
 
 		userInfo, err = b.binanceUserRepo.GetUserInfo()
