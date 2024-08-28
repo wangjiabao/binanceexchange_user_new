@@ -9677,6 +9677,7 @@ func requestBinanceTraderDetail(portfolioId uint64) (string, error) {
 
 	var l *BinanceTraderDetailResp
 	err = json.Unmarshal(b, &l)
+	fmt.Println(string(b))
 	if err != nil {
 		fmt.Println(err)
 		return res, err
