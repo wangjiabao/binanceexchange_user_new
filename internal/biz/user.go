@@ -9627,6 +9627,8 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 				fmt.Println(err)
 				continue
 			}
+
+			time.Sleep(200 * time.Millisecond)
 		}
 
 		time.Sleep(10 * time.Second)
