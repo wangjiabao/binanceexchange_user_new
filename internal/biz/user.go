@@ -9569,7 +9569,7 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 				continue
 			}
 
-			time.Sleep(200 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 			tmpBaseMoney, _ = requestBinanceTraderDetail(vTraderInfo.BId)
 			if 0 >= len(tmpBaseMoney) {
 				continue
@@ -9608,7 +9608,7 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 				continue
 			}
 
-			time.Sleep(200 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 			tmpBaseMoney, _ = requestBinanceTraderDetail(vUserInfo.BId)
 			if 0 >= len(tmpBaseMoney) {
 				continue
@@ -9676,7 +9676,6 @@ func requestBinanceTraderDetail(portfolioId uint64) (string, error) {
 
 	var l *BinanceTraderDetailResp
 	err = json.Unmarshal(b, &l)
-	fmt.Println(string(b))
 	if err != nil {
 		fmt.Println(err)
 		return res, err
