@@ -9589,7 +9589,7 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 				continue
 			}
 
-			time.Sleep(200 * time.Millisecond)
+			time.Sleep(1 * time.Second)
 		}
 
 		userInfo, err = b.binanceUserRepo.GetUserInfo()
@@ -9628,7 +9628,7 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 				continue
 			}
 
-			time.Sleep(200 * time.Millisecond)
+			time.Sleep(1 * time.Second)
 		}
 
 		time.Sleep(10 * time.Second)
