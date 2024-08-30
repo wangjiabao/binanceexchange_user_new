@@ -9542,7 +9542,7 @@ func (b *BinanceUserUsecase) WithdrawToOkx(ctx context.Context, req *v1.Withdraw
 func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.PullTraderBaseMoneyRequest) (*v1.PullTraderBaseMoneyReply, error) {
 	stop := time.Now().Add(150 * time.Second)
 
-	for i := 0; i < 80; i++ {
+	for i := 0; i < 30; i++ {
 		if stop.Before(time.Now()) {
 			break
 		}
@@ -9569,7 +9569,7 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 				continue
 			}
 
-			time.Sleep(200 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 			tmpBaseMoney, _ = requestBinanceTraderDetail(vTraderInfo.BId)
 			if 0 >= len(tmpBaseMoney) {
 				continue
@@ -9608,7 +9608,7 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 				continue
 			}
 
-			time.Sleep(200 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 			tmpBaseMoney, _ = requestBinanceTraderDetail(vUserInfo.BId)
 			if 0 >= len(tmpBaseMoney) {
 				continue
@@ -9630,7 +9630,7 @@ func (b *BinanceUserUsecase) PullTraderBaseMoney(ctx context.Context, req *v1.Pu
 			}
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 
 	return nil, nil
