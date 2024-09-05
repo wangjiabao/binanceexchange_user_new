@@ -299,6 +299,32 @@ type UserOrderDoNew struct {
 	UpdatedAt    time.Time
 }
 
+type NewTraderTransfer struct {
+	ID           uint64  `gorm:"primarykey;type:int"`
+	BinanceId    uint64  `gorm:"type:bigint(20);not null"`
+	Time         uint64  `gorm:"type:bigint(20);not null"`
+	Amount       float64 `gorm:"type:decimal(65,20);not null"`
+	TransferType string  `gorm:"type:varchar(200);not null"`
+	Coin         string  `gorm:"type:varchar(200);not null"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+type NewTraderTransferInfo struct {
+	ID        uint64 `gorm:"primarykey;type:int"`
+	BinanceId uint64 `gorm:"type:bigint(20);not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type NewTraderTransferEmail struct {
+	ID        uint64 `gorm:"primarykey;type:int"`
+	BinanceId uint64 `gorm:"type:bigint(20);not null"`
+	Email     string `gorm:"type:varchar(200);not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type FilData struct {
 	ID       uint64 `gorm:"primarykey;type:int"`
 	FromUser string `gorm:"type:varchar(200);not null"`
@@ -3780,4 +3806,105 @@ func (b *BinanceUserRepo) GetTraderInfo() (map[uint64]*biz.TraderInfo, error) {
 	}
 
 	return res, nil
+}
+
+// GetTraderTransfer .
+func (b *BinanceUserRepo) GetTraderTransfer(binanceId uint64) ([]*biz.NewTraderTransfer, error) {
+	var userOrder []*NewTraderTransfer
+
+	res := make([]*biz.NewTraderTransfer, 0)
+	if err := b.data.db.Table("new_trader_transfer").Where("binance_id=?", binanceId).Order("time desc").
+		Find(&userOrder).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_TRADER_TRANSFER_ERROR", err.Error())
+	}
+
+	for _, v := range userOrder {
+		res = append(res, &biz.NewTraderTransfer{
+			Id:           v.ID,
+			BinanceId:    v.BinanceId,
+			Time:         v.Time,
+			Amount:       v.Amount,
+			TransferType: v.TransferType,
+			Coin:         v.Coin,
+			UpdatedAt:    v.UpdatedAt,
+			CreatedAt:    v.CreatedAt,
+		})
+	}
+
+	return res, nil
+}
+
+// GetTraderTransferInfo .
+func (b *BinanceUserRepo) GetTraderTransferInfo() ([]*biz.NewTraderTransferInfo, error) {
+	var userOrder []*NewTraderTransferInfo
+
+	res := make([]*biz.NewTraderTransferInfo, 0)
+	if err := b.data.db.Table("new_trader_transfer_info").
+		Find(&userOrder).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_TRADER_TRANSFER_INFO_ERROR", err.Error())
+	}
+
+	for _, v := range userOrder {
+		res = append(res, &biz.NewTraderTransferInfo{
+			Id:        v.ID,
+			BinanceId: v.BinanceId,
+			UpdatedAt: v.UpdatedAt,
+			CreatedAt: v.CreatedAt,
+		})
+	}
+
+	return res, nil
+}
+
+// GetTraderTransferInfoEmail .
+func (b *BinanceUserRepo) GetTraderTransferInfoEmail(binanceId uint64) ([]*biz.NewTraderTransferEmail, error) {
+	var userOrder []*NewTraderTransferEmail
+
+	res := make([]*biz.NewTraderTransferEmail, 0)
+	if err := b.data.db.Table("new_trader_transfer_info_email").Where("binance_id=?", binanceId).
+		Find(&userOrder).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "FIND_TRADER_TRANSFER_INFO_EMAIL_ERROR", err.Error())
+	}
+
+	for _, v := range userOrder {
+		res = append(res, &biz.NewTraderTransferEmail{
+			Id:        v.ID,
+			Email:     v.Email,
+			BinanceId: v.BinanceId,
+			UpdatedAt: v.UpdatedAt,
+			CreatedAt: v.CreatedAt,
+		})
+	}
+
+	return res, nil
+}
+
+// InsertTraderTransfer .
+func (b *BinanceUserRepo) InsertTraderTransfer(ctx context.Context, data *biz.NewTraderTransfer) (bool, error) {
+	insert := &NewTraderTransfer{
+		BinanceId:    data.BinanceId,
+		Time:         data.Time,
+		Amount:       data.Amount,
+		TransferType: data.TransferType,
+		Coin:         data.Coin,
+	}
+
+	res := b.data.DB(ctx).Table("new_trader_transfer").Create(&insert)
+	if res.Error != nil {
+		return false, errors.New(500, "CREATE_TRADER_TRANSFER_ERROR", "创建数据失败")
+	}
+
+	return true, nil
 }

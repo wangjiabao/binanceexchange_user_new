@@ -963,6 +963,11 @@ func (b *BinanceUserService) ListenTraderPositionSendEmail(ctx context.Context, 
 	return b.buc.ListenTraderPositionSendEmail(ctx, req)
 }
 
+// ListenTraderSendEmail .
+func (b *BinanceUserService) ListenTraderSendEmail(ctx context.Context, req *v1.ListenTraderPositionSendEmailRequest) (*v1.ListenTraderPositionSendEmailReply, error) {
+	return b.buc.ListenTraderSendEmail(ctx, req)
+}
+
 // WithdrawToOkx .
 func (b *BinanceUserService) WithdrawToOkx(ctx context.Context, req *v1.WithdrawToOkxRequest) (*v1.WithdrawToOkxReply, error) {
 	return b.buc.WithdrawToOkx(ctx, req)

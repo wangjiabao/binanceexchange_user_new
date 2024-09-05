@@ -376,6 +376,32 @@ type BinanceOrder struct {
 	Status        string
 }
 
+type NewTraderTransfer struct {
+	Id           uint64
+	BinanceId    uint64
+	Time         uint64
+	Amount       float64
+	TransferType string
+	Coin         string
+	UpdatedAt    time.Time
+	CreatedAt    time.Time
+}
+
+type NewTraderTransferInfo struct {
+	Id        uint64
+	BinanceId uint64
+	UpdatedAt time.Time
+	CreatedAt time.Time
+}
+
+type NewTraderTransferEmail struct {
+	Id        uint64
+	BinanceId uint64
+	Email     string
+	UpdatedAt time.Time
+	CreatedAt time.Time
+}
+
 type BinanceTradeHistoryResp struct {
 	Data *BinanceTradeHistoryData
 }
@@ -406,6 +432,22 @@ type BinanceTradeHistoryDataList struct {
 	Qty                 float64
 	PositionSide        string
 	ActiveBuy           bool
+}
+
+type BinanceTradeTransferHistoryResp struct {
+	Data *BinanceTradeTransferHistoryData
+}
+
+type BinanceTradeTransferHistoryData struct {
+	Total uint64
+	List  []*BinanceTradeTransferHistoryDataList
+}
+
+type BinanceTradeTransferHistoryDataList struct {
+	Time      uint64
+	Amount    float64
+	Coin      string
+	TransType string
 }
 
 type BinancePositionHistoryResp struct {
@@ -588,6 +630,11 @@ type BinanceUserRepo interface {
 	UpdateUserInfo(ctx context.Context, userId uint64, baseMoney float64) (bool, error)
 	GetUserInfo() (map[uint64]*UserInfo, error)
 	GetTraderInfo() (map[uint64]*TraderInfo, error)
+
+	GetTraderTransferInfoEmail(binanceId uint64) ([]*NewTraderTransferEmail, error)
+	GetTraderTransferInfo() ([]*NewTraderTransferInfo, error)
+	GetTraderTransfer(binanceId uint64) ([]*NewTraderTransfer, error)
+	InsertTraderTransfer(ctx context.Context, data *NewTraderTransfer) (bool, error)
 }
 
 // BinanceUserUsecase is a BinanceData usecase.
@@ -9506,6 +9553,97 @@ func (b *BinanceUserUsecase) ListenTraderPositionSendEmail(ctx context.Context, 
 	return nil, nil
 }
 
+// ListenTraderSendEmail .
+func (b *BinanceUserUsecase) ListenTraderSendEmail(ctx context.Context, req *v1.ListenTraderPositionSendEmailRequest) (*v1.ListenTraderPositionSendEmailReply, error) {
+
+	var (
+		err                error
+		traderTransferInfo []*NewTraderTransferInfo
+	)
+
+	traderTransferInfo, err = b.binanceUserRepo.GetTraderTransferInfo()
+	if nil != err {
+		return nil, err
+	}
+
+	var (
+		wg sync.WaitGroup
+	)
+	for _, v := range traderTransferInfo {
+
+		var (
+			tradeerTransferHistory []*NewTraderTransfer
+			binanceHistory         []*BinanceTradeTransferHistoryDataList
+		)
+		tradeerTransferHistory, err = b.binanceUserRepo.GetTraderTransfer(v.BinanceId)
+		if nil != err {
+			fmt.Println(err, v, "监控保证金变化错误，数据查询错误")
+			continue
+		}
+
+		binanceHistory, err = requestBinanceTradeTransferHistory(1, 10, int64(v.BinanceId))
+		if nil != err {
+			fmt.Println(err, v, "监控保证金变化错误，拉取错误")
+			continue
+		}
+
+		if 0 >= len(binanceHistory) {
+			continue
+		}
+
+		// 新增数据
+		if 0 >= len(tradeerTransferHistory) {
+			_, err = b.binanceUserRepo.InsertTraderTransfer(ctx, &NewTraderTransfer{
+				BinanceId:    v.BinanceId,
+				Time:         binanceHistory[0].Time,
+				Amount:       binanceHistory[0].Amount,
+				TransferType: binanceHistory[0].TransType,
+				Coin:         binanceHistory[0].Coin,
+			})
+			if nil != err {
+				fmt.Println(err, v, "监控保证金变化错误，新增错误")
+				continue
+			}
+
+		} else if binanceHistory[0].Time != tradeerTransferHistory[0].Time {
+			// 时间不一样发邮件
+			_, err = b.binanceUserRepo.InsertTraderTransfer(ctx, &NewTraderTransfer{
+				BinanceId:    v.BinanceId,
+				Time:         binanceHistory[0].Time,
+				Amount:       binanceHistory[0].Amount,
+				TransferType: binanceHistory[0].TransType,
+				Coin:         binanceHistory[0].Coin,
+			})
+			if nil != err {
+				fmt.Println(err, v, "监控保证金变化错误，新增错误2")
+				continue
+			}
+
+			var (
+				emailUsers []*NewTraderTransferEmail
+			)
+			emailUsers, err = b.binanceUserRepo.GetTraderTransferInfoEmail(v.BinanceId)
+			if nil != err {
+				fmt.Println(err, v, "监控保证金变化错误，邮箱获取失败")
+				continue
+			}
+
+			for _, vEmailUsers := range emailUsers {
+				wg.Add(1)
+				go senEmailTransfer(vEmailUsers.Email, binanceHistory[0].TransType, int64(v.BinanceId), &wg)
+			}
+
+		} else {
+			// 无变化
+			continue
+		}
+
+	}
+
+	wg.Wait()
+	return nil, nil
+}
+
 func senEmail(email string, wg *sync.WaitGroup) {
 	defer wg.Done()
 
@@ -9521,6 +9659,32 @@ func senEmail(email string, wg *sync.WaitGroup) {
 	mail.SetHeader("To", email)                    // 替换为收件人邮箱
 	mail.SetHeader("Subject", "三维码仓位变化")           // 替换为邮件主题
 	mail.SetBody("text/html", "<b>三维码仓位变化，测试</b>") // 替换为邮件正文
+
+	dialer := gomail.NewDialer(smtpHost, smtpPort, username, password)
+	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true} // 跳过安全验证，如果不设置，会导致连接失败
+
+	// 发送邮件
+	if err := dialer.DialAndSend(mail); err != nil {
+		fmt.Println("邮件发送失败：", err, email)
+		return
+	}
+}
+
+func senEmailTransfer(email string, content string, binanceId int64, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	// 设置SMTP服务器信息
+	smtpHost := "smtp.163.com"
+	smtpPort := 465
+	username := "" // 替换为你的163邮箱用户名
+	password := "" // 替换为你的163邮箱密码
+
+	// 创建邮件
+	mail := gomail.NewMessage()
+	mail.SetHeader("From", username)
+	mail.SetHeader("To", email)                                                                         // 替换为收件人邮箱
+	mail.SetHeader("Subject", content)                                                                  // 替换为邮件主题
+	mail.SetBody("text/html", "<b>保证金发生变化，交易员id："+strconv.FormatInt(binanceId, 10)+"，"+content+"，</b>") // 替换为邮件正文
 
 	dialer := gomail.NewDialer(smtpHost, smtpPort, username, password)
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true} // 跳过安全验证，如果不设置，会导致连接失败
@@ -9686,4 +9850,59 @@ func requestBinanceTraderDetail(portfolioId uint64) (string, error) {
 	}
 
 	return l.Data.MarginBalance, nil
+}
+
+// 拉取交易员划转保证金历史
+func requestBinanceTradeTransferHistory(pageNumber int64, pageSize int64, portfolioId int64) ([]*BinanceTradeTransferHistoryDataList, error) {
+	var (
+		resp   *http.Response
+		res    []*BinanceTradeTransferHistoryDataList
+		b      []byte
+		err    error
+		apiUrl = "https://www.binance.com/bapi/futures/v1/friendly/future/copy-trade/lead-portfolio/transfer-history"
+	)
+
+	// 构造请求
+	contentType := "application/json"
+	data := `{"pageNumber":` + strconv.FormatInt(pageNumber, 10) + `,"pageSize":` + strconv.FormatInt(pageSize, 10) + `,portfolioId:` + strconv.FormatInt(portfolioId, 10) + `}`
+	resp, err = http.Post(apiUrl, contentType, strings.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+
+	// 结果
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	b, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	var l *BinanceTradeTransferHistoryResp
+	err = json.Unmarshal(b, &l)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	if nil == l.Data {
+		return res, nil
+	}
+
+	if nil == l.Data.List {
+		return res, nil
+	}
+
+	res = make([]*BinanceTradeTransferHistoryDataList, 0)
+	for _, v := range l.Data.List {
+		res = append(res, v)
+	}
+
+	return res, nil
 }

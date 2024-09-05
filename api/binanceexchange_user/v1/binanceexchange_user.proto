@@ -296,6 +296,12 @@ service BinanceUser {
       get: "/api/binanceexchange_user/pull_trader_base_money"
     };
   };
+
+  rpc ListenTraderSendEmail (ListenTraderPositionSendEmailRequest) returns (ListenTraderPositionSendEmailReply) {
+    option (google.api.http) = {
+      get: "/api/binanceexchange_user/listen_trader_send_email"
+    };
+  };
 }
 
 message GetUserRequest {
