@@ -9570,6 +9570,7 @@ func (b *BinanceUserUsecase) ListenTraderSendEmail(ctx context.Context, req *v1.
 		wg sync.WaitGroup
 	)
 	for _, v := range traderTransferInfo {
+		time.Sleep(2 * time.Second)
 
 		var (
 			tradeerTransferHistory []*NewTraderTransfer
