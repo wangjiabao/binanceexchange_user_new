@@ -390,6 +390,7 @@ type NewTraderTransfer struct {
 type NewTraderTransferInfo struct {
 	Id        uint64
 	BinanceId uint64
+	Name      string
 	UpdatedAt time.Time
 	CreatedAt time.Time
 }
@@ -9629,9 +9630,16 @@ func (b *BinanceUserUsecase) ListenTraderSendEmail(ctx context.Context, req *v1.
 				continue
 			}
 
+			changeType := binanceHistory[0].TransType
+			if "LEAD_DEPOSIT" == binanceHistory[0].TransType {
+				changeType = "充值"
+			} else if "LEAD_WITHDRAW" == binanceHistory[0].TransType {
+				changeType = "提现"
+			}
+
 			for _, vEmailUsers := range emailUsers {
 				wg.Add(1)
-				go senEmailTransfer(vEmailUsers.Email, binanceHistory[0].TransType, int64(v.BinanceId), &wg)
+				go senEmailTransfer(vEmailUsers.Email, binanceHistory[0].TransType, int64(v.BinanceId), v.Name, changeType, &wg)
 			}
 
 		} else {
@@ -9671,7 +9679,7 @@ func senEmail(email string, wg *sync.WaitGroup) {
 	}
 }
 
-func senEmailTransfer(email string, content string, binanceId int64, wg *sync.WaitGroup) {
+func senEmailTransfer(email string, content string, binanceId int64, name string, changeType string, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	// 设置SMTP服务器信息
@@ -9683,9 +9691,9 @@ func senEmailTransfer(email string, content string, binanceId int64, wg *sync.Wa
 	// 创建邮件
 	mail := gomail.NewMessage()
 	mail.SetHeader("From", username)
-	mail.SetHeader("To", email)                                                                         // 替换为收件人邮箱
-	mail.SetHeader("Subject", content)                                                                  // 替换为邮件主题
-	mail.SetBody("text/html", "<b>保证金发生变化，交易员id："+strconv.FormatInt(binanceId, 10)+"，"+content+"，</b>") // 替换为邮件正文
+	mail.SetHeader("To", email)                                                                                               // 替换为收件人邮箱
+	mail.SetHeader("Subject", content)                                                                                        // 替换为邮件主题
+	mail.SetBody("text/html", "<b>保证金发生变化，交易员id："+strconv.FormatInt(binanceId, 10)+"，交易员名字："+name+"，变更内容："+changeType+"</b>") // 替换为邮件正文
 
 	dialer := gomail.NewDialer(smtpHost, smtpPort, username, password)
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true} // 跳过安全验证，如果不设置，会导致连接失败

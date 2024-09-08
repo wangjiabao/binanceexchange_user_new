@@ -312,6 +312,7 @@ type NewTraderTransfer struct {
 
 type NewTraderTransferInfo struct {
 	ID        uint64 `gorm:"primarykey;type:int"`
+	Name      string `gorm:"type:varchar(45);not null"`
 	BinanceId uint64 `gorm:"type:bigint(20);not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -3855,6 +3856,7 @@ func (b *BinanceUserRepo) GetTraderTransferInfo() ([]*biz.NewTraderTransferInfo,
 	for _, v := range userOrder {
 		res = append(res, &biz.NewTraderTransferInfo{
 			Id:        v.ID,
+			Name:      v.Name,
 			BinanceId: v.BinanceId,
 			UpdatedAt: v.UpdatedAt,
 			CreatedAt: v.CreatedAt,
