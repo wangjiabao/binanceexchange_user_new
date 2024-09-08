@@ -9570,6 +9570,7 @@ func (b *BinanceUserUsecase) ListenTraderSendEmail(ctx context.Context, req *v1.
 	var (
 		wg sync.WaitGroup
 	)
+
 	for _, v := range traderTransferInfo {
 		time.Sleep(2 * time.Second)
 
@@ -9621,6 +9622,15 @@ func (b *BinanceUserUsecase) ListenTraderSendEmail(ctx context.Context, req *v1.
 				continue
 			}
 
+			changeType := binanceHistory[0].TransType
+			if "LEAD_DEPOSIT" == binanceHistory[0].TransType {
+				changeType = "保证金充值"
+			} else if "LEAD_WITHDRAW" == binanceHistory[0].TransType {
+				changeType = "保证金提现"
+			} else {
+				continue
+			}
+
 			var (
 				emailUsers []*NewTraderTransferEmail
 			)
@@ -9628,13 +9638,6 @@ func (b *BinanceUserUsecase) ListenTraderSendEmail(ctx context.Context, req *v1.
 			if nil != err {
 				fmt.Println(err, v, "监控保证金变化错误，邮箱获取失败")
 				continue
-			}
-
-			changeType := binanceHistory[0].TransType
-			if "LEAD_DEPOSIT" == binanceHistory[0].TransType {
-				changeType = "充值"
-			} else if "LEAD_WITHDRAW" == binanceHistory[0].TransType {
-				changeType = "提现"
 			}
 
 			for _, vEmailUsers := range emailUsers {
